@@ -71,8 +71,8 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     totalStaked += tokenIds.length;
     for (uint256 i; i != tokenIds.length; i++) {
       tokenId = tokenIds[i];
+      require(vault[tokenId].owner == address(0), "already staked");
       require(IERC721Enumerable(nftAddress).ownerOf(tokenId) == msg.sender, "not your token");
-      require(vault[tokenId].tokenId == 0, "already staked");
 
       IERC721Enumerable(nftAddress).safeTransferFrom(msg.sender, address(this), tokenId);
       emit NFTStaked(msg.sender, tokenId, block.timestamp);

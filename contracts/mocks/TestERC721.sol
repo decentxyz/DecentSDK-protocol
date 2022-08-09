@@ -20,7 +20,7 @@ contract TestERC721 is ERC721Enumerable, Ownable {
   function mintNft(uint numberOfTokens) public payable {
     uint256 mintIndex = totalSupply();
     for(uint256 i = 0; i < numberOfTokens; i++) {
-      _safeMint(msg.sender, ++mintIndex);
+      _safeMint(msg.sender, mintIndex++);
     }
   }
 }

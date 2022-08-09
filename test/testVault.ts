@@ -232,7 +232,7 @@ describe("DCNTVault contract", () => {
 
     describe("and he then receives another one and tries to redeem it", async () => {
       it("should should transfer 6 tokens to the user's account (1 * 73)/11", async () => {
-        await nft.connect(addr2)["safeTransferFrom(address,address,uint256)"](addr2.address, addr1.address, 4);
+        await nft.connect(addr2)["safeTransferFrom(address,address,uint256)"](addr2.address, addr1.address, 3);
         await unlockedVault.claimAll(addr1.address);
         expect(await token.balanceOf(addr1.address)).to.equal(25);
       });
@@ -241,7 +241,7 @@ describe("DCNTVault contract", () => {
     describe("and he then receives another one thats already been claimed and tries to redeem it", async () => {
       it("should return an error", async () => {
         await unlockedVault.claimAll(addr3.address);
-        await nft.connect(addr3)["safeTransferFrom(address,address,uint256)"](addr3.address, addr1.address, 5);
+        await nft.connect(addr3)["safeTransferFrom(address,address,uint256)"](addr3.address, addr1.address, 4);
         await expect(unlockedVault.claimAll(addr1.address)).to.be.revertedWith(
           'address has no claimable tokens'
         );

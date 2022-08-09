@@ -98,20 +98,20 @@ describe("DCNTStaking contract", () => {
       await nft.connect(addr2).mintNft(9);
 
       // approve transfer and stake 1 nft
-      await nft.connect(addr1).approve(clone.address, 1);
+      await nft.connect(addr1).approve(clone.address, 0);
       await theFuture.travel(oneDay);
-      await clone.connect(addr1).stake([1]);
+      await clone.connect(addr1).stake([0]);
 
       // approve transfer and stake 1 nft
-      await nft.connect(addr2).approve(clone.address, 2);
-      await clone.connect(addr2).stake([2]);
+      await nft.connect(addr2).approve(clone.address, 1);
+      await clone.connect(addr2).stake([1]);
     });
 
     describe("and a user with one nft stakes for 1 day", async () => {
       it("they would have earned 0.1 token", async () => {
         await theFuture.travel(oneDay);
         await theFuture.arrive();
-        const earn = await clone.earningInfo(addr1.address, [1]);
+        const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.1'));
       });
     });
@@ -120,7 +120,7 @@ describe("DCNTStaking contract", () => {
       it("they would have earned 0.25 token", async () => {
         await theFuture.travel(oneDay*1.5);
         await theFuture.arrive();
-        const earn = await clone.earningInfo(addr1.address, [1]);
+        const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.25'));
       });
     });
@@ -129,18 +129,18 @@ describe("DCNTStaking contract", () => {
       it("they would have earned 0.5 token", async () => {
         await theFuture.travel(oneDay*2.5);
         await theFuture.arrive();
-        const earn = await clone.earningInfo(addr1.address, [1]);
+        const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.5'));
       });
     });
 
     describe("and continues to stake for another day after a user claims", async () => {
       it("they would have earned 0.6 token", async () => {
-        await clone.connect(addr2).claim([2]);
+        await clone.connect(addr2).claim([1]);
 
         await theFuture.travel(oneDay);
         await theFuture.arrive();
-        const earn = await clone.earningInfo(addr1.address, [1]);
+        const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.6'));
       });
     });
@@ -151,8 +151,20 @@ describe("DCNTStaking contract", () => {
 
         await theFuture.travel(oneDay);
         await theFuture.arrive();
-        const earn = await clone.earningInfo(addr1.address, [1]);
+        const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('1.4'));
+      });
+    });
+
+    describe("and then tries to stake the same nft again ", async () => {
+      it("should revert with already staked", async () => {
+        await expect(clone.connect(addr1).stake([0])).to.be.revertedWith("already staked");
+      });
+    });
+
+    describe("and then tries to stake another user's nft ", async () => {
+      it("should revert with not your token", async () => {
+        await expect(clone.connect(addr1).stake([2])).to.be.revertedWith("not your token");
       });
     });
 

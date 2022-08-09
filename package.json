@@ -1,6 +1,9 @@
 {
   "dependencies": {
-    "hardhat": "^2.10.1"
+    "@openzeppelin/contracts": "^4.7.2",
+    "erc721a": "^4.2.2",
+    "hardhat": "^2.10.1",
+    "solmate": "^6.5.0"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2"

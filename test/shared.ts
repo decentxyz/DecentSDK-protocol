@@ -1,5 +1,28 @@
 import { ethers } from "hardhat";
 import { BigNumber, Contract } from "ethers";
+import { time } from "@nomicfoundation/hardhat-network-helpers";
+
+export const theFuture = (() => {
+  // the future is now
+  let future = Math.floor((new Date()).getTime() / 1000);
+  return {
+    // an arbitrary point in the future
+    time: () => {
+      return future;
+    },
+    // travel to the future, arrival on next block mined
+    travel: async(travel: number = 0) => {
+      await ethers.provider.send('evm_setNextBlockTimestamp', [future += travel]);
+      return future;
+    },
+    // mine a block in the future
+    arrive: async() => {
+      if ( future > await time.latest() ) {
+        await ethers.provider.send('evm_mine', []);
+      }
+    },
+  };
+})();
 
 export type Implementations = {
   nft: Contract;
@@ -109,14 +132,12 @@ export const deployStaking = async (
   decentSDK: Contract,
   nft: string,
   token: string,
-  tokenDecimals: number,
-  vaultEnd: number
+  vaultDuration: number
 ) => {
   const deployTx = await decentSDK.deployStaking(
     nft,
     token,
-    tokenDecimals,
-    vaultEnd
+    vaultDuration
   );
 
   const receipt = await deployTx.wait();

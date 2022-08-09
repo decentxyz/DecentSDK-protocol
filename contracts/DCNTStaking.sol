@@ -43,8 +43,9 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
 
   address public nftAddress;
   address public erc20Address;
-  uint256 public tokenDecimals;
+  uint256 public vaultStart;
   uint256 public vaultEnd;
+  uint256 public totalClaimed;
 
   // maps tokenId to stake
   mapping(uint256 => Stake) public vault;
@@ -53,8 +54,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     address _owner,
     address _nft,
     address _token,
-    uint256 _tokenDecimals,
-    uint256 _vaultEnd
+    uint256 _vaultDuration
   )
     public
     initializer
@@ -62,8 +62,8 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     _transferOwnership(_owner);
     nftAddress = _nft;
     erc20Address = _token;
-    tokenDecimals = _tokenDecimals;
-    vaultEnd = _vaultEnd;
+    vaultStart = block.timestamp;
+    vaultEnd = vaultStart + (_vaultDuration * 1 days);
   }
 
   function stake(uint256[] calldata tokenIds) external nonReentrant {
@@ -123,7 +123,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
       uint256 currentTime = min(block.timestamp, vaultEnd);
 
       // staking structure = 16 tokens per day
-      earned += 16 * (10**tokenDecimals) * (currentTime - stakedAt) / 1 days;
+      earned += calculateEarn(stakedAt);
 
       vault[tokenId] = Stake({
         owner: account,
@@ -134,11 +134,26 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     }
     if (earned > 0) {
       IERC20(erc20Address).transfer(account, earned);
+      totalClaimed += earned;
     }
     if (_unstake) {
       _unstakeMany(account, tokenIds);
     }
     emit Claimed(account, earned);
+  }
+
+  function calculateEarn(uint256 stakedAt) internal view returns (uint256) {
+    uint256 totalSupply = IERC721Enumerable(nftAddress).totalSupply();
+    uint256 vaultBalance = IERC20(erc20Address).balanceOf(address(this));
+    uint256 totalFunding = vaultBalance + totalClaimed;
+
+    uint256 vaultDuration = vaultEnd - vaultStart;
+    uint256 vaultDays = vaultDuration / 1 days;
+
+    uint256 payout = totalFunding / totalSupply / vaultDays;
+    uint256 stakeDuration = min(block.timestamp, vaultEnd) - stakedAt;
+
+    return payout * stakeDuration / 1 days;
   }
 
   function earningInfo(address account, uint256[] calldata tokenIds) external view returns (uint256) {
@@ -150,7 +165,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
       Stake memory staked = vault[tokenId];
       require(staked.owner == account, "not an owner");
       uint256 stakedAt = staked.timestamp;
-      earned += 16 * (10**tokenDecimals) * (min(block.timestamp, vaultEnd) - stakedAt) / 1 days;
+      earned += calculateEarn(stakedAt);
     }
     return earned;
   }

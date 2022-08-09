@@ -72,9 +72,9 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
     require(numberOfTokens <= maxTokenPurchase, "Exceeded max number per mint");
     require(msg.value >= (tokenPrice * numberOfTokens), "Insufficient funds");
 
+    _safeMint(msg.sender, numberOfTokens);
     for(uint256 i = 0; i < numberOfTokens; i++) {
-      _safeMint(msg.sender, ++mintIndex);
-      emit Minted(msg.sender, mintIndex);
+      emit Minted(msg.sender, mintIndex++);
     }
   }
 

@@ -126,14 +126,16 @@ contract DCNTSDK is Ownable {
   function deployVault(
     address _vaultDistributionTokenAddress,
     address _nftVaultKeyAddress,
+    uint256 _nftTotalSupply,
     uint256 _unlockDate
   ) external payable {
     address vaultInstance = Clones.clone(vaultImplementation);
     (bool success, ) = vaultInstance.call{value: msg.value}(
-      abi.encodeWithSignature("initialize(address,address,address,uint256)",
+      abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _vaultDistributionTokenAddress,
         _nftVaultKeyAddress,
+        _nftTotalSupply,
         _unlockDate
       )
     );

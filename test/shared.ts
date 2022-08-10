@@ -114,12 +114,14 @@ export const deployCrescendo = async (
 export const deployVault = async (
   decentSDK: Contract,
   _vaultDistributionTokenAddress: string,
-  _NftWrapperTokenAddress: string,
+  _nftVaultKeyAddress: string,
+  _nftTotalSupply: number,
   _unlockDate: number
 ) => {
   const deployTx = await decentSDK.deployVault(
     _vaultDistributionTokenAddress,
-    _NftWrapperTokenAddress,
+    _nftVaultKeyAddress,
+    _nftTotalSupply,
     _unlockDate
   );
 

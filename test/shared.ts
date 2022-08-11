@@ -11,12 +11,12 @@ export const theFuture = (() => {
       return future;
     },
     // travel to the future, arrival on next block mined
-    travel: async(travel: number = 0) => {
+    travel: async (travel: number = 0) => {
       await ethers.provider.send('evm_setNextBlockTimestamp', [future += travel]);
       return future;
     },
     // mine a block in the future
-    arrive: async() => {
+    arrive: async () => {
       if ( future > await time.latest() ) {
         await ethers.provider.send('evm_mine', []);
       }

@@ -5,23 +5,24 @@ import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deploySDK, deployVault, deployMockERC20, deployMockERC721, theFuture } from "./shared";
 
-const name = 'Decent';
-const symbol = 'DCNT';
-const maxTokens = 4;
-const tokenPrice = ethers.utils.parseEther('0.01');
-const maxTokenPurchase = 2;
-
 const oneDay = 60 * 60 * 24;
 
-describe("DCNTVault contract", () => {
+describe("DCNTVault", async () => {
   let owner: SignerWithAddress,
       sdk: Contract,
       clone: Contract,
       token: Contract,
       nft: Contract;
 
-  describe("basic tests", () => {
-    beforeEach(async () => {
+  let addr1: SignerWithAddress,
+      addr2: SignerWithAddress,
+      addr3: SignerWithAddress,
+      addr4: SignerWithAddress,
+      vault: Contract,
+      unlockedVault: Contract;
+
+  describe("initialize()", async () => {
+    before(async () => {
       [owner] = await ethers.getSigners();
       sdk = await deploySDK();
       nft = await deployMockERC721();
@@ -35,33 +36,19 @@ describe("DCNTVault contract", () => {
       );
     });
 
-    describe("DCNTVault clones", async () => {
-      it("should have the owner set as the EOA deploying the contract", async () => {
-        expect(ethers.utils.getAddress(await clone.owner())).to.equal(owner.address);
-      });
+    it("should have the owner set as the EOA deploying the contract", async () => {
+      expect(ethers.utils.getAddress(await clone.owner())).to.equal(owner.address);
+    });
 
-      it("should initialize state which would otherwise be set in constructor", async () => {
-        expect(ethers.utils.getAddress(await clone.vaultDistributionToken())).to.equal(token.address);
-        expect(ethers.utils.getAddress(await clone.nftVaultKey())).to.equal(nft.address);
-        expect(await clone.unlockDate()).to.equal(theFuture.time());
-      });
+    it("should initialize state which would otherwise be set in constructor", async () => {
+      expect(ethers.utils.getAddress(await clone.vaultDistributionToken())).to.equal(token.address);
+      expect(ethers.utils.getAddress(await clone.nftVaultKey())).to.equal(nft.address);
+      expect(await clone.unlockDate()).to.equal(theFuture.time());
     });
   });
-});
 
-describe("DCNTVault contract", () => {
-  let addr1: SignerWithAddress,
-      addr2: SignerWithAddress,
-      addr3: SignerWithAddress,
-      addr4: SignerWithAddress,
-      sdk: Contract,
-      clone: Contract,
-      token: Contract,
-      nft: Contract,
-      vault: Contract,
-      unlockedVault: Contract;
 
-  describe("basic tests", () => {
+  describe("vault functionality", async () => {
     beforeEach(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       sdk = await deploySDK();
@@ -76,38 +63,26 @@ describe("DCNTVault contract", () => {
       );
     })
 
-    describe("initial deployment", async () => {
-      it("should have the same erc20 address as its backing token", async () => {
-        expect(ethers.utils.getAddress(await vault.vaultDistributionToken())).to.equal(token.address);
-      });
+    it("should have a vault balance of zero", async () => {
+      expect(await vault.vaultBalance()).to.equal(0);
+    });
 
-      it("should have the same erc721 address as its backing nft", async () => {
-        expect(ethers.utils.getAddress(await vault.nftVaultKey())).to.equal(nft.address);
+    describe("and 50 tokens are added to the vault", async () => {
+      it("should have a vault balance of 50", async () => {
+        await token.connect(addr1).transfer(vault.address, 50);
+        expect(await vault.vaultBalance()).to.equal(50);
       });
     });
 
-    describe("vault functionality", async () => {
-      it("should have a vault balance of zero", async () => {
-        expect(await vault.vaultBalance()).to.equal(0);
-      });
-
-      describe("and 50 tokens are added to the vault", async () => {
-        it("should have a vault balance of 50", async () => {
-          await token.connect(addr1).transfer(vault.address, 50);
-          expect(await vault.vaultBalance()).to.equal(50);
-        });
-      });
-
-      describe("and 50 more tokens are added to the vault", async () => {
-        it("should have a vault balance of 100", async () => {
-          await token.connect(addr1).transfer(vault.address, 100);
-          expect(await vault.vaultBalance()).to.equal(100);
-        });
+    describe("and 50 more tokens are added to the vault", async () => {
+      it("should have a vault balance of 100", async () => {
+        await token.connect(addr1).transfer(vault.address, 100);
+        expect(await vault.vaultBalance()).to.equal(100);
       });
     });
   });
 
-  describe("claiming core functionality", async () => {
+describe("claiming core functionality", async () => {
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       nft = await deployMockERC721();

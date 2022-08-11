@@ -13,7 +13,7 @@ const oneDay = 60 * 60 * 24;
 const oneEth = ethers.utils.parseEther("1");
 const vaultFund = oneEth.mul(100);
 
-describe("DCNTStaking contract", () => {
+describe("DCNTStaking", async () => {
   let owner: SignerWithAddress,
       addr1: SignerWithAddress,
       addr2: SignerWithAddress,
@@ -25,61 +25,70 @@ describe("DCNTStaking contract", () => {
       nft: Contract,
       totalSupply: number;
 
-  describe("basic tests", () => {
-    beforeEach(async () => {
-      [owner] = await ethers.getSigners();
-      sdk = await deploySDK();
-      token = await deployMockERC20(vaultFund);
-      nft = await deployMockERC721();
-      totalSupply = 10;
-      await theFuture.travel(oneDay);
-      clone = await deployStaking(
-        sdk,
-        nft.address,
-        token.address,
-        vaultDuration,
-        totalSupply
-      );
+  before(async () => {
+    [owner] = await ethers.getSigners();
+    sdk = await deploySDK();
+    token = await deployMockERC20(vaultFund);
+    nft = await deployMockERC721();
+    totalSupply = 10;
+    await theFuture.travel(oneDay);
+    clone = await deployStaking(
+      sdk,
+      nft.address,
+      token.address,
+      vaultDuration,
+      totalSupply
+    );
+  });
+
+  describe("initialize()", async () => {
+    it("should have the owner set as the EOA deploying the contract", async () => {
+      expect(ethers.utils.getAddress(await clone.owner())).to.equal(owner.address);
     });
 
-    describe("DCNTStaking clones", async () => {
-      it("should have the owner set as the EOA deploying the contract", async () => {
-        expect(ethers.utils.getAddress(await clone.owner())).to.equal(owner.address);
-      });
-
-      it("should initialize state which would otherwise be set in constructor", async () => {
-        expect(await clone.nftAddress()).to.equal(nft.address);
-        expect(await clone.erc20Address()).to.equal(token.address);
-      });
+    it("should initialize state which would otherwise be set in constructor", async () => {
+      expect(await clone.nftAddress()).to.equal(nft.address);
+      expect(await clone.erc20Address()).to.equal(token.address);
     });
 
-    describe("vault functionality", async () => {
-      it("should calculate vault start and end dates based on block timestamp", async () => {
-        expect(await clone.vaultStart()).to.equal(theFuture.time());
-        expect(await clone.vaultEnd()).to.equal(theFuture.time() + (oneDay * vaultDuration));
-      });
+    it("should calculate vault start and end dates based on block timestamp", async () => {
+      expect(await clone.vaultStart()).to.equal(theFuture.time());
+      expect(await clone.vaultEnd()).to.equal(theFuture.time() + (oneDay * vaultDuration));
+    });
+  });
 
-      it("should have a vault balance of zero", async () => {
-        expect(await nft.balanceOf(owner.address)).to.equal(0);
+  describe("vault functionality", async () => {
+    it("should have a vault balance of zero", async () => {
+      expect(await nft.balanceOf(owner.address)).to.equal(0);
+    })
+
+    describe("and 50 tokens are added to the vault", async () => {
+      it("should have a vault balance of 50", async () => {
+        await token.connect(owner).transfer(clone.address, 50);
+        expect(await token.balanceOf(clone.address)).to.equal(50);
       })
+    });
 
-      describe("and 50 tokens are added to the vault", async () => {
-        it("should have a vault balance of 50", async () => {
-          await token.connect(owner).transfer(clone.address, 50);
-          expect(await token.balanceOf(clone.address)).to.equal(50);
-        })
-      });
-
-      describe("and 50 more tokens are added to the vault", async () => {
-        it("should have a vault balance of 100", async () => {
-          await token.connect(owner).transfer(clone.address, 100);
-          expect(await token.balanceOf(clone.address)).to.equal(100);
-        })
-      });
+    describe("and 50 more tokens are added to the vault", async () => {
+      it("should have a vault balance of 100", async () => {
+        await token.connect(owner).transfer(clone.address, 50);
+        expect(await token.balanceOf(clone.address)).to.equal(100);
+      })
     });
   });
 
   describe("claiming functionality", async () => {
+    let owner: SignerWithAddress,
+        addr1: SignerWithAddress,
+        addr2: SignerWithAddress,
+        addr3: SignerWithAddress,
+        addr4: SignerWithAddress,
+        sdk: Contract,
+        clone: Contract,
+        token: Contract,
+        nft: Contract,
+        totalSupply: number;
+
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       sdk = await deploySDK();
@@ -172,7 +181,6 @@ describe("DCNTStaking contract", () => {
         await expect(clone.connect(addr1).stake([2])).to.be.revertedWith("not your token");
       });
     });
-
   });
-
 });
+

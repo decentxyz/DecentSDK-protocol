@@ -16,7 +16,7 @@ pragma solidity ^0.8.0;
 
 /// ============ Imports ============
 
-import "./extensions/DCNT1155Extended.sol";
+import "solmate/src/tokens/ERC1155.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -24,13 +24,16 @@ import "./interfaces/IBondingCurve.sol";
 
 /// ========= Bonding Token =========
 
-contract DCNTCrescendo is IBondingCurve, DCNT1155Extended, Initializable, Ownable {
+contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable {
 
   // Token name
   string private _name;
 
   // Token symbol
   string private _symbol;
+
+  // Token uri
+  string private _uri;
 
   uint256 private step1;
   uint256 private step2;
@@ -104,6 +107,7 @@ contract DCNTCrescendo is IBondingCurve, DCNT1155Extended, Initializable, Ownabl
     }
 
     _mint(msg.sender, id, 1, "");
+    _totalSupply[id] += 1;
     emit CurvedMint(msg.sender, 1, id, price);
 
     // update supply / price
@@ -121,7 +125,8 @@ contract DCNTCrescendo is IBondingCurve, DCNT1155Extended, Initializable, Ownabl
     require(balanceOf[msg.sender][id] > 0, "must own nft to sell");
 
     // burn nft
-    burn(msg.sender, id, 1);
+    _burn(msg.sender, id, 1);
+    _totalSupply[id] -= 1;
 
     // send money to nft holder
     (bool success, ) = payable(msg.sender).call{value: price}("");
@@ -138,32 +143,6 @@ contract DCNTCrescendo is IBondingCurve, DCNT1155Extended, Initializable, Ownabl
 
   function totalSupply(uint256 id) public view returns (uint256) {
     return _totalSupply[id];
-  }
-
-  /**
-  * @dev See {ERC1155-_beforeTokenTransfer}.
-  */
-  function _beforeTokenTransfer(
-    address operator,
-    address from,
-    address to,
-    uint256[] memory ids,
-    uint256[] memory amounts,
-    bytes memory data
-  ) internal virtual override {
-    super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
-
-    if (from == address(0)) {
-      for (uint256 i = 0; i < ids.length; ++i) {
-        _totalSupply[ids[i]] += amounts[i];
-      }
-    }
-
-    if (to == address(0)) {
-      for (uint256 i = 0; i < ids.length; ++i) {
-        _totalSupply[ids[i]] -= amounts[i];
-      }
-    }
   }
 
   function flipSaleState() external onlyOwner {
@@ -195,6 +174,14 @@ contract DCNTCrescendo is IBondingCurve, DCNT1155Extended, Initializable, Ownabl
 
   function symbol() external view returns (string memory) {
       return _symbol;
+  }
+
+  function uri(uint256) public view override returns (string memory) {
+      return _uri;
+  }
+
+  function _setURI(string memory newuri) private {
+      _uri = newuri;
   }
 
   function updateUri(string memory uri_) external onlyOwner {

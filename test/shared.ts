@@ -149,9 +149,9 @@ export const deployStaking = async (
   return ethers.getContractAt("DCNTStaking", newNFTAddress);
 }
 
-export const deployTestERC20 = async (amountToMint: BigNumber | number) => {
-  const TestERC20 = await ethers.getContractFactory("TestERC20");
-  const erc20Token = await TestERC20.deploy(
+export const deployMockERC20 = async (amountToMint: BigNumber | number) => {
+  const MockERC20 = await ethers.getContractFactory("MockERC20");
+  const erc20Token = await MockERC20.deploy(
     "token",
     "TKN",
     amountToMint
@@ -159,9 +159,9 @@ export const deployTestERC20 = async (amountToMint: BigNumber | number) => {
   return await erc20Token.deployed();
 }
 
-export const deployTestERC721 = async () => {
-  const TestERC721 = await ethers.getContractFactory("TestERC721");
-  const erc721Token = await TestERC721.deploy(
+export const deployMockERC721 = async () => {
+  const MockERC721 = await ethers.getContractFactory("MockERC721");
+  const erc721Token = await MockERC721.deploy(
     "nft",
     "NFT",
   );

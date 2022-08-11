@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deployVault, deployTestERC20, deployTestERC721, theFuture } from "./shared";
+import { deploySDK, deployVault, deployMockERC20, deployMockERC721, theFuture } from "./shared";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -24,8 +24,8 @@ describe("DCNTVault contract", () => {
     beforeEach(async () => {
       [owner] = await ethers.getSigners();
       sdk = await deploySDK();
-      nft = await deployTestERC721();
-      token = await deployTestERC20(100);
+      nft = await deployMockERC721();
+      token = await deployMockERC20(100);
       clone = await deployVault(
         sdk,
         token.address,
@@ -65,8 +65,8 @@ describe("DCNTVault contract", () => {
     beforeEach(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       sdk = await deploySDK();
-      nft = await deployTestERC721();
-      token = await deployTestERC20(100);
+      nft = await deployMockERC721();
+      token = await deployMockERC20(100);
       vault = await deployVault(
         sdk,
         token.address,
@@ -110,8 +110,8 @@ describe("DCNTVault contract", () => {
   describe("claiming core functionality", async () => {
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
-      nft = await deployTestERC721();
-      token = await deployTestERC20(100);
+      nft = await deployMockERC721();
+      token = await deployMockERC20(100);
       let tomorrow = theFuture.time() + oneDay;
 
       // mint 1 nft for 1 address and 2 for 2 more
@@ -151,8 +151,8 @@ describe("DCNTVault contract", () => {
 
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
-      nft = await deployTestERC721();
-      token = await deployTestERC20(100);
+      nft = await deployMockERC721();
+      token = await deployMockERC20(100);
       let yesterday = theFuture.time() - oneDay;
 
       // set nft portions
@@ -209,8 +209,8 @@ describe("DCNTVault contract", () => {
   describe("claiming division tests", async () => {
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
-      nft = await deployTestERC721();
-      token = await deployTestERC20(73);
+      nft = await deployMockERC721();
+      token = await deployMockERC20(73);
       let yesterday = theFuture.time() - oneDay;
 
       await nft.connect(addr1).mintNft(3);

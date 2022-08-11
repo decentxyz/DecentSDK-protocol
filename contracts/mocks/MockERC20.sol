@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 
 // based on Uniswaps TestERC20 token
-contract TestERC20 is ERC20 {
+contract MockERC20 is ERC20 {
   constructor (
     string memory name_,
     string memory symbol_,
-    uint amountToMint) 
+    uint amountToMint)
     ERC20(name_, symbol_) {
       setBalance(msg.sender, amountToMint);
   }

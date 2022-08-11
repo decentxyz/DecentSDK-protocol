@@ -148,15 +148,17 @@ contract DCNTSDK is Ownable {
   function deployStaking(
     address _nft,
     address _token,
-    uint256 _vaultDuration
+    uint256 _vaultDuration,
+    uint256 _totalSupply
   ) external payable {
     address stakingInstance = Clones.clone(stakingImplementation);
     (bool success, ) = stakingInstance.call{value: msg.value}(
-      abi.encodeWithSignature("initialize(address,address,address,uint256)",
+      abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _nft,
         _token,
-        _vaultDuration
+        _vaultDuration,
+        _totalSupply
       )
     );
     require(success);

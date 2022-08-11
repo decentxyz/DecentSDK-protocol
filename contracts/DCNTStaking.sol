@@ -19,12 +19,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
-// could swap out 721Enumerable for 721 but would need to rewrite balanceOf + tokensOfOwner
-// import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver {
 
@@ -46,6 +43,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
   uint256 public vaultStart;
   uint256 public vaultEnd;
   uint256 public totalClaimed;
+  uint256 public totalSupply;
 
   // maps tokenId to stake
   mapping(uint256 => Stake) public vault;
@@ -54,7 +52,8 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     address _owner,
     address _nft,
     address _token,
-    uint256 _vaultDuration
+    uint256 _vaultDuration,
+    uint256 _totalSupply
   )
     public
     initializer
@@ -64,6 +63,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     erc20Address = _token;
     vaultStart = block.timestamp;
     vaultEnd = vaultStart + (_vaultDuration * 1 days);
+    totalSupply = _totalSupply;
   }
 
   function stake(uint256[] calldata tokenIds) external nonReentrant {
@@ -72,9 +72,9 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     for (uint256 i; i != tokenIds.length; i++) {
       tokenId = tokenIds[i];
       require(vault[tokenId].owner == address(0), "already staked");
-      require(IERC721Enumerable(nftAddress).ownerOf(tokenId) == msg.sender, "not your token");
+      require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "not your token");
 
-      IERC721Enumerable(nftAddress).safeTransferFrom(msg.sender, address(this), tokenId);
+      IERC721(nftAddress).safeTransferFrom(msg.sender, address(this), tokenId);
       emit NFTStaked(msg.sender, tokenId, block.timestamp);
 
       vault[tokenId] = Stake({
@@ -95,7 +95,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
 
       delete vault[tokenId];
       emit NFTUnstaked(account, tokenId, block.timestamp);
-      IERC721Enumerable(nftAddress).safeTransferFrom(address(this), account, tokenId);
+      IERC721(nftAddress).safeTransferFrom(address(this), account, tokenId);
     }
   }
 
@@ -122,7 +122,6 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
       uint256 stakedAt = staked.timestamp;
       uint256 currentTime = min(block.timestamp, vaultEnd);
 
-      // staking structure = 16 tokens per day
       earned += calculateEarn(stakedAt);
 
       vault[tokenId] = Stake({
@@ -143,7 +142,6 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
   }
 
   function calculateEarn(uint256 stakedAt) internal view returns (uint256) {
-    uint256 totalSupply = IERC721Enumerable(nftAddress).totalSupply();
     uint256 vaultBalance = IERC20(erc20Address).balanceOf(address(this));
     uint256 totalFunding = vaultBalance + totalClaimed;
 
@@ -173,10 +171,8 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
   // get number of tokens staked in account
   function balanceOf(address account) external view returns (uint256) {
     uint256 balance = 0;
-    uint256 supply = IERC721Enumerable(nftAddress).totalSupply();
 
-    // note DecentNfts are 1-indexed
-    for(uint256 i = 1; i <= supply; i++) {
+    for(uint256 i = 0; i <= totalSupply; i++) {
       if (vault[i].owner == account) {
         balance++;
       }
@@ -187,11 +183,10 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
   // return nft tokens staked of owner
   function tokensOfOwner(address account) external view returns (uint256[] memory ownerTokens) {
 
-    uint256 supply = IERC721Enumerable(nftAddress).totalSupply();
-    uint256[] memory tmp = new uint256[](supply);
+    uint256[] memory tmp = new uint256[](totalSupply);
 
     uint256 index = 0;
-    for(uint256 tokenId = 1; tokenId <= supply; tokenId++) {
+    for(uint256 tokenId = 0; tokenId <= totalSupply; tokenId++) {
       if (vault[tokenId].owner == account) {
         tmp[index] = vault[tokenId].tokenId;
         index++;

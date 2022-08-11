@@ -134,12 +134,14 @@ export const deployStaking = async (
   decentSDK: Contract,
   nft: string,
   token: string,
-  vaultDuration: number
+  vaultDuration: number,
+  totalSupply: number
 ) => {
   const deployTx = await decentSDK.deployStaking(
     nft,
     token,
-    vaultDuration
+    vaultDuration,
+    totalSupply
   );
 
   const receipt = await deployTx.wait();

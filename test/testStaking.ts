@@ -22,7 +22,8 @@ describe("DCNTStaking contract", () => {
       sdk: Contract,
       clone: Contract,
       token: Contract,
-      nft: Contract;
+      nft: Contract,
+      totalSupply: number;
 
   describe("basic tests", () => {
     beforeEach(async () => {
@@ -30,12 +31,14 @@ describe("DCNTStaking contract", () => {
       sdk = await deploySDK();
       token = await deployTestERC20(vaultFund);
       nft = await deployTestERC721();
+      totalSupply = 10;
       await theFuture.travel(oneDay);
       clone = await deployStaking(
         sdk,
         nft.address,
         token.address,
-        vaultDuration
+        vaultDuration,
+        totalSupply
       );
     });
 
@@ -82,12 +85,14 @@ describe("DCNTStaking contract", () => {
       sdk = await deploySDK();
       token = await deployTestERC20(vaultFund.mul(2));
       nft = await deployTestERC721();
+      totalSupply = 10;
       await theFuture.travel(oneDay);
       clone = await deployStaking(
         sdk,
         nft.address,
         token.address,
-        vaultDuration
+        vaultDuration,
+        totalSupply
       );
 
       // fund the vault

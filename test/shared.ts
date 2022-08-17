@@ -21,6 +21,9 @@ export const theFuture = (() => {
         await ethers.provider.send('evm_mine', []);
       }
     },
+    oneDay: 60 * 60 * 24,
+    oneMonth: 60 * 60 * 24 * 30,
+    oneYear: 60 * 60 * 24 * 365,
   };
 })();
 

@@ -5,8 +5,6 @@ import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deploySDK, deployVault, deployMockERC20, deployMockERC721, theFuture } from "./shared";
 
-const oneDay = 60 * 60 * 24;
-
 describe("DCNTVault", async () => {
   let owner: SignerWithAddress,
       sdk: Contract,
@@ -87,7 +85,7 @@ describe("claiming core functionality", async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       nft = await deployMockERC721();
       token = await deployMockERC20(100);
-      let tomorrow = theFuture.time() + oneDay;
+      let tomorrow = theFuture.time() + theFuture.oneDay;
 
       // mint 1 nft for 1 address and 2 for 2 more
       await nft.connect(addr1).mintNft(1);
@@ -128,7 +126,7 @@ describe("claiming core functionality", async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       nft = await deployMockERC721();
       token = await deployMockERC20(100);
-      let yesterday = theFuture.time() - oneDay;
+      let yesterday = theFuture.time() - theFuture.oneDay;
 
       // set nft portions
       await nft.connect(addr1).mintNft(1);
@@ -186,7 +184,7 @@ describe("claiming core functionality", async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       nft = await deployMockERC721();
       token = await deployMockERC20(73);
-      let yesterday = theFuture.time() - oneDay;
+      let yesterday = theFuture.time() - theFuture.oneDay;
 
       await nft.connect(addr1).mintNft(3);
       await nft.connect(addr2).mintNft(1);

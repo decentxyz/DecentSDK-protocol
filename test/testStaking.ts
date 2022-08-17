@@ -9,7 +9,6 @@ const tokenDecimals = 18;
 const vaultDuration = 100; // days
 
 // amounts
-const oneDay = 60 * 60 * 24;
 const oneEth = ethers.utils.parseEther("1");
 const vaultFund = oneEth.mul(100);
 
@@ -31,7 +30,7 @@ describe("DCNTStaking", async () => {
     token = await deployMockERC20(vaultFund);
     nft = await deployMockERC721();
     totalSupply = 10;
-    await theFuture.travel(oneDay);
+    await theFuture.travel(theFuture.oneDay);
     clone = await deployStaking(
       sdk,
       nft.address,
@@ -53,7 +52,7 @@ describe("DCNTStaking", async () => {
 
     it("should calculate vault start and end dates based on block timestamp", async () => {
       expect(await clone.vaultStart()).to.equal(theFuture.time());
-      expect(await clone.vaultEnd()).to.equal(theFuture.time() + (oneDay * vaultDuration));
+      expect(await clone.vaultEnd()).to.equal(theFuture.time() + (theFuture.oneDay * vaultDuration));
     });
   });
 
@@ -95,7 +94,7 @@ describe("DCNTStaking", async () => {
       token = await deployMockERC20(vaultFund.mul(2));
       nft = await deployMockERC721();
       totalSupply = 10;
-      await theFuture.travel(oneDay);
+      await theFuture.travel(theFuture.oneDay);
       clone = await deployStaking(
         sdk,
         nft.address,
@@ -113,7 +112,7 @@ describe("DCNTStaking", async () => {
 
       // approve transfer and stake 1 nft
       await nft.connect(addr1).approve(clone.address, 0);
-      await theFuture.travel(oneDay);
+      await theFuture.travel(theFuture.oneDay);
       await clone.connect(addr1).stake([0]);
 
       // approve transfer and stake 1 nft
@@ -123,7 +122,7 @@ describe("DCNTStaking", async () => {
 
     describe("and a user with one nft stakes for 1 day", async () => {
       it("they would have earned 0.1 token", async () => {
-        await theFuture.travel(oneDay);
+        await theFuture.travel(theFuture.oneDay);
         await theFuture.arrive();
         const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.1'));
@@ -132,7 +131,7 @@ describe("DCNTStaking", async () => {
 
     describe("and continues to stake for another 1.5 days", async () => {
       it("they would have earned 0.25 token", async () => {
-        await theFuture.travel(oneDay*1.5);
+        await theFuture.travel(theFuture.oneDay*1.5);
         await theFuture.arrive();
         const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.25'));
@@ -141,7 +140,7 @@ describe("DCNTStaking", async () => {
 
     describe("and continues to stake for another 2.5 days", async () => {
       it("they would have earned 0.5 token", async () => {
-        await theFuture.travel(oneDay*2.5);
+        await theFuture.travel(theFuture.oneDay*2.5);
         await theFuture.arrive();
         const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.5'));
@@ -152,7 +151,7 @@ describe("DCNTStaking", async () => {
       it("they would have earned 0.6 token", async () => {
         await clone.connect(addr2).claim([1]);
 
-        await theFuture.travel(oneDay);
+        await theFuture.travel(theFuture.oneDay);
         await theFuture.arrive();
         const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('0.6'));
@@ -163,7 +162,7 @@ describe("DCNTStaking", async () => {
       it("they would have earned 1.4 token", async () => {
         await token.connect(addr1).transfer(clone.address, vaultFund);
 
-        await theFuture.travel(oneDay);
+        await theFuture.travel(theFuture.oneDay);
         await theFuture.arrive();
         const earn = await clone.earningInfo(addr1.address, [0]);
         expect(earn).to.equal(ethers.utils.parseEther('1.4'));

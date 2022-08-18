@@ -17,13 +17,59 @@ const config: HardhatUserConfig = {
       url: process.env.RINKEBY_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },
+    polygon: {
+      url: process.env.POLYGON_MAINNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
+    polyon_testnet: {
+      url: process.env.POLYGON_TESTNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
+    optimism: {
+      url: process.env.OPTIMISM_MAINNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
+    optimism_testnet: {
+      url: process.env.OPTIMISM_TESTNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
+    arbitrum: {
+      url: process.env.ARBITRUM_MAINNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
+    arbitrum_testnet: {
+      url: process.env.ARBITRUM_TESTNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
   },
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY as string,
       goerli: process.env.ETHERSCAN_KEY as string,
       rinkeby: process.env.ETHERSCAN_KEY as string,
+      polygon: process.env.POLYGONSCAN_KEY as string,
+      polygonMumbai: process.env.POLYGONSCAN_KEY as string,
+      optimism_testnet: process.env.BLOCKSCOUT_KEY as string,
+      arbitrum_testnet: process.env.BLOCKSCOUT_KEY as string,
     },
+    customChains: [
+      {
+        network: "optimism_testnet",
+        chainId: 420,
+        urls: {
+          apiURL: "https://blockscout.com/optimism/goerli/api",
+          browserURL: "https://blockscout.com/optimism/goerli"
+        }
+      },
+      {
+        network: "arbitrum_testnet",
+        chainId: 421613,
+        urls: {
+          apiURL: "https://goerli-rollup-explorer.arbitrum.io/api",
+          browserURL: "https://goerli-rollup-explorer.arbitrum.io"
+        }
+      },
+    ],
   },
   gasReporter: {
     currency: 'USD',

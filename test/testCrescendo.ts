@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deployCrescendo } from "./shared";
+import { deploySDK, deployCrescendo } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';

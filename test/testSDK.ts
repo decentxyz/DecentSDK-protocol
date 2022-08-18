@@ -11,7 +11,7 @@ import {
   deployVault,
   deployStaking,
   theFuture
-} from "./shared";
+} from "../core";
 
 describe("DCNTSDK", async () => {
   let owner: SignerWithAddress,

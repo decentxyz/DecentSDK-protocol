@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deployVault, deployMockERC20, deployMockERC721, theFuture } from "./shared";
+import { deploySDK, deployVault, deployMockERC20, deployMockERC721, theFuture } from "../core";
 
 describe("DCNTVault", async () => {
   let owner: SignerWithAddress,

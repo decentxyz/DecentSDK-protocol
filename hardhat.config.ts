@@ -18,6 +18,13 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY as string]
     },
   },
+  etherscan: {
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_KEY as string,
+      goerli: process.env.ETHERSCAN_KEY as string,
+      rinkeby: process.env.ETHERSCAN_KEY as string,
+    },
+  },
   gasReporter: {
     currency: 'USD',
     coinmarketcap: process.env.COINMARKETCAP_KEY,

@@ -7,6 +7,7 @@ import {
   deploySDK,
   deployImplementations,
   deploy721A,
+  deploy4907A,
   deployCrescendo,
   deployVault,
   deployStaking,
@@ -28,6 +29,10 @@ describe("DCNTSDK", async () => {
   describe("constructor()", async () => {
     it("should store the DCNT721A implementation address on the sdk", async () => {
       expect(ethers.utils.getAddress(await sdk.nftImplementation())).to.equal(implementations.nft.address);
+    });
+
+    it("should store the DCNT4907A implementation address on the sdk", async () => {
+      expect(ethers.utils.getAddress(await sdk.DCNT4907AImplementation())).to.equal(implementations.DCNT4907A.address);
     });
 
     it("should store the DCNTCrescendo implementation address on the sdk", async () => {
@@ -62,6 +67,29 @@ describe("DCNTSDK", async () => {
     });
 
     it("should deploy and initialize a DCNT721A contract", async () => {
+      expect(clone.address).to.be.properAddress;
+    });
+  });
+
+  describe("deploy4907A()", async () => {
+    before(async () => {
+      const name = 'Decent';
+      const symbol = 'DCNT';
+      const maxTokens = 4;
+      const tokenPrice = ethers.utils.parseEther('0.01');
+      const maxTokenPurchase = 2;
+
+      clone = await deploy4907A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase
+      );
+    });
+
+    it("should deploy and initialize a DCNT4907A contract", async () => {
       expect(clone.address).to.be.properAddress;
     });
   });

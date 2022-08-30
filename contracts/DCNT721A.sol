@@ -90,7 +90,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
     baseURI = uri;
   }
 
-  function _baseURI() internal view override returns (string memory) {
+  function _baseURI() internal view virtual override returns (string memory) {
     return baseURI;
   }
 

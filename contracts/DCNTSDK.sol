@@ -27,12 +27,14 @@ contract DCNTSDK is Ownable {
 
   /// @notice implementation addresses for base contracts
   address public nftImplementation;
+  address public DCNT4907AImplementation;
   address public crescendoImplementation;
   address public vaultImplementation;
   address public stakingImplementation;
 
   /// @notice contracts deployed by DecentSDK proxy factory
   address[] public allNFTs;
+  address[] public allDCNT4907A;
   address[] public allCrescendos;
   address[] public allVaults;
   address[] public allStaking;
@@ -41,6 +43,7 @@ contract DCNTSDK is Ownable {
 
   /// @notice Emitted after successfully deploying a contract
   event NewNFT(address nft);
+  event DeployDCNT4907A(address DCNT4907A);
   event NewCrescendo(address crescendo);
   event NewVault(address vault);
   event NewStaking(address staking);
@@ -50,11 +53,13 @@ contract DCNTSDK is Ownable {
   /// @notice Creates a new DecentSDK instance
   constructor(
     address _nftImplementation,
+    address _DCNT4907AImplementation,
     address _crescendoImplementation,
     address _vaultImplementation,
     address _stakingImplementation
   ) {
     nftImplementation = _nftImplementation;
+    DCNT4907AImplementation = _DCNT4907AImplementation;
     crescendoImplementation = _crescendoImplementation;
     vaultImplementation = _vaultImplementation;
     stakingImplementation = _stakingImplementation;
@@ -85,6 +90,31 @@ contract DCNTSDK is Ownable {
     require(success);
     allNFTs.push(nftInstance);
     emit NewNFT(nftInstance);
+  }
+
+  // deploy and initialize an erc4907a clone
+  function deploy4907A(
+    string memory _name,
+    string memory _symbol,
+    uint256 _maxTokens,
+    uint256 _tokenPrice,
+    uint256 _maxTokenPurchase
+  ) external payable {
+    address DCNT4907AClone = Clones.clone(DCNT4907AImplementation);
+    (bool success, ) = DCNT4907AClone.call{value: msg.value}(
+      abi.encodeWithSignature(
+        "initialize(address,string,string,uint256,uint256,uint256)",
+        msg.sender,
+        _name,
+        _symbol,
+        _maxTokens,
+        _tokenPrice,
+        _maxTokenPurchase
+      )
+    );
+    require(success);
+    allDCNT4907A.push(DCNT4907AClone);
+    emit DeployDCNT4907A(DCNT4907AClone);
   }
 
   // deploy and initialize a Crescendo clone

@@ -7,6 +7,7 @@ const DCNTSDK_ENDPOINT = '';
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
   const DCNT721A = await DCNTSDK.nftImplementation();
+  const DCNT4907A = await DCNTSDK.DCNT4907AImplementation();
   const DCNTCrescendo = await DCNTSDK.crescendoImplementation();
   const DCNTVault = await DCNTSDK.vaultImplementation();
   const DCNTStaking = await DCNTSDK.stakingImplementation();
@@ -15,6 +16,7 @@ async function main() {
   console.log(`npx hardhat verify --network ${hre.network.name}`,
     DCNTSDK_ENDPOINT,
     DCNT721A,
+    DCNT4907A,
     DCNTCrescendo,
     DCNTVault,
     DCNTStaking
@@ -22,6 +24,9 @@ async function main() {
 
   console.log('\nVerify DCNT721A:');
   console.log(`npx hardhat verify --network ${hre.network.name} ${DCNT721A}`);
+
+  console.log('\nVerify DCNT4907A:');
+  console.log(`npx hardhat verify --network ${hre.network.name} ${DCNT4907A}`);
 
   console.log('\nVerify DCNTCrescendo:');
   console.log(`npx hardhat verify --network ${hre.network.name} ${DCNTCrescendo}`);

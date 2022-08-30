@@ -21,7 +21,7 @@ const config: HardhatUserConfig = {
       url: process.env.POLYGON_MAINNET_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },
-    polyon_testnet: {
+    polygon_testnet: {
       url: process.env.POLYGON_TESTNET_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },

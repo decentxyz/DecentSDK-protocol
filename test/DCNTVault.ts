@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deployVault, deployMockERC20, deployMockERC721, theFuture } from "../core";
+import { deployDCNTSDK, deployDCNTVault, deployMockERC20, deployMockERC721, theFuture } from "../core";
 
 describe("DCNTVault", async () => {
   let owner: SignerWithAddress,
@@ -22,10 +22,10 @@ describe("DCNTVault", async () => {
   describe("initialize()", async () => {
     before(async () => {
       [owner] = await ethers.getSigners();
-      sdk = await deploySDK();
+      sdk = await deployDCNTSDK();
       nft = await deployMockERC721();
       token = await deployMockERC20(100);
-      clone = await deployVault(
+      clone = await deployDCNTVault(
         sdk,
         token.address,
         nft.address,
@@ -49,10 +49,10 @@ describe("DCNTVault", async () => {
   describe("vault functionality", async () => {
     beforeEach(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
-      sdk = await deploySDK();
+      sdk = await deployDCNTSDK();
       nft = await deployMockERC721();
       token = await deployMockERC20(100);
-      vault = await deployVault(
+      vault = await deployDCNTVault(
         sdk,
         token.address,
         nft.address,
@@ -92,7 +92,7 @@ describe("claiming core functionality", async () => {
       await nft.connect(addr2).mintNft(2);
       await nft.connect(addr3).mintNft(2);
 
-      vault = await deployVault(
+      vault = await deployDCNTVault(
         sdk,
         token.address,
         nft.address,
@@ -133,7 +133,7 @@ describe("claiming core functionality", async () => {
       await nft.connect(addr2).mintNft(2);
       await nft.connect(addr3).mintNft(2);
 
-      unlockedVault = await deployVault(
+      unlockedVault = await deployDCNTVault(
         sdk,
         token.address,
         nft.address,
@@ -191,7 +191,7 @@ describe("claiming core functionality", async () => {
       await nft.connect(addr3).mintNft(1);
       await nft.connect(addr4).mintNft(6);
 
-      unlockedVault = await deployVault(
+      unlockedVault = await deployDCNTVault(
         sdk,
         token.address,
         nft.address,

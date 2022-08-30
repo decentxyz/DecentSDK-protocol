@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deployStaking, deployMockERC20, deployMockERC721, theFuture } from "../core";
+import { deployDCNTSDK, deployDCNTStaking, deployMockERC20, deployMockERC721, theFuture } from "../core";
 
 const tokenDecimals = 18;
 const vaultDuration = 100; // days
@@ -26,12 +26,12 @@ describe("DCNTStaking", async () => {
 
   before(async () => {
     [owner] = await ethers.getSigners();
-    sdk = await deploySDK();
+    sdk = await deployDCNTSDK();
     token = await deployMockERC20(vaultFund);
     nft = await deployMockERC721();
     totalSupply = 10;
     await theFuture.travel(theFuture.oneDay);
-    clone = await deployStaking(
+    clone = await deployDCNTStaking(
       sdk,
       nft.address,
       token.address,
@@ -90,12 +90,12 @@ describe("DCNTStaking", async () => {
 
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
-      sdk = await deploySDK();
+      sdk = await deployDCNTSDK();
       token = await deployMockERC20(vaultFund.mul(2));
       nft = await deployMockERC721();
       totalSupply = 10;
       await theFuture.travel(theFuture.oneDay);
-      clone = await deployStaking(
+      clone = await deployDCNTStaking(
         sdk,
         nft.address,
         token.address,

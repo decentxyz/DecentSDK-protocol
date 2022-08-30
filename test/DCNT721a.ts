@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deploy721A } from "../core";
+import { deployDCNTSDK, deployDCNT721A } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -28,8 +28,8 @@ describe("DCNT721A", async () => {
   describe("initialize()", async () => {
     before(async () => {
       [owner] = await ethers.getSigners();
-      sdk = await deploySDK();
-      clone = await deploy721A(
+      sdk = await deployDCNTSDK();
+      clone = await deployDCNT721A(
         sdk,
         name,
         symbol,
@@ -55,8 +55,8 @@ describe("DCNT721A", async () => {
   describe("mint()", async () => {
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
-      const sdk = await deploySDK();
-      nft = await deploy721A(
+      const sdk = await deployDCNTSDK();
+      nft = await deployDCNT721A(
         sdk,
         name,
         symbol,

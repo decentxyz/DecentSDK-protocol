@@ -26,57 +26,57 @@ contract DCNTSDK is Ownable {
   /// ============ Mutable storage ============
 
   /// @notice implementation addresses for base contracts
-  address public nftImplementation;
+  address public DCNT721AImplementation;
   address public DCNT4907AImplementation;
-  address public crescendoImplementation;
-  address public vaultImplementation;
-  address public stakingImplementation;
+  address public DCNTCrescendoImplementation;
+  address public DCNTVaultImplementation;
+  address public DCNTStakingImplementation;
 
   /// @notice contracts deployed by DecentSDK proxy factory
-  address[] public allNFTs;
+  address[] public allDCNT721A;
   address[] public allDCNT4907A;
-  address[] public allCrescendos;
-  address[] public allVaults;
-  address[] public allStaking;
+  address[] public allDCNTCrescendo;
+  address[] public allDCNTVault;
+  address[] public allDCNTStaking;
 
   /// ============ Events ============
 
   /// @notice Emitted after successfully deploying a contract
-  event NewNFT(address nft);
+  event DeployDCNT721A(address DCNT721A);
   event DeployDCNT4907A(address DCNT4907A);
-  event NewCrescendo(address crescendo);
-  event NewVault(address vault);
-  event NewStaking(address staking);
+  event DeployDCNTCrescendo(address DCNTCrescendo);
+  event DeployDCNTVault(address DCNTVault);
+  event DeployDCNTStaking(address DCNTStaking);
 
   /// ============ Constructor ============
 
   /// @notice Creates a new DecentSDK instance
   constructor(
-    address _nftImplementation,
+    address _DCNT721AImplementation,
     address _DCNT4907AImplementation,
-    address _crescendoImplementation,
-    address _vaultImplementation,
-    address _stakingImplementation
+    address _DCNTCrescendoImplementation,
+    address _DCNTVaultImplementation,
+    address _DCNTStakingImplementation
   ) {
-    nftImplementation = _nftImplementation;
+    DCNT721AImplementation = _DCNT721AImplementation;
     DCNT4907AImplementation = _DCNT4907AImplementation;
-    crescendoImplementation = _crescendoImplementation;
-    vaultImplementation = _vaultImplementation;
-    stakingImplementation = _stakingImplementation;
+    DCNTCrescendoImplementation = _DCNTCrescendoImplementation;
+    DCNTVaultImplementation = _DCNTVaultImplementation;
+    DCNTStakingImplementation = _DCNTStakingImplementation;
   }
 
   /// ============ Functions ============
 
   // deploy and initialize an erc721a clone
-  function deploy721A(
+  function deployDCNT721A(
     string memory _name,
     string memory _symbol,
     uint256 _maxTokens,
     uint256 _tokenPrice,
     uint256 _maxTokenPurchase
   ) external payable {
-    address nftInstance = Clones.clone(nftImplementation);
-    (bool success, ) = nftInstance.call{value: msg.value}(
+    address DCNT721AClone = Clones.clone(DCNT721AImplementation);
+    (bool success, ) = DCNT721AClone.call{value: msg.value}(
       abi.encodeWithSignature(
         "initialize(address,string,string,uint256,uint256,uint256)",
         msg.sender,
@@ -88,12 +88,12 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allNFTs.push(nftInstance);
-    emit NewNFT(nftInstance);
+    allDCNT721A.push(DCNT721AClone);
+    emit DeployDCNT721A(DCNT721AClone);
   }
 
   // deploy and initialize an erc4907a clone
-  function deploy4907A(
+  function deployDCNT4907A(
     string memory _name,
     string memory _symbol,
     uint256 _maxTokens,
@@ -118,7 +118,7 @@ contract DCNTSDK is Ownable {
   }
 
   // deploy and initialize a Crescendo clone
-  function deployCrescendo(
+  function deployDCNTCrescendo(
     string memory _name,
     string memory _symbol,
     string memory _uri,
@@ -130,8 +130,8 @@ contract DCNTSDK is Ownable {
     uint256 _trDenom,
     address payable _payouts
   ) external payable {
-    address crescendoInstance = Clones.clone(crescendoImplementation);
-    (bool success, ) = crescendoInstance.call{value: msg.value}(
+    address DCNTCrescendoClone = Clones.clone(DCNTCrescendoImplementation);
+    (bool success, ) = DCNTCrescendoClone.call{value: msg.value}(
       abi.encodeWithSignature(
         "initialize(address,string,string,string,uint256,uint256,uint256,uint256,uint256,uint256,address)",
         msg.sender,
@@ -148,19 +148,19 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allCrescendos.push(crescendoInstance);
-    emit NewCrescendo(crescendoInstance);
+    allDCNTCrescendo.push(DCNTCrescendoClone);
+    emit DeployDCNTCrescendo(DCNTCrescendoClone);
   }
 
   // deploy and initialize a vault wrapper clone
-  function deployVault(
+  function deployDCNTVault(
     address _vaultDistributionTokenAddress,
     address _nftVaultKeyAddress,
     uint256 _nftTotalSupply,
     uint256 _unlockDate
   ) external payable {
-    address vaultInstance = Clones.clone(vaultImplementation);
-    (bool success, ) = vaultInstance.call{value: msg.value}(
+    address DCNTVaultClone = Clones.clone(DCNTVaultImplementation);
+    (bool success, ) = DCNTVaultClone.call{value: msg.value}(
       abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _vaultDistributionTokenAddress,
@@ -170,19 +170,19 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allVaults.push(vaultInstance);
-    emit NewVault(vaultInstance);
+    allDCNTVault.push(DCNTVaultClone);
+    emit DeployDCNTVault(DCNTVaultClone);
   }
 
   // deploy and initialize a vault wrapper clone
-  function deployStaking(
+  function deployDCNTStaking(
     address _nft,
     address _token,
     uint256 _vaultDuration,
     uint256 _totalSupply
   ) external payable {
-    address stakingInstance = Clones.clone(stakingImplementation);
-    (bool success, ) = stakingInstance.call{value: msg.value}(
+    address DCNTStakingClone = Clones.clone(DCNTStakingImplementation);
+    (bool success, ) = DCNTStakingClone.call{value: msg.value}(
       abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _nft,
@@ -192,7 +192,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allStaking.push(stakingInstance);
-    emit NewStaking(stakingInstance);
+    allDCNTStaking.push(DCNTStakingClone);
+    emit DeployDCNTStaking(DCNTStakingClone);
   }
 }

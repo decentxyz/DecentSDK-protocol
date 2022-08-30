@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deploy4907A, theFuture } from "../core";
+import { deployDCNTSDK, deployDCNT4907A, theFuture } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -24,8 +24,8 @@ describe("DCNT4907A", async () => {
 
   before(async () => {
     [owner] = await ethers.getSigners();
-    sdk = await deploySDK();
-    clone = await deploy4907A(
+    sdk = await deployDCNTSDK();
+    clone = await deployDCNT4907A(
       sdk,
       name,
       symbol,

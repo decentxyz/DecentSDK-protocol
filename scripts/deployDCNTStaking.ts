@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployStaking } from "../core";
+import { deployDCNTStaking } from "../core";
 
 // set up DCNTSDK
 const DCNTSDK_ENDPOINT = '';
@@ -12,7 +12,7 @@ const totalSupply = 25;
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
-  const DCNTStaking = await deployStaking(
+  const DCNTStaking = await deployDCNTStaking(
     DCNTSDK,
     nftAddress,
     tokenAddress,

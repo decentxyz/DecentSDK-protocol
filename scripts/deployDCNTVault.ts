@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployVault, theFuture } from "../core";
+import { deployDCNTVault, theFuture } from "../core";
 
 // set up DCNTSDK
 const DCNTSDK_ENDPOINT = '';
@@ -12,7 +12,7 @@ const unlockDate = theFuture.time() + theFuture.oneMonth;
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
-  const DCNTVault = await deployVault(
+  const DCNTVault = await deployDCNTVault(
     DCNTSDK,
     vaultDistributionTokenAddress,
     nftVaultKeyAddress,

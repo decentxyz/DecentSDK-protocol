@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deploySDK, deployCrescendo } from "../core";
+import { deployDCNTSDK, deployDCNTCrescendo } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -27,8 +27,8 @@ describe("DCNTCrescendo", async () => {
 
   before(async () => {
     [owner] = await ethers.getSigners();
-    sdk = await deploySDK();
-    clone = await deployCrescendo(
+    sdk = await deployDCNTSDK();
+    clone = await deployDCNTCrescendo(
       sdk,
       name,
       symbol,
@@ -79,7 +79,7 @@ describe("DCNTCrescendo", async () => {
 
   describe("buy()", async () => {
     before(async () => {
-      crescendo = await deployCrescendo(
+      crescendo = await deployDCNTCrescendo(
         sdk,
         name,
         symbol,
@@ -127,7 +127,7 @@ describe("DCNTCrescendo", async () => {
 
   describe("sell()", async () => {
     beforeEach(async () => {
-      crescendo = await deployCrescendo(
+      crescendo = await deployDCNTCrescendo(
         sdk,
         name,
         symbol,

@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
-import { deploySDK, deployImplementations } from "../core";
+import { deployDCNTSDK, deployImplementations } from "../core";
 
 async function main() {
-  const sdk = await deploySDK();
+  const sdk = await deployDCNTSDK();
   console.log("DCNTSDK deployed to: ", sdk.address);
 }
 

@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deploy721A } from "../core";
+import { deployDCNT721A } from "../core";
 
 // set up DCNTSDK
 const DCNTSDK_ENDPOINT = '';
@@ -13,7 +13,7 @@ const maxTokenPurchase = 2;
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
-  const DCNT721A = await deploy721A(
+  const DCNT721A = await deployDCNT721A(
     DCNTSDK,
     name,
     symbol,

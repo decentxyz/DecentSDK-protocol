@@ -4,13 +4,13 @@ import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  deploySDK,
+  deployDCNTSDK,
   deployImplementations,
-  deploy721A,
-  deploy4907A,
-  deployCrescendo,
-  deployVault,
-  deployStaking,
+  deployDCNT721A,
+  deployDCNT4907A,
+  deployDCNTCrescendo,
+  deployDCNTVault,
+  deployDCNTStaking,
   theFuture
 } from "../core";
 
@@ -23,32 +23,32 @@ describe("DCNTSDK", async () => {
   beforeEach(async () => {
     [owner] = await ethers.getSigners();
     implementations = await deployImplementations();
-    sdk = await deploySDK(implementations);
+    sdk = await deployDCNTSDK(implementations);
   });
 
   describe("constructor()", async () => {
     it("should store the DCNT721A implementation address on the sdk", async () => {
-      expect(ethers.utils.getAddress(await sdk.nftImplementation())).to.equal(implementations.nft.address);
+      expect(await sdk.DCNT721AImplementation()).to.equal(implementations.DCNT721A.address);
     });
 
     it("should store the DCNT4907A implementation address on the sdk", async () => {
-      expect(ethers.utils.getAddress(await sdk.DCNT4907AImplementation())).to.equal(implementations.DCNT4907A.address);
+      expect(await sdk.DCNT4907AImplementation()).to.equal(implementations.DCNT4907A.address);
     });
 
     it("should store the DCNTCrescendo implementation address on the sdk", async () => {
-      expect(ethers.utils.getAddress(await sdk.crescendoImplementation())).to.equal(implementations.crescendo.address);
+      expect(await sdk.DCNTCrescendoImplementation()).to.equal(implementations.DCNTCrescendo.address);
     });
 
     it("should store the DCNTVault implementation address on the sdk", async () => {
-      expect(ethers.utils.getAddress(await sdk.vaultImplementation())).to.equal(implementations.vault.address);
+      expect(await sdk.DCNTVaultImplementation()).to.equal(implementations.DCNTVault.address);
     });
 
     it("should store the DCNTStaking implementation address on the sdk", async () => {
-      expect(ethers.utils.getAddress(await sdk.nftImplementation())).to.equal(implementations.nft.address);
+      expect(await sdk.DCNTStakingImplementation()).to.equal(implementations.DCNTStaking.address);
     });
   });
 
-  describe("deploy721A()", async () => {
+  describe("deployDCNT721A()", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
@@ -56,7 +56,7 @@ describe("DCNTSDK", async () => {
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
 
-      clone = await deploy721A(
+      clone = await deployDCNT721A(
         sdk,
         name,
         symbol,
@@ -71,7 +71,7 @@ describe("DCNTSDK", async () => {
     });
   });
 
-  describe("deploy4907A()", async () => {
+  describe("deployDCNT4907A()", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
@@ -79,7 +79,7 @@ describe("DCNTSDK", async () => {
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
 
-      clone = await deploy4907A(
+      clone = await deployDCNT4907A(
         sdk,
         name,
         symbol,
@@ -94,7 +94,7 @@ describe("DCNTSDK", async () => {
     });
   });
 
-  describe("deployCrescendo()", async () => {
+  describe("deployDCNTCrescendo()", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
@@ -106,7 +106,7 @@ describe("DCNTSDK", async () => {
       const [trNum,trDenom] = [3,20];
       const payouts = ethers.constants.AddressZero;
 
-      clone = await deployCrescendo(
+      clone = await deployDCNTCrescendo(
         sdk,
         name,
         symbol,
@@ -126,9 +126,9 @@ describe("DCNTSDK", async () => {
     });
   });
 
-  describe("deployVault()", async () => {
+  describe("deployDCNTVault()", async () => {
     before(async () => {
-      clone = await deployVault(
+      clone = await deployDCNTVault(
         sdk,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,
@@ -142,11 +142,11 @@ describe("DCNTSDK", async () => {
     });
   });
 
-  describe("deployStaking()", async () => {
+  describe("deployDCNTStaking()", async () => {
     before(async () => {
       const vaultDuration = 100;
       const totalSupply = 10;
-      clone = await deployStaking(
+      clone = await deployDCNTStaking(
         sdk,
         ethers.constants.AddressZero,
         ethers.constants.AddressZero,

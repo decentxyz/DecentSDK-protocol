@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployCrescendo } from "../core";
+import { deployDCNTCrescendo } from "../core";
 
 // set up DCNTSDK
 const DCNTSDK_ENDPOINT = '';
@@ -17,7 +17,7 @@ const payouts = ethers.constants.AddressZero;
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
-  const DCNTCrescendo = await deployCrescendo(
+  const DCNTCrescendo = await deployDCNTCrescendo(
     DCNTSDK,
     name,
     symbol,

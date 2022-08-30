@@ -28,35 +28,41 @@ export const theFuture = (() => {
 })();
 
 export type Implementations = {
-  nft: Contract;
+  DCNT721A: Contract;
   DCNT4907A: Contract;
-  crescendo: Contract;
-  vault: Contract;
-  staking: Contract;
+  DCNTCrescendo: Contract;
+  DCNTVault: Contract;
+  DCNTStaking: Contract;
 };
 
-export const deploySDK = async (
+export const deployDCNTSDK = async (
   implementations?: Implementations
 ) => {
   implementations = implementations ?? await deployImplementations();
   const decentSDKFactory = await ethers.getContractFactory('DCNTSDK');
   const decentSDK = await decentSDKFactory.deploy(
-    implementations.nft.address,
+    implementations.DCNT721A.address,
     implementations.DCNT4907A.address,
-    implementations.crescendo.address,
-    implementations.vault.address,
-    implementations.staking.address,
+    implementations.DCNTCrescendo.address,
+    implementations.DCNTVault.address,
+    implementations.DCNTStaking.address,
   );
   return await decentSDK.deployed();
 }
 
 export const deployImplementations = async () => {
-  const nft = await deployContract('DCNT721A');
+  const DCNT721A = await deployContract('DCNT721A');
   const DCNT4907A = await deployContract('DCNT4907A');
-  const crescendo = await deployContract('DCNTCrescendo');
-  const vault = await deployContract('DCNTVault');
-  const staking = await deployContract('DCNTStaking');
-  return { nft, DCNT4907A, crescendo, vault, staking };
+  const DCNTCrescendo = await deployContract('DCNTCrescendo');
+  const DCNTVault = await deployContract('DCNTVault');
+  const DCNTStaking = await deployContract('DCNTStaking');
+  return {
+    DCNT721A,
+    DCNT4907A,
+    DCNTCrescendo,
+    DCNTVault,
+    DCNTStaking
+  };
 }
 
 export const deployContract = async (contract: string) => {
@@ -65,7 +71,7 @@ export const deployContract = async (contract: string) => {
   return await tx.deployed();
 }
 
-export const deploy721A = async (
+export const deployDCNT721A = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
@@ -73,7 +79,7 @@ export const deploy721A = async (
   tokenPrice: BigNumber,
   maxTokenPurchase: number
 ) => {
-  const deployTx = await decentSDK.deploy721A(
+  const deployTx = await decentSDK.deployDCNT721A(
     name,
     symbol,
     maxTokens,
@@ -82,11 +88,11 @@ export const deploy721A = async (
   );
 
   const receipt = await deployTx.wait();
-  const newNFTAddress = receipt.events.find((x: any) => x.event === 'NewNFT').args[0];
-  return ethers.getContractAt("DCNT721A", newNFTAddress);
+  const address = receipt.events.find((x: any) => x.event === 'DeployDCNT721A').args.DCNT721A;
+  return ethers.getContractAt("DCNT721A", address);
 }
 
-export const deploy4907A = async (
+export const deployDCNT4907A = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
@@ -94,7 +100,7 @@ export const deploy4907A = async (
   tokenPrice: BigNumber,
   maxTokenPurchase: number
 ) => {
-  const deployTx = await decentSDK.deploy4907A(
+  const deployTx = await decentSDK.deployDCNT4907A(
     name,
     symbol,
     maxTokens,
@@ -107,7 +113,7 @@ export const deploy4907A = async (
   return ethers.getContractAt("DCNT4907A", address);
 }
 
-export const deployCrescendo = async (
+export const deployDCNTCrescendo = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
@@ -120,7 +126,7 @@ export const deployCrescendo = async (
   trDenom: number,
   payouts: string
 ) => {
-  const deployTx = await decentSDK.deployCrescendo(
+  const deployTx = await decentSDK.deployDCNTCrescendo(
     name,
     symbol,
     uri,
@@ -134,18 +140,18 @@ export const deployCrescendo = async (
   );
 
   const receipt = await deployTx.wait();
-  const newCrescendoAddress = receipt.events.find((x: any) => x.event === 'NewCrescendo').args[0];
-  return ethers.getContractAt('DCNTCrescendo', newCrescendoAddress);
+  const address = receipt.events.find((x: any) => x.event === 'DeployDCNTCrescendo').args.DCNTCrescendo;
+  return ethers.getContractAt('DCNTCrescendo', address);
 }
 
-export const deployVault = async (
+export const deployDCNTVault = async (
   decentSDK: Contract,
   _vaultDistributionTokenAddress: string,
   _nftVaultKeyAddress: string,
   _nftTotalSupply: number,
   _unlockDate: number
 ) => {
-  const deployTx = await decentSDK.deployVault(
+  const deployTx = await decentSDK.deployDCNTVault(
     _vaultDistributionTokenAddress,
     _nftVaultKeyAddress,
     _nftTotalSupply,
@@ -153,18 +159,18 @@ export const deployVault = async (
   );
 
   const receipt = await deployTx.wait();
-  const newVaultAddress = receipt.events.find((x: any) => x.event === 'NewVault').args[0];
-  return ethers.getContractAt("DCNTVault", newVaultAddress);
+  const address = receipt.events.find((x: any) => x.event === 'DeployDCNTVault').args.DCNTVault;
+  return ethers.getContractAt("DCNTVault", address);
 }
 
-export const deployStaking = async (
+export const deployDCNTStaking = async (
   decentSDK: Contract,
   nft: string,
   token: string,
   vaultDuration: number,
   totalSupply: number
 ) => {
-  const deployTx = await decentSDK.deployStaking(
+  const deployTx = await decentSDK.deployDCNTStaking(
     nft,
     token,
     vaultDuration,
@@ -172,8 +178,8 @@ export const deployStaking = async (
   );
 
   const receipt = await deployTx.wait();
-  const newNFTAddress = receipt.events.find((x: any) => x.event === 'NewStaking').args[0];
-  return ethers.getContractAt("DCNTStaking", newNFTAddress);
+  const address = receipt.events.find((x: any) => x.event === 'DeployDCNTStaking').args.DCNTStaking;
+  return ethers.getContractAt("DCNTStaking", address);
 }
 
 export const deployMockERC20 = async (amountToMint: BigNumber | number) => {

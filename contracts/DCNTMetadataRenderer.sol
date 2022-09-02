@@ -47,7 +47,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string newDescription
     );
 
-    /// @notice Description updated for this edition
+    /// @notice AudioQuantitativeUpdated updated for this edition
     /// @dev admin function indexer feedback
     event AudioQuantitativeUpdated(
         address indexed target,

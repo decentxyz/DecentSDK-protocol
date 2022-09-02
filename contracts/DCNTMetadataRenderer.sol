@@ -47,18 +47,6 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string newDescription
     );
 
-    /// @notice AudioQuantitativeUpdated updated for this edition
-    /// @dev admin function indexer feedback
-    event AudioQuantitativeUpdated(
-        address indexed target,
-        address sender,
-        string key,
-        uint256 bpm,
-        uint256 duration,
-        string audioMimeType,
-        uint256 trackNumber
-    );
-
     /// @notice Token information mapping storage
     mapping(address => TokenEditionInfo) public tokenInfos;
     mapping(address => AudioQuantitativeInfo) public audioQuantitativeInfos;

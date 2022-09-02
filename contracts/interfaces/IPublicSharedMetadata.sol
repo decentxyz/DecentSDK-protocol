@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./IOnChainMetadata.sol";
+
 /// Shared public library for on-chain NFT functions
-interface IPublicSharedMetadata {
+interface IPublicSharedMetadata is IOnChainMetadata {
     /// @param unencoded bytes to base64-encode
     function base64Encode(bytes memory unencoded)
         external

@@ -22,13 +22,6 @@ import {MetadataRenderAdminCheck} from "./utils/MetadataRenderAdminCheck.sol";
 
 /// @notice DCNTMetadataRenderer for editions support
 contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
-    /// @notice Storage for token edition information
-    struct TokenEditionInfo {
-        string description;
-        string imageURI;
-        string animationURI;
-    }
-
     /// @notice Event for updated Media URIs
     event MediaURIsUpdated(
         address indexed target,
@@ -54,8 +47,21 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string newDescription
     );
 
+    /// @notice Description updated for this edition
+    /// @dev admin function indexer feedback
+    event AudioQuantitativeUpdated(
+        address indexed target,
+        address sender,
+        string key,
+        uint256 bpm,
+        uint256 duration,
+        string audioMimeType,
+        uint256 trackNumber
+    );
+
     /// @notice Token information mapping storage
     mapping(address => TokenEditionInfo) public tokenInfos;
+    mapping(address => AudioQuantitativeInfo) public audioQuantitativeInfos;
 
     /// @notice Reference to Shared NFT logic library
     SharedNFTLogic private immutable sharedNFTLogic;
@@ -98,6 +104,39 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             target: target,
             sender: msg.sender,
             newDescription: newDescription
+        });
+    }
+
+    /// @notice Admin function to update AudioQuantitative
+    /// @param key musical key
+    /// @param bpm beats per minute
+    /// @param duration length (in seconds)
+    /// @param audioMimeType mimeType of the content
+    /// @param trackNumber track number in project
+    function updateAudioQuantitativeInfo(
+        address target,
+        string memory key,
+        uint256 bpm,
+        uint256 duration,
+        string memory audioMimeType,
+        uint256 trackNumber
+    ) external requireSenderAdmin(target) {
+        audioQuantitativeInfos[target] = AudioQuantitativeInfo({
+            key: key,
+            bpm: bpm,
+            duration: duration,
+            audioMimeType: audioMimeType,
+            trackNumber: trackNumber
+        });
+
+        emit AudioQuantitativeUpdated({
+            target: target,
+            sender: msg.sender,
+            key: key,
+            bpm: bpm,
+            duration: duration,
+            audioMimeType: audioMimeType,
+            trackNumber: trackNumber
         });
     }
 
@@ -162,6 +201,9 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         address target = msg.sender;
 
         TokenEditionInfo memory info = tokenInfos[target];
+        AudioQuantitativeInfo
+            memory audioQuantitativeInfo = audioQuantitativeInfos[target];
+
         IERC721Drop media = IERC721Drop(target);
 
         uint256 maxSupply = media.saleDetails().maxSupply;
@@ -179,7 +221,8 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                 imageUrl: info.imageURI,
                 animationUrl: info.animationURI,
                 tokenOfEdition: tokenId,
-                editionSize: maxSupply
+                editionSize: maxSupply,
+                audioQuantitativeInfo: audioQuantitativeInfo
             });
     }
 }

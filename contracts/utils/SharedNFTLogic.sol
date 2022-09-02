@@ -43,7 +43,8 @@ contract SharedNFTLogic is IPublicSharedMetadata {
         string memory imageUrl,
         string memory animationUrl,
         uint256 tokenOfEdition,
-        uint256 editionSize
+        uint256 editionSize,
+        AudioQuantitativeInfo memory audioQuantitativeInfo
     ) external pure returns (string memory) {
         string memory _tokenMediaData = tokenMediaData(
             imageUrl,
@@ -55,7 +56,8 @@ contract SharedNFTLogic is IPublicSharedMetadata {
             description,
             _tokenMediaData,
             tokenOfEdition,
-            editionSize
+            editionSize,
+            audioQuantitativeInfo
         );
         return encodeMetadataJSON(json);
     }
@@ -71,7 +73,8 @@ contract SharedNFTLogic is IPublicSharedMetadata {
         string memory description,
         string memory mediaData,
         uint256 tokenOfEdition,
-        uint256 editionSize
+        uint256 editionSize,
+        AudioQuantitativeInfo memory audioQuantitativeInfo
     ) public pure returns (bytes memory) {
         bytes memory editionSizeText;
         if (editionSize > 0) {
@@ -87,16 +90,18 @@ contract SharedNFTLogic is IPublicSharedMetadata {
                 " ",
                 numberToString(tokenOfEdition),
                 editionSizeText,
-                '", "mimeType": "audio/wav"',
-                ', "',
+                '",',
+                _formatAudioQuantitativeInfo(audioQuantitativeInfo),
+                '", "',
                 'description": "',
                 description,
                 '", "',
                 mediaData,
                 'properties": {"number": ',
                 numberToString(tokenOfEdition),
-                ', "mimeType": "audio/wav"',
-                ', "name": "',
+                ', "mimeType": "',
+                audioQuantitativeInfo.audioMimeType,
+                '", "name": "',
                 name,
                 '"}}'
             );
@@ -172,5 +177,23 @@ contract SharedNFTLogic is IPublicSharedMetadata {
         }
 
         return "";
+    }
+
+    function _formatAudioQuantitativeInfo(
+        AudioQuantitativeInfo memory audioQuantitativeInfo
+    ) internal pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '"key": "',
+                audioQuantitativeInfo.key,
+                '", "bpm": ',
+                numberToString(audioQuantitativeInfo.bpm),
+                ', "duration": ',
+                numberToString(audioQuantitativeInfo.duration),
+                ', "mimeType": "',
+                audioQuantitativeInfo.audioMimeType,
+                '", "trackNumber": "',
+                numberToString(audioQuantitativeInfo.trackNumber)
+            );
     }
 }

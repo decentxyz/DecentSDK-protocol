@@ -16,11 +16,10 @@ pragma solidity ^0.8.0;
 /// ============ Imports ============
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
-import {IPublicSharedMetadata} from "../interfaces/IPublicSharedMetadata.sol";
 
 /// Shared NFT logic for rendering metadata associated with editions
 /// @dev Can safely be used for generic base64Encode and numberToString functions
-contract SharedNFTLogic is IPublicSharedMetadata {
+contract SharedNFTLogic {
     /// @param unencoded bytes to base64-encode
     function base64Encode(bytes memory unencoded)
         public

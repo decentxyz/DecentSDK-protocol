@@ -16,15 +16,15 @@ pragma solidity ^0.8.0;
 /// ============ Imports ============
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
+import "../interfaces/IOnChainMetadata.sol";
 
 /// Shared NFT logic for rendering metadata associated with editions
 /// @dev Can safely be used for generic base64Encode and numberToString functions
-contract SharedNFTLogic {
+contract SharedNFTLogic is IOnChainMetadata {
     /// @param unencoded bytes to base64-encode
     function base64Encode(bytes memory unencoded)
         public
         pure
-        override
         returns (string memory)
     {
         return Base64.encode(unencoded);
@@ -32,12 +32,7 @@ contract SharedNFTLogic {
 
     /// Proxy to openzeppelin's toString function
     /// @param value number to return as a string
-    function numberToString(uint256 value)
-        public
-        pure
-        override
-        returns (string memory)
-    {
+    function numberToString(uint256 value) public pure returns (string memory) {
         return Strings.toString(value);
     }
 
@@ -89,12 +84,6 @@ contract SharedNFTLogic {
             );
         }
         bytes memory songMetadataFormatted = _formatSongMetadata(songMetadata);
-        ProjectMetadata memory projectMetadata = ProjectMetadata(
-            songMetadata.songPublishingData,
-            songMetadata.song.artwork,
-            "single",
-            "upc"
-        );
         return
             abi.encodePacked(
                 '{"version": "0.1", "name": "',
@@ -123,7 +112,6 @@ contract SharedNFTLogic {
     function encodeMetadataJSON(bytes memory json)
         public
         pure
-        override
         returns (string memory)
     {
         return

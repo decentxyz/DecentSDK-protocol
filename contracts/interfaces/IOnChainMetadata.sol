@@ -43,6 +43,16 @@ interface IOnChainMetadata {
         string artworkNft
     );
 
+    /// @notice Visualizer updated for this edition
+    /// @dev admin function indexer feedback
+    event VisualizerUpdated(
+        address indexed target,
+        address sender,
+        string artworkUri,
+        string artworkMimeType,
+        string artworkNft
+    );
+
     /// @notice ProjectMetadata updated for this edition
     /// @dev admin function indexer feedback
     event ProjectArtworkUpdated(
@@ -108,6 +118,14 @@ interface IOnChainMetadata {
         address indexed target,
         address sender,
         string newDescription
+    );
+
+    /// @notice Artist updated for this edition
+    /// @dev admin function indexer feedback
+    event ArtistUpdated(
+        address indexed target,
+        address sender,
+        string newArtist
     );
 
     /// @notice Event for updated Media URIs

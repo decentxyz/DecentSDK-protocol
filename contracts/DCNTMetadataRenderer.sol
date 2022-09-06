@@ -23,18 +23,8 @@ import {MetadataRenderAdminCheck} from "./utils/MetadataRenderAdminCheck.sol";
 /// @notice DCNTMetadataRenderer for editions support
 contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     /// @notice Token information mapping storage
-    mapping(address => string) internal losslessAudios;
-    mapping(address => TokenEditionInfo) public tokenInfos;
-    mapping(address => AudioQuantitative) public audioQuantitatives;
-    mapping(address => AudioQualitative) public audioQualitatives;
-    mapping(address => Lyrics) public lyrics;
-    mapping(address => Artwork) public artworks;
-    mapping(address => PublishingData) public publishingDatas;
+    mapping(address => SongMetadata) public songMetadatas;
     mapping(address => ProjectMetadata) public projectMetadatas;
-    mapping(address => Artwork) public projectArtworks;
-    mapping(address => PublishingData) public projectPublishingDatas;
-    mapping(address => string) internal projectTypes;
-    mapping(address => string) internal projectUPCs;
     mapping(address => string[]) internal trackTags;
     mapping(address => Credit[]) internal credits;
 
@@ -56,8 +46,8 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory imageURI,
         string memory animationURI
     ) external requireSenderAdmin(target) {
-        tokenInfos[target].imageURI = imageURI;
-        tokenInfos[target].animationURI = animationURI;
+        songMetadatas[target].song.artwork.artworkUri = imageURI;
+        songMetadatas[target].song.audio.losslessAudio = animationURI;
         emit MediaURIsUpdated({
             target: target,
             sender: msg.sender,
@@ -73,12 +63,28 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         external
         requireSenderAdmin(target)
     {
-        tokenInfos[target].description = newDescription;
+        songMetadatas[target].songPublishingData.description = newDescription;
 
         emit DescriptionUpdated({
             target: target,
             sender: msg.sender,
             newDescription: newDescription
+        });
+    }
+
+    /// @notice Admin function to update artist
+    /// @param target target artist
+    /// @param newArtist new artist
+    function updateArtist(address target, string memory newArtist)
+        external
+        requireSenderAdmin(target)
+    {
+        songMetadatas[target].song.audio.songDetails.artistName = newArtist;
+
+        emit ArtistUpdated({
+            target: target,
+            sender: msg.sender,
+            newArtist: newArtist
         });
     }
 
@@ -89,7 +95,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         external
         requireSenderAdmin(target)
     {
-        losslessAudios[target] = _losslessAudio;
+        songMetadatas[target].song.audio.losslessAudio = _losslessAudio;
 
         emit LosslessAudioUpdated({
             target: target,
@@ -143,7 +149,11 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory audioMimeType,
         uint256 trackNumber
     ) external requireSenderAdmin(target) {
-        audioQuantitatives[target] = AudioQuantitative({
+        songMetadatas[target]
+            .song
+            .audio
+            .songDetails
+            .audioQuantitative = AudioQuantitative({
             key: key,
             bpm: bpm,
             duration: duration,
@@ -175,7 +185,11 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory isrc,
         string memory genre
     ) external requireSenderAdmin(target) {
-        audioQualitatives[target] = AudioQualitative({
+        songMetadatas[target]
+            .song
+            .audio
+            .songDetails
+            .audioQualitative = AudioQualitative({
             license: license,
             externalUrl: externalUrl,
             isrc: isrc,
@@ -200,7 +214,10 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory _lyrics,
         string memory _lyricsNft
     ) external requireSenderAdmin(target) {
-        lyrics[target] = Lyrics({lyrics: _lyrics, lyricsNft: _lyricsNft});
+        songMetadatas[target].song.audio.lyrics = Lyrics({
+            lyrics: _lyrics,
+            lyricsNft: _lyricsNft
+        });
 
         emit LyricsUpdated({
             target: target,
@@ -210,7 +227,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         });
     }
 
-    /// @notice Admin function to update Lyrics
+    /// @notice Admin function to update Artwork
     /// @param artworkUri The uri of the artwork (ipfs://<CID>)
     /// @param artworkMimeType The mime type of the artwork
     /// @param artworkNft The NFT of the artwork (caip19)
@@ -220,13 +237,38 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory artworkMimeType,
         string memory artworkNft
     ) external requireSenderAdmin(target) {
-        artworks[target] = Artwork({
+        songMetadatas[target].song.artwork = Artwork({
             artworkUri: artworkUri,
             artworkMimeType: artworkMimeType,
             artworkNft: artworkNft
         });
 
         emit ArtworkUpdated({
+            target: target,
+            sender: msg.sender,
+            artworkUri: artworkUri,
+            artworkMimeType: artworkMimeType,
+            artworkNft: artworkNft
+        });
+    }
+
+    /// @notice Admin function to update Visualizer
+    /// @param artworkUri The uri of the artwork (ipfs://<CID>)
+    /// @param artworkMimeType The mime type of the artwork
+    /// @param artworkNft The NFT of the artwork (caip19)
+    function updateVisualizer(
+        address target,
+        string memory artworkUri,
+        string memory artworkMimeType,
+        string memory artworkNft
+    ) external requireSenderAdmin(target) {
+        songMetadatas[target].song.visualizer = Artwork({
+            artworkUri: artworkUri,
+            artworkMimeType: artworkMimeType,
+            artworkNft: artworkNft
+        });
+
+        emit VisualizerUpdated({
             target: target,
             sender: msg.sender,
             artworkUri: artworkUri,
@@ -251,7 +293,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory locationCreated,
         string memory releaseDate
     ) external requireSenderAdmin(target) {
-        publishingDatas[target] = PublishingData({
+        songMetadatas[target].songPublishingData = PublishingData({
             title: title,
             description: description,
             recordLabel: recordLabel,
@@ -282,7 +324,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory artworkMimeType,
         string memory artworkNft
     ) external requireSenderAdmin(target) {
-        projectArtworks[target] = Artwork(
+        projectMetadatas[target].artwork = Artwork(
             artworkUri,
             artworkMimeType,
             artworkNft
@@ -315,7 +357,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         string memory projectType,
         string memory upc
     ) external requireSenderAdmin(target) {
-        projectPublishingDatas[target] = PublishingData({
+        projectMetadatas[target].publishingData = PublishingData({
             title: title,
             description: description,
             recordLabel: recordLabel,
@@ -323,8 +365,8 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             locationCreated: locationCreated,
             releaseDate: releaseDate
         });
-        projectTypes[target] = projectType;
-        projectUPCs[target] = upc;
+        projectMetadatas[target].projectType = projectType;
+        projectMetadatas[target].upc = upc;
 
         emit ProjectPublishingDataUpdated({
             target: target,
@@ -350,11 +392,10 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             string memory animationURI
         ) = abi.decode(data, (string, string, string));
 
-        tokenInfos[msg.sender] = TokenEditionInfo({
-            description: description,
-            imageURI: imageURI,
-            animationURI: animationURI
-        });
+        songMetadatas[msg.sender].songPublishingData.description = description;
+        songMetadatas[msg.sender].song.audio.losslessAudio = animationURI;
+        songMetadatas[msg.sender].song.artwork.artworkUri = imageURI;
+
         emit EditionInitialized({
             target: msg.sender,
             description: description,
@@ -368,10 +409,10 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     function contractURI() external view override returns (string memory) {
         address target = msg.sender;
         bytes memory imageSpace = bytes("");
-        if (bytes(tokenInfos[target].imageURI).length > 0) {
+        if (bytes(songMetadatas[target].song.artwork.artworkUri).length > 0) {
             imageSpace = abi.encodePacked(
                 '", "image": "',
-                tokenInfos[target].imageURI
+                songMetadatas[target].song.artwork.artworkUri
             );
         }
         return
@@ -379,9 +420,9 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                 sharedNFTLogic.encodeMetadataJSON(
                     abi.encodePacked(
                         '{"name": "',
-                        IERC721Metadata(target).name(),
+                        songMetadatas[target].songPublishingData.title,
                         '", "description": "',
-                        tokenInfos[target].description,
+                        songMetadatas[target].songPublishingData.description,
                         imageSpace,
                         '"}'
                     )
@@ -400,10 +441,6 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     {
         address target = msg.sender;
 
-        TokenEditionInfo memory info = tokenInfos[target];
-
-        SongMetadata memory songMetadata = songMetadata(target);
-
         IERC721Drop media = IERC721Drop(target);
 
         uint256 maxSupply = media.saleDetails().maxSupply;
@@ -418,7 +455,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             sharedNFTLogic.createMetadataEdition({
                 tokenOfEdition: tokenId,
                 editionSize: maxSupply,
-                songMetadata: songMetadata,
+                songMetadata: songMetadatas[target],
                 projectMetadata: projectMetadatas[target],
                 credits: credits[target],
                 tags: trackTags[target]
@@ -433,15 +470,11 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         view
         returns (string memory)
     {
-        TokenEditionInfo memory info = tokenInfos[target];
-
-        SongMetadata memory songMetadata = songMetadata(target);
-
         return
             sharedNFTLogic.createMetadataEdition({
                 tokenOfEdition: tokenId,
                 editionSize: 0,
-                songMetadata: songMetadata,
+                songMetadata: songMetadatas[target],
                 projectMetadata: projectMetadatas[target],
                 credits: credits[target],
                 tags: trackTags[target]
@@ -453,20 +486,6 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         view
         returns (SongMetadata memory)
     {
-        Audio memory audio = Audio(
-            losslessAudios[target],
-            SongDetails(
-                "my artist name",
-                audioQuantitatives[target],
-                audioQualitatives[target]
-            ),
-            lyrics[target]
-        );
-
-        return
-            SongMetadata(
-                SongContent(audio, artworks[target], artworks[target]),
-                publishingDatas[target]
-            );
+        return songMetadatas[target];
     }
 }

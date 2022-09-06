@@ -133,18 +133,21 @@ interface IOnChainMetadata {
         PublishingData songPublishingData;
     }
 
+    /// @notice Storage for SongContent
     struct SongContent {
         Audio audio;
         Artwork artwork;
         Artwork visualizer;
     }
 
+    /// @notice Storage for SongDetails
     struct SongDetails {
         string artistName;
         AudioQuantitative audioQuantitative;
         AudioQualitative audioQualitative;
     }
 
+    /// @notice Storage for Audio
     struct Audio {
         string losslessAudio; // ipfs://{cid} or arweave
         SongDetails songDetails;
@@ -199,6 +202,7 @@ interface IOnChainMetadata {
         string upc; // 03600029145
     }
 
+    /// @notice Storage for Credit
     struct Credit {
         string name;
         string collaboratorType;

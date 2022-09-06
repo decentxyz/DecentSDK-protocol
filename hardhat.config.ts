@@ -49,7 +49,7 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_KEY as string,
       polygon: process.env.POLYGONSCAN_KEY as string,
       polygonMumbai: process.env.POLYGONSCAN_KEY as string,
-      optimism_testnet: process.env.BLOCKSCOUT_KEY as string,
+      optimism_testnet: process.env.OPTIMISMSCAN_KEY as string,
       arbitrum_testnet: process.env.BLOCKSCOUT_KEY as string,
     },
     customChains: [
@@ -57,8 +57,8 @@ const config: HardhatUserConfig = {
         network: "optimism_testnet",
         chainId: 420,
         urls: {
-          apiURL: "https://blockscout.com/optimism/goerli/api",
-          browserURL: "https://blockscout.com/optimism/goerli"
+          apiURL: "https://api-goerli-optimism.etherscan.io/api",
+          browserURL: "https://goerli-optimism.etherscan.io/"
         }
       },
       {

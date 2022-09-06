@@ -39,12 +39,12 @@ contract SharedNFTLogic is IOnChainMetadata {
     /// Generate edition metadata from storage information as base64-json blob
     /// Combines the media data and metadata
     /// @param tokenOfEdition Token ID for specific token
-    /// @param editionSize Size of entire edition to show
     /// @param songMetadata song metadata
     /// @param projectMetadata project metadata
+    /// @param credits The credits of the track
+    /// @param tags The tags of the track
     function createMetadataEdition(
         uint256 tokenOfEdition,
-        uint256 editionSize,
         SongMetadata memory songMetadata,
         ProjectMetadata memory projectMetadata,
         Credit[] memory credits,
@@ -53,7 +53,6 @@ contract SharedNFTLogic is IOnChainMetadata {
         bytes memory json = createMetadataJSON(
             songMetadata.songPublishingData.title,
             tokenOfEdition,
-            editionSize,
             songMetadata,
             projectMetadata,
             credits,
@@ -65,32 +64,25 @@ contract SharedNFTLogic is IOnChainMetadata {
     /// Function to create the metadata json string for the nft edition
     /// @param name Name of NFT in metadata
     /// @param tokenOfEdition Token ID for specific token
-    /// @param editionSize Size of entire edition to show
     /// @param songMetadata metadata of the song
+    /// @param projectMetadata metadata of the project
+    /// @param credits The credits of the track
+    /// @param tags The tags of the track
     function createMetadataJSON(
         string memory name,
         uint256 tokenOfEdition,
-        uint256 editionSize,
         SongMetadata memory songMetadata,
         ProjectMetadata memory projectMetadata,
         Credit[] memory credits,
         string[] memory tags
     ) public pure returns (bytes memory) {
-        bytes memory editionSizeText;
-        if (editionSize > 0) {
-            editionSizeText = abi.encodePacked(
-                "/",
-                numberToString(editionSize)
-            );
-        }
         bytes memory songMetadataFormatted = _formatSongMetadata(songMetadata);
         return
             abi.encodePacked(
                 '{"version": "0.1", "name": "',
                 name,
                 " ",
-                numberToString(editionSize),
-                editionSizeText,
+                numberToString(tokenOfEdition),
                 '",',
                 songMetadataFormatted,
                 ", ",

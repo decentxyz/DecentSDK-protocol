@@ -15,8 +15,6 @@ pragma solidity ^0.8.0;
 
 /// ============ Imports ============
 import "./interfaces/IMetadataRenderer.sol";
-import "./interfaces/IERC721Drop.sol";
-import "@openzeppelin/contracts/interfaces/IERC721Metadata.sol";
 import {SharedNFTLogic} from "./utils/SharedNFTLogic.sol";
 import {MetadataRenderAdminCheck} from "./utils/MetadataRenderAdminCheck.sol";
 
@@ -441,51 +439,24 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     {
         address target = msg.sender;
 
-        IERC721Drop media = IERC721Drop(target);
-
-        uint256 maxSupply = media.saleDetails().maxSupply;
-
-        // For open editions, set max supply to 0 for renderer to remove the edition max number
-        // This will be added back on once the open edition is "finalized"
-        if (maxSupply == type(uint64).max) {
-            maxSupply = 0;
-        }
-
-        return
-            sharedNFTLogic.createMetadataEdition({
-                tokenOfEdition: tokenId,
-                editionSize: maxSupply,
-                songMetadata: songMetadatas[target],
-                projectMetadata: projectMetadatas[target],
-                credits: credits[target],
-                tags: trackTags[target]
-            });
+        return tokenURITarget(tokenId, target);
     }
 
     /// @notice Token URI information getter
     /// @param tokenId to get uri for
     /// @return contract uri (if set)
     function tokenURITarget(uint256 tokenId, address target)
-        external
+        public
         view
         returns (string memory)
     {
         return
             sharedNFTLogic.createMetadataEdition({
                 tokenOfEdition: tokenId,
-                editionSize: 0,
                 songMetadata: songMetadatas[target],
                 projectMetadata: projectMetadatas[target],
                 credits: credits[target],
                 tags: trackTags[target]
             });
-    }
-
-    function songMetadata(address target)
-        public
-        view
-        returns (SongMetadata memory)
-    {
-        return songMetadatas[target];
     }
 }

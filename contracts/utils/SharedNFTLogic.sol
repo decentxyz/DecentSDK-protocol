@@ -76,6 +76,45 @@ contract SharedNFTLogic is IOnChainMetadata {
         Credit[] memory credits,
         string[] memory tags
     ) public pure returns (bytes memory) {
+        bool isMusicNft = bytes(
+            songMetadata.song.audio.songDetails.audioQuantitative.audioMimeType
+        ).length > 0;
+        if (isMusicNft) {
+            return
+                createMusicMetadataJSON(
+                    name,
+                    tokenOfEdition,
+                    songMetadata,
+                    projectMetadata,
+                    credits,
+                    tags
+                );
+        }
+        return
+            createBaseMetadataEdition(
+                name,
+                songMetadata.songPublishingData.description,
+                songMetadata.song.artwork.artworkUri,
+                songMetadata.song.audio.losslessAudio,
+                tokenOfEdition
+            );
+    }
+
+    /// Function to create the metadata json string for the nft edition
+    /// @param name Name of NFT in metadata
+    /// @param tokenOfEdition Token ID for specific token
+    /// @param songMetadata metadata of the song
+    /// @param projectMetadata metadata of the project
+    /// @param credits The credits of the track
+    /// @param tags The tags of the track
+    function createMusicMetadataJSON(
+        string memory name,
+        uint256 tokenOfEdition,
+        SongMetadata memory songMetadata,
+        ProjectMetadata memory projectMetadata,
+        Credit[] memory credits,
+        string[] memory tags
+    ) public pure returns (bytes memory) {
         bytes memory songMetadataFormatted = _formatSongMetadata(songMetadata);
         return
             abi.encodePacked(
@@ -97,6 +136,94 @@ contract SharedNFTLogic is IOnChainMetadata {
                 ),
                 "}"
             );
+    }
+
+    /// Generate edition metadata from storage information as base64-json blob
+    /// Combines the media data and metadata
+    /// @param name Name of NFT in metadata
+    /// @param description Description of NFT in metadata
+    /// @param imageUrl URL of image to render for edition
+    /// @param animationUrl URL of animation to render for edition
+    /// @param tokenOfEdition Token ID for specific token
+    function createBaseMetadataEdition(
+        string memory name,
+        string memory description,
+        string memory imageUrl,
+        string memory animationUrl,
+        uint256 tokenOfEdition
+    ) public pure returns (bytes memory) {
+        return
+            abi.encodePacked(
+                '{"name": "',
+                name,
+                " ",
+                numberToString(tokenOfEdition),
+                '", "',
+                'description": "',
+                description,
+                '", "',
+                tokenMediaData(imageUrl, animationUrl, tokenOfEdition),
+                'properties": {"number": ',
+                numberToString(tokenOfEdition),
+                ', "name": "',
+                name,
+                '"}}'
+            );
+    }
+
+    /// Generates edition metadata from storage information as base64-json blob
+    /// Combines the media data and metadata
+    /// @param imageUrl URL of image to render for edition
+    /// @param animationUrl URL of animation to render for edition
+    function tokenMediaData(
+        string memory imageUrl,
+        string memory animationUrl,
+        uint256 tokenOfEdition
+    ) public pure returns (string memory) {
+        bool hasImage = bytes(imageUrl).length > 0;
+        bool hasAnimation = bytes(animationUrl).length > 0;
+        if (hasImage && hasAnimation) {
+            return
+                string(
+                    abi.encodePacked(
+                        'image": "',
+                        imageUrl,
+                        "?id=",
+                        numberToString(tokenOfEdition),
+                        '", "animation_url": "',
+                        animationUrl,
+                        "?id=",
+                        numberToString(tokenOfEdition),
+                        '", "'
+                    )
+                );
+        }
+        if (hasImage) {
+            return
+                string(
+                    abi.encodePacked(
+                        'image": "',
+                        imageUrl,
+                        "?id=",
+                        numberToString(tokenOfEdition),
+                        '", "'
+                    )
+                );
+        }
+        if (hasAnimation) {
+            return
+                string(
+                    abi.encodePacked(
+                        'animation_url": "',
+                        animationUrl,
+                        "?id=",
+                        numberToString(tokenOfEdition),
+                        '", "'
+                    )
+                );
+        }
+
+        return "";
     }
 
     /// Encodes the argument json bytes into base64-data uri format

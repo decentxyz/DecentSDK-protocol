@@ -16,20 +16,11 @@ pragma solidity ^0.8.0;
 /// ============ Imports ============
 import "./interfaces/IMetadataRenderer.sol";
 import {MusicMetadata} from "./utils/MusicMetadata.sol";
-import {Project} from "./utils/Project.sol";
 import {Credits} from "./utils/Credits.sol";
 import {ISharedNFTLogic} from "./interfaces/ISharedNFTLogic.sol";
 
 /// @notice DCNTMetadataRenderer for editions support
-contract DCNTMetadataRenderer is
-    IMetadataRenderer,
-    MusicMetadata,
-    Project,
-    Credits
-{
-    /// @notice Token information mapping storage
-    mapping(address => string[]) internal trackTags;
-
+contract DCNTMetadataRenderer is IMetadataRenderer, MusicMetadata, Credits {
     /// @notice Reference to Shared NFT logic library
     ISharedNFTLogic private immutable sharedNFTLogic;
 
@@ -39,16 +30,54 @@ contract DCNTMetadataRenderer is
         sharedNFTLogic = _sharedNFTLogic;
     }
 
-    /// @notice Admin function to update description
-    /// @param target target description
-    /// @param tags The tags of the track
-    function updateTags(address target, string[] memory tags)
-        public
-        requireSenderAdmin(target)
-    {
-        trackTags[target] = tags;
+    /// @notice Default initializer for edition data from a specific contract
+    /// @param data data to init with
+    function initializeWithData(bytes memory data) external {
+        // data format: description, imageURI, animationURI
+        (
+            string memory description,
+            string memory imageURI,
+            string memory animationURI
+        ) = abi.decode(data, (string, string, string));
 
-        emit TagsUpdated({target: target, sender: msg.sender, tags: tags});
+        songMetadatas[msg.sender].songPublishingData.description = description;
+        songMetadatas[msg.sender].song.audio.losslessAudio = animationURI;
+        songMetadatas[msg.sender].song.artwork.artworkUri = imageURI;
+
+        emit EditionInitialized({
+            target: msg.sender,
+            description: description,
+            imageURI: imageURI,
+            animationURI: animationURI
+        });
+    }
+
+    /// @notice Update everything in 1 transaction.
+    /// @param target target for contract to update metadata for
+    /// @param _songMetadata song metadata
+    /// @param _projectMetadata project metadata
+    /// @param _tags tags
+    /// @param _credits credits for the track
+    function bulkUpdate(
+        address target,
+        SongMetadata memory _songMetadata,
+        ProjectMetadata memory _projectMetadata,
+        string[] memory _tags,
+        Credit[] calldata _credits
+    ) external requireSenderAdmin(target) {
+        songMetadatas[target] = _songMetadata;
+        projectMetadatas[target] = _projectMetadata;
+        updateTags(target, _tags);
+        updateCredits(target, _credits);
+
+        emit SongUpdated({
+            target: target,
+            sender: msg.sender,
+            songMetadata: _songMetadata,
+            projectMetadata: _projectMetadata,
+            tags: _tags,
+            credits: _credits
+        });
     }
 
     /// @notice Contract URI information getter

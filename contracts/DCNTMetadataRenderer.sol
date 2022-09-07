@@ -18,7 +18,7 @@ import "./interfaces/IMetadataRenderer.sol";
 import {MusicMetadata} from "./utils/MusicMetadata.sol";
 import {Project} from "./utils/Project.sol";
 import {Credits} from "./utils/Credits.sol";
-import {SharedNFTLogic} from "./utils/SharedNFTLogic.sol";
+import {ISharedNFTLogic} from "./interfaces/ISharedNFTLogic.sol";
 
 /// @notice DCNTMetadataRenderer for editions support
 contract DCNTMetadataRenderer is
@@ -31,40 +31,12 @@ contract DCNTMetadataRenderer is
     mapping(address => string[]) internal trackTags;
 
     /// @notice Reference to Shared NFT logic library
-    SharedNFTLogic private immutable sharedNFTLogic;
+    ISharedNFTLogic private immutable sharedNFTLogic;
 
     /// @notice Constructor for library
     /// @param _sharedNFTLogic reference to shared NFT logic library
-    constructor(SharedNFTLogic _sharedNFTLogic) {
+    constructor(ISharedNFTLogic _sharedNFTLogic) {
         sharedNFTLogic = _sharedNFTLogic;
-    }
-
-    /// @notice Update everything in 1 transaction.
-    /// @param target target for contract to update metadata for
-    /// @param _songMetadata song metadata
-    /// @param _projectMetadata project metadata
-    /// @param _tags tags
-    /// @param _credits credits for the track
-    function bulkUpdate(
-        address target,
-        SongMetadata memory _songMetadata,
-        ProjectMetadata memory _projectMetadata,
-        string[] memory _tags,
-        Credit[] calldata _credits
-    ) external requireSenderAdmin(target) {
-        songMetadatas[target] = _songMetadata;
-        projectMetadatas[target] = _projectMetadata;
-        updateTags(target, _tags);
-        updateCredits(target, _credits);
-
-        emit SongUpdated({
-            target: target,
-            sender: msg.sender,
-            songMetadata: _songMetadata,
-            projectMetadata: _projectMetadata,
-            tags: _tags,
-            credits: _credits
-        });
     }
 
     /// @notice Admin function to update description
@@ -77,28 +49,6 @@ contract DCNTMetadataRenderer is
         trackTags[target] = tags;
 
         emit TagsUpdated({target: target, sender: msg.sender, tags: tags});
-    }
-
-    /// @notice Default initializer for edition data from a specific contract
-    /// @param data data to init with
-    function initializeWithData(bytes memory data) external {
-        // data format: description, imageURI, animationURI
-        (
-            string memory description,
-            string memory imageURI,
-            string memory animationURI
-        ) = abi.decode(data, (string, string, string));
-
-        songMetadatas[msg.sender].songPublishingData.description = description;
-        songMetadatas[msg.sender].song.audio.losslessAudio = animationURI;
-        songMetadatas[msg.sender].song.artwork.artworkUri = imageURI;
-
-        emit EditionInitialized({
-            target: msg.sender,
-            description: description,
-            imageURI: imageURI,
-            animationURI: animationURI
-        });
     }
 
     /// @notice Contract URI information getter

@@ -2,6 +2,15 @@
 pragma solidity ^0.8.0;
 
 interface IOnChainMetadata {
+    /// @notice Lyrics updated for this edition
+    event SongUpdated(
+        address target,
+        address sender,
+        SongMetadata songMetadata,
+        ProjectMetadata projectMetadata,
+        string[] tags
+    );
+
     /// @notice AudioQuantitativeUpdated updated for this edition
     /// @dev admin function indexer feedback
     event AudioQuantitativeUpdated(

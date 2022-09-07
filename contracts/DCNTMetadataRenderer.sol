@@ -35,6 +35,30 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         sharedNFTLogic = _sharedNFTLogic;
     }
 
+    /// @notice Update everything in 1 transaction.
+    /// @param target target for contract to update metadata for
+    /// @param _songMetadata song metadata
+    /// @param _projectMetadata project metadata
+    /// @param _tags tags
+    function bulkUpdate(
+        address target,
+        SongMetadata memory _songMetadata,
+        ProjectMetadata memory _projectMetadata,
+        string[] memory _tags
+    ) external requireSenderAdmin(target) {
+        songMetadatas[target] = _songMetadata;
+        projectMetadatas[target] = _projectMetadata;
+        trackTags[target] = _tags;
+
+        emit SongUpdated({
+            target: target,
+            sender: msg.sender,
+            songMetadata: _songMetadata,
+            projectMetadata: _projectMetadata,
+            tags: _tags
+        });
+    }
+
     /// @notice Update media URIs
     /// @param target target for contract to update metadata for
     /// @param imageURI new image uri address

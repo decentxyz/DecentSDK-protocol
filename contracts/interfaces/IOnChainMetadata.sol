@@ -8,7 +8,8 @@ interface IOnChainMetadata {
         address sender,
         SongMetadata songMetadata,
         ProjectMetadata projectMetadata,
-        string[] tags
+        string[] tags,
+        Credit[] credits
     );
 
     /// @notice AudioQuantitativeUpdated updated for this edition
@@ -76,13 +77,12 @@ interface IOnChainMetadata {
     /// @dev admin function indexer feedback
     event TagsUpdated(address indexed target, address sender, string[] tags);
 
-    /// @notice Credit added for this edition
+    /// @notice Credit updated for this edition
     /// @dev admin function indexer feedback
-    event CreditAdded(
+    event CreditsUpdated(
         address indexed target,
         address sender,
-        string name,
-        string collaboratorType
+        Credit[] credits
     );
 
     /// @notice ProjectMetadata updated for this edition

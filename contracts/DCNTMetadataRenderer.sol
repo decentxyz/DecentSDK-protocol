@@ -40,22 +40,26 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     /// @param _songMetadata song metadata
     /// @param _projectMetadata project metadata
     /// @param _tags tags
+    /// @param _credits credits for the track
     function bulkUpdate(
         address target,
         SongMetadata memory _songMetadata,
         ProjectMetadata memory _projectMetadata,
-        string[] memory _tags
+        string[] memory _tags,
+        Credit[] calldata _credits
     ) external requireSenderAdmin(target) {
         songMetadatas[target] = _songMetadata;
         projectMetadatas[target] = _projectMetadata;
-        trackTags[target] = _tags;
+        updateTags(target, _tags);
+        updateCredits(target, _credits);
 
         emit SongUpdated({
             target: target,
             sender: msg.sender,
             songMetadata: _songMetadata,
             projectMetadata: _projectMetadata,
-            tags: _tags
+            tags: _tags,
+            credits: _credits
         });
     }
 
@@ -130,7 +134,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     /// @param target target description
     /// @param tags The tags of the track
     function updateTags(address target, string[] memory tags)
-        external
+        public
         requireSenderAdmin(target)
     {
         trackTags[target] = tags;
@@ -140,20 +144,23 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
 
     /// @notice Admin function to update description
     /// @param target target description
-    /// @param _name The name of the credit
-    /// @param _collaboratorType The type of the collaborator
-    function addCredit(
-        address target,
-        string memory _name,
-        string memory _collaboratorType
-    ) external requireSenderAdmin(target) {
-        credits[target].push(Credit(_name, _collaboratorType));
+    /// @param _credits credits for the track
+    function updateCredits(address target, Credit[] calldata _credits)
+        public
+        requireSenderAdmin(target)
+    {
+        delete credits[target];
 
-        emit CreditAdded({
+        for (uint256 i = 0; i < _credits.length; i++) {
+            credits[target].push(
+                Credit(_credits[i].name, _credits[i].collaboratorType)
+            );
+        }
+
+        emit CreditsUpdated({
             target: target,
             sender: msg.sender,
-            name: _name,
-            collaboratorType: _collaboratorType
+            credits: _credits
         });
     }
 

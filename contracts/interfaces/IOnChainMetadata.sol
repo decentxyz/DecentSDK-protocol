@@ -85,6 +85,14 @@ interface IOnChainMetadata {
         string collaboratorType
     );
 
+    /// @notice Credit added for this edition
+    /// @dev admin function indexer feedback
+    event CreditsUpdated(
+        address indexed target,
+        address sender,
+        Credit[] credits
+    );
+
     /// @notice ProjectMetadata updated for this edition
     /// @dev admin function indexer feedback
     event ProjectPublishingDataUpdated(

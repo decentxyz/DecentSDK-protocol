@@ -157,6 +157,22 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         });
     }
 
+    /// @notice Admin function to update description
+    /// @param target target description
+    /// @param _credits The credits of the credit
+    function updateCredits(address target, Credit[] memory _credits)
+        external
+        requireSenderAdmin(target)
+    {
+        credits[target] = _credits;
+
+        emit CreditsUpdated({
+            target: target,
+            sender: msg.sender,
+            credits: _credits
+        });
+    }
+
     /// @notice Admin function to update AudioQuantitative
     /// @param key musical key
     /// @param bpm beats per minute

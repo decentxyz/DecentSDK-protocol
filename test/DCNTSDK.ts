@@ -128,12 +128,17 @@ describe("DCNTSDK", async () => {
 
   describe("deployDCNTVault()", async () => {
     before(async () => {
+      const vaultDistributionTokenAddress = ethers.constants.AddressZero;
+      const nftVaultKeyAddress = ethers.constants.AddressZero;
+      const nftTotalSupply = 100;
+      const unlockDate = theFuture.time();
+
       clone = await deployDCNTVault(
         sdk,
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
-        100,
-        theFuture.time()
+        vaultDistributionTokenAddress,
+        nftVaultKeyAddress,
+        nftTotalSupply,
+        unlockDate
       );
     });
 
@@ -144,12 +149,15 @@ describe("DCNTSDK", async () => {
 
   describe("deployDCNTStaking()", async () => {
     before(async () => {
+      const nft = ethers.constants.AddressZero;
+      const token = ethers.constants.AddressZero;
       const vaultDuration = 100;
       const totalSupply = 10;
+
       clone = await deployDCNTStaking(
         sdk,
-        ethers.constants.AddressZero,
-        ethers.constants.AddressZero,
+        nft,
+        token,
         vaultDuration,
         totalSupply
       );

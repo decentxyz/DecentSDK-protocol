@@ -84,7 +84,6 @@ describe("DCNT4907A", async () => {
     });
   });
 
-
   describe("userExpires()", async () => {
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
@@ -94,6 +93,12 @@ describe("DCNT4907A", async () => {
 
     it("should return the expiration timestamp", async () => {
       expect(await clone.userExpires(0)).to.equal(expiration);
+    });
+  });
+
+  describe("supportsInterface()", async () => {
+    it('should support the interface for ERC4907', async function () {
+      expect(await clone.supportsInterface('0xad092b5c')).to.eq(true);
     });
   });
 });

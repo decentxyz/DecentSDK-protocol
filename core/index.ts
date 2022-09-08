@@ -202,6 +202,41 @@ export const deployDCNTStaking = async (
   return ethers.getContractAt("DCNTStaking", address);
 }
 
+export const DCNTVaultNFTCreate = async (
+  dcntVaultNFT: Contract,
+  decentSDK: Contract,
+  name: string,
+  symbol: string,
+  maxTokens: number,
+  tokenPrice: BigNumber,
+  maxTokenPurchase: number,
+  vaultDistributionTokenAddress: string,
+  unlockDate: number,
+  supports4907: boolean
+) => {
+  const deployTx = await dcntVaultNFT.create(
+    decentSDK.address,
+    name,
+    symbol,
+    maxTokens,
+    tokenPrice,
+    maxTokenPurchase,
+    vaultDistributionTokenAddress,
+    unlockDate,
+    supports4907
+  );
+
+  const receipt = await deployTx.wait();
+
+  const nftAddr = receipt.events.find((x: any) => x.event === 'Create').args.nft;
+  const nft = await ethers.getContractAt("DCNT721A", nftAddr);
+
+  const vaultAddr = receipt.events.find((x: any) => x.event === 'Create').args.vault;
+  const vault = await ethers.getContractAt("DCNT721A", vaultAddr);
+
+  return [nft, vault];
+}
+
 export const deployMockERC20 = async (amountToMint: BigNumber | number) => {
   const MockERC20 = await ethers.getContractFactory("MockERC20");
   const erc20Token = await MockERC20.deploy(

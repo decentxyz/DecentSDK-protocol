@@ -1,0 +1,85 @@
+{
+  "version": "mnft-20220202",
+  "title": "Our Taproot",
+  "artist": "Omari Jazz",
+  "description": "this song is a vibe",
+  "duration": 65,
+  "mimeType": "audio/aiff",
+  "trackNumber": 9,
+  "project": {
+    "title": "Dream Child",
+    "artwork": {
+      "uri": "ipfs://bafybeibmxbxuw5n5hwmrhtyp2qlzgiu56qpzzwi3pbflbnbb4ykhhgy7gu",
+      "mimeType": "image/jpeg",
+      "nft": "eip155:1/erc721:0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/771769"
+    },
+    "description": "",
+    "type": "Album",
+    "originalReleaseDate": "2020-06-05",
+    "recordLabel": "",
+    "publisher": "",
+    "upc": ""
+  },
+  "artwork": {
+    "uri": "ipfs://bafybeibmxbxuw5n5hwmrhtyp2qlzgiu56qpzzwi3pbflbnbb4ykhhgy7gu",
+    "mimeType": "image/jpeg",
+    "nft": "eip155:1/erc721:0x06012c8cf97BEaD5deAe237070F9587f8E7A266d/771769"
+  },
+  "visualizer": {
+    "uri": "ipfs://bafybeibmxbxuw5n5hwmrhtyp2qlzgiu56qpzzwi3pbflbnbb4ykhhgy7gu",
+    "mimeType": "video/mp4",
+    "nft": ""
+  },
+  "genre": "Future beats",
+  "tags": [
+    "chill",
+    "dreamy"
+  ],
+  "lyrics": {
+      "text": "My amazing lyrics",
+      "nft": "My amazing lyrics"
+  },
+  "bpm": "93",
+  "key": "6a",
+  "license": "CC0",
+  "isrc": "QZHN62027539",
+  "locationCreated": "Portland, OR",
+  "originalReleaseDate": "2020-06-05",
+  "recordLabel": "",
+  "publisher": "",
+  "credits": [
+    {
+      "name": "Omari Jazz",
+      "collaboratorType": "producer"
+    },
+    {
+      "name": "Omari Jazz",
+      "collaboratorType": "songwriter"
+    },
+    {
+      "name": "Harris Cole",
+      "collaboratorType": "masteringEngineer"
+    },
+    {
+      "name": "Doplhin Midwives",
+      "collaboratorType": "performer"
+    },
+    {
+      "name": "B Timon",
+      "collaboratorType": "performer"
+    }
+  ],
+  "image": "ipfs://bafybeibmxbxuw5n5hwmrhtyp2qlzgiu56qpzzwi3pbflbnbb4ykhhgy7gu",
+  "name": "Omari Jazz - Our Taproot",
+  "external_url": "https://catalog.works/0x7C2668BD0D3c050703CEcC956C11Bd520c26f7d4/our-taproot",
+  "animation_url": "ipfs://bafybeibmxbxuw5n5hwmrhtyp2qlzgiu56qpzzwi3pbflbnbb4ykhhgy7gu",
+  "attributes": {
+    "artist": "Omari Jazz",
+    "project": "Dream Child",
+    "bpm": 93,
+    "key": "6a",
+    "genre": "Future beats",
+    "recordLabel": "",
+    "license": "CC0"
+  }
+}

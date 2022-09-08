@@ -74,9 +74,9 @@ contract DCNTSDK is Ownable {
     uint256 _maxTokens,
     uint256 _tokenPrice,
     uint256 _maxTokenPurchase
-  ) external payable {
+  ) public returns (address clone) {
     address DCNT721AClone = Clones.clone(DCNT721AImplementation);
-    (bool success, ) = DCNT721AClone.call{value: msg.value}(
+    (bool success, ) = DCNT721AClone.call(
       abi.encodeWithSignature(
         "initialize(address,string,string,uint256,uint256,uint256)",
         msg.sender,
@@ -90,6 +90,7 @@ contract DCNTSDK is Ownable {
     require(success);
     allDCNT721A.push(DCNT721AClone);
     emit DeployDCNT721A(DCNT721AClone);
+    return DCNT721AClone;
   }
 
   // deploy and initialize an erc4907a clone
@@ -99,9 +100,9 @@ contract DCNTSDK is Ownable {
     uint256 _maxTokens,
     uint256 _tokenPrice,
     uint256 _maxTokenPurchase
-  ) external payable {
+  ) external returns (address clone) {
     address DCNT4907AClone = Clones.clone(DCNT4907AImplementation);
-    (bool success, ) = DCNT4907AClone.call{value: msg.value}(
+    (bool success, ) = DCNT4907AClone.call(
       abi.encodeWithSignature(
         "initialize(address,string,string,uint256,uint256,uint256)",
         msg.sender,
@@ -115,6 +116,7 @@ contract DCNTSDK is Ownable {
     require(success);
     allDCNT4907A.push(DCNT4907AClone);
     emit DeployDCNT4907A(DCNT4907AClone);
+    return DCNT4907AClone;
   }
 
   // deploy and initialize a Crescendo clone
@@ -129,9 +131,9 @@ contract DCNTSDK is Ownable {
     uint256 _trNum,
     uint256 _trDenom,
     address payable _payouts
-  ) external payable {
+  ) external returns (address clone) {
     address DCNTCrescendoClone = Clones.clone(DCNTCrescendoImplementation);
-    (bool success, ) = DCNTCrescendoClone.call{value: msg.value}(
+    (bool success, ) = DCNTCrescendoClone.call(
       abi.encodeWithSignature(
         "initialize(address,string,string,string,uint256,uint256,uint256,uint256,uint256,uint256,address)",
         msg.sender,
@@ -150,6 +152,7 @@ contract DCNTSDK is Ownable {
     require(success);
     allDCNTCrescendo.push(DCNTCrescendoClone);
     emit DeployDCNTCrescendo(DCNTCrescendoClone);
+    return DCNTCrescendoClone;
   }
 
   // deploy and initialize a vault wrapper clone
@@ -158,9 +161,9 @@ contract DCNTSDK is Ownable {
     address _nftVaultKeyAddress,
     uint256 _nftTotalSupply,
     uint256 _unlockDate
-  ) external payable {
+  ) public returns (address clone) {
     address DCNTVaultClone = Clones.clone(DCNTVaultImplementation);
-    (bool success, ) = DCNTVaultClone.call{value: msg.value}(
+    (bool success, ) = DCNTVaultClone.call(
       abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _vaultDistributionTokenAddress,
@@ -172,6 +175,7 @@ contract DCNTSDK is Ownable {
     require(success);
     allDCNTVault.push(DCNTVaultClone);
     emit DeployDCNTVault(DCNTVaultClone);
+    return DCNTVaultClone;
   }
 
   // deploy and initialize a vault wrapper clone
@@ -180,9 +184,9 @@ contract DCNTSDK is Ownable {
     address _token,
     uint256 _vaultDuration,
     uint256 _totalSupply
-  ) external payable {
+  ) external returns (address clone) {
     address DCNTStakingClone = Clones.clone(DCNTStakingImplementation);
-    (bool success, ) = DCNTStakingClone.call{value: msg.value}(
+    (bool success, ) = DCNTStakingClone.call(
       abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _nft,
@@ -194,5 +198,6 @@ contract DCNTSDK is Ownable {
     require(success);
     allDCNTStaking.push(DCNTStakingClone);
     emit DeployDCNTStaking(DCNTStakingClone);
+    return DCNTStakingClone;
   }
 }

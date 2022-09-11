@@ -36,9 +36,11 @@ export type Implementations = {
 };
 
 export const deployDCNTSDK = async (
-  implementations?: Implementations
+  implementations?: Implementations,
+  contractRegistry?: Contract,
 ) => {
   implementations = implementations ?? await deployImplementations();
+  contractRegistry = contractRegistry ?? await deployContract('DCNTRegistry');
   const decentSDKFactory = await ethers.getContractFactory('DCNTSDK');
   const decentSDK = await decentSDKFactory.deploy(
     implementations.DCNT721A.address,
@@ -46,6 +48,7 @@ export const deployDCNTSDK = async (
     implementations.DCNTCrescendo.address,
     implementations.DCNTVault.address,
     implementations.DCNTStaking.address,
+    contractRegistry.address
   );
   return await decentSDK.deployed();
 }

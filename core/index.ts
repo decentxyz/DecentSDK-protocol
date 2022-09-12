@@ -91,6 +91,12 @@ export const deployContract = async (contract: string) => {
   return await tx.deployed();
 }
 
+export const deployDCNTVaultNFT = async (decentSDK: Contract) => {
+  const factory = await ethers.getContractFactory('DCNTVaultNFT');
+  const tx = await factory.deploy(decentSDK.address);
+  return await tx.deployed();
+}
+
 export const deployDCNT721A = async (
   decentSDK: Contract,
   name: string,
@@ -232,7 +238,7 @@ export const DCNTVaultNFTCreate = async (
   const nft = await ethers.getContractAt("DCNT721A", nftAddr);
 
   const vaultAddr = receipt.events.find((x: any) => x.event === 'Create').args.vault;
-  const vault = await ethers.getContractAt("DCNT721A", vaultAddr);
+  const vault = await ethers.getContractAt("DCNTVault", vaultAddr);
 
   return [nft, vault];
 }

@@ -16,13 +16,20 @@ pragma solidity ^0.8.0;
 
 /// ============ Imports ============
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 import "./interfaces/IDCNTSDK.sol";
 
-contract DCNTVaultNFT {
+contract DCNTVaultNFT is Ownable {
 
   /// ============ Immutable storage ============
 
-  /// ============ Mutable storage ============
+  /// @notice implementation addresses for base contracts
+  address public DCNT721AImplementation;
+  address public DCNT4907AImplementation;
+  address public DCNTCrescendoImplementation;
+  address public DCNTVaultImplementation;
+  address public DCNTStakingImplementation;
 
   /// ============ Events ============
 
@@ -32,7 +39,12 @@ contract DCNTVaultNFT {
   /// ============ Constructor ============
 
   /// @notice Creates a new DecentVaultWrapped instance
-  constructor() { }
+  constructor(address _DCNTSDK) {
+    IDCNTSDK sdk = IDCNTSDK(_DCNTSDK);
+    DCNT721AImplementation = sdk.DCNT721AImplementation();
+    DCNT4907AImplementation = sdk.DCNT4907AImplementation();
+    DCNTVaultImplementation = sdk.DCNTVaultImplementation();
+  }
 
   /// ============ Functions ============
 
@@ -47,35 +59,54 @@ contract DCNTVaultNFT {
     uint256 _unlockDate,
     bool _supports4907
   ) external returns (address nft, address vault) {
-    IDCNTSDK sdk = IDCNTSDK(_DCNTSDK);
-
     address deployedNFT;
     if ( _supports4907 ) {
-      deployedNFT = sdk.deployDCNT4907A(
-        _name,
-        _symbol,
-        _maxTokens,
-        _tokenPrice,
-        _maxTokenPurchase
+      (bool success1, bytes memory data1) = _DCNTSDK.delegatecall(
+        abi.encodeWithSignature("deployDCNT4907A(string,string,uint256,uint256,uint256)",
+          _name,
+          _symbol,
+          _maxTokens,
+          _tokenPrice,
+          _maxTokenPurchase
+        )
       );
+
+      require(success1);
+      deployedNFT = abi.decode(data1, (address));
     } else {
-      deployedNFT = sdk.deployDCNT721A(
-        _name,
-        _symbol,
-        _maxTokens,
-        _tokenPrice,
-        _maxTokenPurchase
+      (bool success2, bytes memory data2) = _DCNTSDK.delegatecall(
+        abi.encodeWithSignature("deployDCNT721A(string,string,uint256,uint256,uint256)",
+          _name,
+          _symbol,
+          _maxTokens,
+          _tokenPrice,
+          _maxTokenPurchase
+        )
       );
+
+      require(success2);
+      deployedNFT = abi.decode(data2, (address));
     }
 
-    address deployedVault = sdk.deployDCNTVault(
-      _vaultDistributionTokenAddress,
-      deployedNFT,
-      _maxTokens,
-      _unlockDate
+    (bool success, bytes memory data) = _DCNTSDK.delegatecall(
+      abi.encodeWithSignature("deployDCNTVault(address,address,uint256,uint256)",
+        _vaultDistributionTokenAddress,
+        deployedNFT,
+        _maxTokens,
+        _unlockDate
+      )
     );
+
+    require(success);
+    address deployedVault = abi.decode(data, (address));
 
     emit Create(deployedNFT, deployedVault);
     return (deployedNFT, deployedVault);
+  }
+
+  function bytesToAddress(bytes memory _bytes) private pure returns (address addr) {
+    assembly {
+      addr := mload(add(_bytes,32))
+    }
   }
 }

@@ -74,7 +74,7 @@ contract DCNTSDK is Ownable {
     uint256 _maxTokens,
     uint256 _tokenPrice,
     uint256 _maxTokenPurchase
-  ) public returns (address clone) {
+  ) external returns (address clone) {
     address DCNT721AClone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = DCNT721AClone.call(
       abi.encodeWithSignature(
@@ -161,7 +161,7 @@ contract DCNTSDK is Ownable {
     address _nftVaultKeyAddress,
     uint256 _nftTotalSupply,
     uint256 _unlockDate
-  ) public returns (address clone) {
+  ) external returns (address clone) {
     address DCNTVaultClone = Clones.clone(DCNTVaultImplementation);
     (bool success, ) = DCNTVaultClone.call(
       abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",

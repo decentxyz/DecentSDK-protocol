@@ -18,6 +18,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+import "./interfaces/IDCNTRegistry.sol";
 
 contract DCNTSDK is Ownable {
 
@@ -32,12 +33,8 @@ contract DCNTSDK is Ownable {
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
 
-  /// @notice contracts deployed by DecentSDK proxy factory
-  address[] public allDCNT721A;
-  address[] public allDCNT4907A;
-  address[] public allDCNTCrescendo;
-  address[] public allDCNTVault;
-  address[] public allDCNTStaking;
+  /// @notice address of the associated registry
+  address public contractRegistry;
 
   /// ============ Events ============
 
@@ -56,13 +53,15 @@ contract DCNTSDK is Ownable {
     address _DCNT4907AImplementation,
     address _DCNTCrescendoImplementation,
     address _DCNTVaultImplementation,
-    address _DCNTStakingImplementation
+    address _DCNTStakingImplementation,
+    address _contractRegistry
   ) {
     DCNT721AImplementation = _DCNT721AImplementation;
     DCNT4907AImplementation = _DCNT4907AImplementation;
     DCNTCrescendoImplementation = _DCNTCrescendoImplementation;
     DCNTVaultImplementation = _DCNTVaultImplementation;
     DCNTStakingImplementation = _DCNTStakingImplementation;
+    contractRegistry = _contractRegistry;
   }
 
   /// ============ Functions ============
@@ -88,7 +87,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allDCNT721A.push(DCNT721AClone);
+    IDCNTRegistry(contractRegistry).register(msg.sender, DCNT721AClone);
     emit DeployDCNT721A(DCNT721AClone);
     return DCNT721AClone;
   }
@@ -114,7 +113,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allDCNT4907A.push(DCNT4907AClone);
+    IDCNTRegistry(contractRegistry).register(msg.sender, DCNT4907AClone);
     emit DeployDCNT4907A(DCNT4907AClone);
     return DCNT4907AClone;
   }
@@ -150,7 +149,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allDCNTCrescendo.push(DCNTCrescendoClone);
+    IDCNTRegistry(contractRegistry).register(msg.sender, DCNTCrescendoClone);
     emit DeployDCNTCrescendo(DCNTCrescendoClone);
     return DCNTCrescendoClone;
   }
@@ -173,7 +172,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allDCNTVault.push(DCNTVaultClone);
+    IDCNTRegistry(contractRegistry).register(msg.sender, DCNTVaultClone);
     emit DeployDCNTVault(DCNTVaultClone);
     return DCNTVaultClone;
   }
@@ -196,7 +195,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    allDCNTStaking.push(DCNTStakingClone);
+    IDCNTRegistry(contractRegistry).register(msg.sender, DCNTStakingClone);
     emit DeployDCNTStaking(DCNTStakingClone);
     return DCNTStakingClone;
   }

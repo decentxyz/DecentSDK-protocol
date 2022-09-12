@@ -11,19 +11,22 @@ import {
   deployDCNTCrescendo,
   deployDCNTVault,
   deployDCNTStaking,
+  deployContract,
   theFuture
 } from "../core";
 
 describe("DCNTSDK", async () => {
   let owner: SignerWithAddress,
       implementations: any,
+      contractRegistry: Contract,
       sdk: Contract,
       clone: Contract;
 
-  beforeEach(async () => {
+  before(async () => {
     [owner] = await ethers.getSigners();
     implementations = await deployImplementations();
-    sdk = await deployDCNTSDK(implementations);
+    contractRegistry = await deployContract('DCNTRegistry');
+    sdk = await deployDCNTSDK(implementations, contractRegistry);
   });
 
   describe("constructor()", async () => {
@@ -45,6 +48,10 @@ describe("DCNTSDK", async () => {
 
     it("should store the DCNTStaking implementation address on the sdk", async () => {
       expect(await sdk.DCNTStakingImplementation()).to.equal(implementations.DCNTStaking.address);
+    });
+
+    it("should store the DCNTRegistry address on the sdk", async () => {
+      expect(await sdk.contractRegistry()).to.equal(contractRegistry.address);
     });
   });
 
@@ -69,6 +76,11 @@ describe("DCNTSDK", async () => {
     it("should deploy and initialize a DCNT721A contract", async () => {
       expect(clone.address).to.be.properAddress;
     });
+
+    it("should register the deployed DCNT721A with the contract registry", async () => {
+      const deployments = await contractRegistry.query(owner.address);
+      expect(deployments[0]).to.equal(clone.address);
+    });
   });
 
   describe("deployDCNT4907A()", async () => {
@@ -91,6 +103,11 @@ describe("DCNTSDK", async () => {
 
     it("should deploy and initialize a DCNT4907A contract", async () => {
       expect(clone.address).to.be.properAddress;
+    });
+
+    it("should register the deployed DCNT4907A with the contract registry", async () => {
+      const deployments = await contractRegistry.query(owner.address);
+      expect(deployments[1]).to.equal(clone.address);
     });
   });
 
@@ -124,6 +141,11 @@ describe("DCNTSDK", async () => {
     it("should deploy and initialize a DCNTCrescendo contract", async () => {
       expect(clone.address).to.be.properAddress;
     });
+
+    it("should register the deployed DCNTCrescendo with the contract registry", async () => {
+      const deployments = await contractRegistry.query(owner.address);
+      expect(deployments[2]).to.equal(clone.address);
+    });
   });
 
   describe("deployDCNTVault()", async () => {
@@ -145,6 +167,11 @@ describe("DCNTSDK", async () => {
     it("should deploy and initialize a DCNTVault contract", async () => {
       expect(clone.address).to.be.properAddress;
     });
+
+    it("should register the deployed DCNTVault with the contract registry", async () => {
+      const deployments = await contractRegistry.query(owner.address);
+      expect(deployments[3]).to.equal(clone.address);
+    });
   });
 
   describe("deployDCNTStaking()", async () => {
@@ -163,8 +190,13 @@ describe("DCNTSDK", async () => {
       );
     });
 
-    it("should deploy and initialize a DCNTCrescendo contract", async () => {
+    it("should deploy and initialize a DCNTStaking contract", async () => {
       expect(clone.address).to.be.properAddress;
+    });
+
+    it("should register the deployed DCNTStaking with the contract registry", async () => {
+      const deployments = await contractRegistry.query(owner.address);
+      expect(deployments[4]).to.equal(clone.address);
     });
   });
 });

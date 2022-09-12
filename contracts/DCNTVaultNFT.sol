@@ -31,6 +31,9 @@ contract DCNTVaultNFT is Ownable {
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
 
+  /// @notice address of the associated registry
+  address public contractRegistry;
+
   /// ============ Events ============
 
   /// @notice Emitted after successfully deploying a contract
@@ -44,6 +47,7 @@ contract DCNTVaultNFT is Ownable {
     DCNT721AImplementation = sdk.DCNT721AImplementation();
     DCNT4907AImplementation = sdk.DCNT4907AImplementation();
     DCNTVaultImplementation = sdk.DCNTVaultImplementation();
+    contractRegistry = sdk.contractRegistry();
   }
 
   /// ============ Functions ============

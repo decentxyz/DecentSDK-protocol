@@ -22,11 +22,20 @@ contract DCNTRegistry {
 
   using EnumerableSet for EnumerableSet.AddressSet;
 
-  mapping(address => EnumerableSet.AddressSet) private deployments;
+  mapping(address => EnumerableSet.AddressSet) private contracts;
 
   /// ============ Events ============
 
-  event Registered(address indexed deployer, address indexed deployment);
+  event Register(
+    address indexed deployer,
+    address indexed deployment,
+    string key
+  );
+
+  event Remove(
+    address indexed deployer,
+    address indexed deployment
+  );
 
   /// ============ Constructor ============
 
@@ -34,11 +43,28 @@ contract DCNTRegistry {
 
   /// ============ Functions ============
 
-  function register(address _deployer, address _deployment) external {
-    deployments[_deployer].add(_deployment);
+  function register(
+    address _deployer,
+    address _deployment,
+    string calldata _key
+  ) external {
+    bool registered = contracts[_deployer].add(_deployment);
+    require(registered, "Registration was unsuccessful");
+    emit Register(_deployer, _deployment, _key);
   }
 
-  function query(address _deployer) external view returns (address[] memory) {
-    return deployments[_deployer].values();
+  function remove(
+    address _deployer,
+    address _deployment
+  ) external {
+    bool removed = contracts[_deployer].remove(_deployment);
+    require(removed, "Removal was unsuccessful");
+    emit Remove(_deployer, _deployment);
+  }
+
+  function query(
+    address _deployer
+  ) external view returns (address[] memory) {
+    return contracts[_deployer].values();
   }
 }

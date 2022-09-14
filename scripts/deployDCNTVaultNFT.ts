@@ -1,7 +1,12 @@
-import { deployContract } from "../core";
+import { ethers } from "hardhat";
+import { deployDCNTVaultNFT } from "../core";
+
+// set up DCNTSDK
+const DCNTSDK_ENDPOINT = '';
 
 async function main() {
-  const dcntVaultNFT = await deployContract('DCNTVaultNFT');
+  const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
+  const dcntVaultNFT = await deployDCNTVaultNFT(DCNTSDK);
   console.log("DCNTVaultNFT deployed to: ", dcntVaultNFT.address);
 }
 

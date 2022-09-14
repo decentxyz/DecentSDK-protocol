@@ -84,5 +84,9 @@ describe("DCNTVaultNFT", async () => {
       expect(nft.address).to.be.properAddress;
       expect(await nft.supportsInterface('0xad092b5c')).to.eq(true);
     });
+
+    it("should have the owner properly set on the DCNT4907A deployment", async () => {
+      expect(ethers.utils.getAddress(await nft.owner())).to.equal(owner.address);
+    });
   });
 });

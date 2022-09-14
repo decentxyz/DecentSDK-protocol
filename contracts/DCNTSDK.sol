@@ -74,8 +74,8 @@ contract DCNTSDK is Ownable {
     uint256 _tokenPrice,
     uint256 _maxTokenPurchase
   ) external returns (address clone) {
-    address DCNT721AClone = Clones.clone(DCNT721AImplementation);
-    (bool success, ) = DCNT721AClone.call(
+    clone = Clones.clone(DCNT721AImplementation);
+    (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize(address,string,string,uint256,uint256,uint256)",
         msg.sender,
@@ -87,9 +87,8 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, DCNT721AClone);
-    emit DeployDCNT721A(DCNT721AClone);
-    return DCNT721AClone;
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNT721A');
+    emit DeployDCNT721A(clone);
   }
 
   // deploy and initialize an erc4907a clone
@@ -100,8 +99,8 @@ contract DCNTSDK is Ownable {
     uint256 _tokenPrice,
     uint256 _maxTokenPurchase
   ) external returns (address clone) {
-    address DCNT4907AClone = Clones.clone(DCNT4907AImplementation);
-    (bool success, ) = DCNT4907AClone.call(
+    clone = Clones.clone(DCNT4907AImplementation);
+    (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize(address,string,string,uint256,uint256,uint256)",
         msg.sender,
@@ -113,9 +112,8 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, DCNT4907AClone);
-    emit DeployDCNT4907A(DCNT4907AClone);
-    return DCNT4907AClone;
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNT4907A');
+    emit DeployDCNT4907A(clone);
   }
 
   // deploy and initialize a Crescendo clone
@@ -131,8 +129,8 @@ contract DCNTSDK is Ownable {
     uint256 _trDenom,
     address payable _payouts
   ) external returns (address clone) {
-    address DCNTCrescendoClone = Clones.clone(DCNTCrescendoImplementation);
-    (bool success, ) = DCNTCrescendoClone.call(
+    clone = Clones.clone(DCNTCrescendoImplementation);
+    (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize(address,string,string,string,uint256,uint256,uint256,uint256,uint256,uint256,address)",
         msg.sender,
@@ -149,9 +147,8 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, DCNTCrescendoClone);
-    emit DeployDCNTCrescendo(DCNTCrescendoClone);
-    return DCNTCrescendoClone;
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNTCrescendo');
+    emit DeployDCNTCrescendo(clone);
   }
 
   // deploy and initialize a vault wrapper clone
@@ -161,8 +158,8 @@ contract DCNTSDK is Ownable {
     uint256 _nftTotalSupply,
     uint256 _unlockDate
   ) external returns (address clone) {
-    address DCNTVaultClone = Clones.clone(DCNTVaultImplementation);
-    (bool success, ) = DCNTVaultClone.call(
+    clone = Clones.clone(DCNTVaultImplementation);
+    (bool success, ) = clone.call(
       abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _vaultDistributionTokenAddress,
@@ -172,9 +169,8 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, DCNTVaultClone);
-    emit DeployDCNTVault(DCNTVaultClone);
-    return DCNTVaultClone;
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNTVault');
+    emit DeployDCNTVault(clone);
   }
 
   // deploy and initialize a vault wrapper clone
@@ -184,8 +180,8 @@ contract DCNTSDK is Ownable {
     uint256 _vaultDuration,
     uint256 _totalSupply
   ) external returns (address clone) {
-    address DCNTStakingClone = Clones.clone(DCNTStakingImplementation);
-    (bool success, ) = DCNTStakingClone.call(
+    clone = Clones.clone(DCNTStakingImplementation);
+    (bool success, ) = clone.call(
       abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _nft,
@@ -195,8 +191,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, DCNTStakingClone);
-    emit DeployDCNTStaking(DCNTStakingClone);
-    return DCNTStakingClone;
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNTStaking');
+    emit DeployDCNTStaking(clone);
   }
 }

@@ -108,7 +108,8 @@ describe("DCNTStaking", async () => {
 
       // mint 1/10 of nft collection to owner
       await nft.connect(addr1).mintNft(1);
-      await nft.connect(addr2).mintNft(9);
+      await nft.connect(addr2).mintNft(8);
+      await nft.connect(addr3).mintNft(1);
 
       // approve transfer and stake 1 nft
       await nft.connect(addr1).approve(clone.address, 0);
@@ -178,6 +179,12 @@ describe("DCNTStaking", async () => {
     describe("and then tries to stake another user's nft ", async () => {
       it("should revert with not your token", async () => {
         await expect(clone.connect(addr1).stake([2])).to.be.revertedWith("not your token");
+      });
+    });
+
+    describe("and another user tries to stake without approving first", async () => {
+      it("should revert with not approved for transfer", async () => {
+        await expect(clone.connect(addr3).stake([9])).to.be.revertedWith("not approved for transfer");
       });
     });
   });

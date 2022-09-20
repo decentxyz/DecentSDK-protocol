@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNTCrescendo } from "../core";
+import { deployDCNTSDK, deployDCNTCrescendo, sortByAddress } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -13,7 +13,6 @@ const step1 = ethers.utils.parseEther("0.005");
 const step2 = ethers.utils.parseEther("0.05");
 const hitch = 20;
 const [trNum,trDenom] = [3,20];
-const payouts = ethers.constants.AddressZero;
 
 const calculateCurvedBurnReturn = (price: BigNumber) => price.mul(trDenom-trNum).div(trDenom);
 
@@ -21,9 +20,11 @@ describe("DCNTCrescendo", async () => {
   let owner: SignerWithAddress,
       addr1: SignerWithAddress,
       addr2: SignerWithAddress,
+      addr3: SignerWithAddress,
       sdk: Contract,
       clone: Contract,
-      crescendo: Contract;
+      crescendo: Contract,
+      split: any[];
 
   before(async () => {
     [owner] = await ethers.getSigners();
@@ -38,8 +39,7 @@ describe("DCNTCrescendo", async () => {
       step2,
       hitch,
       trNum,
-      trDenom,
-      payouts
+      trDenom
     );
   });
 
@@ -53,7 +53,6 @@ describe("DCNTCrescendo", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
       expect(await clone.uri(0)).to.equal(uri);
-      expect(await clone.payouts()).to.equal(payouts);
 
       // private state
       const key = ethers.utils.defaultAbiCoder.encode(["uint256","uint256"],[0,12]);
@@ -89,8 +88,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         trNum,
-        trDenom,
-        payouts
+        trDenom
       );
     });
 
@@ -137,8 +135,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         trNum,
-        trDenom,
-        payouts
+        trDenom
       );
 
       await crescendo.flipSaleState();
@@ -185,6 +182,215 @@ describe("DCNTCrescendo", async () => {
       expect(await crescendo.calculateCurvedMintReturn(1,0)).to.equal(postHitch.add(step2));
       await crescendo.sell(0);
       expect(await crescendo.calculateCurvedMintReturn(1,0)).to.equal(postHitch);
+    });
+  });
+
+  describe("withdraw()", async () => {
+    before(async () => {
+      [addr1, addr2, addr3] = await ethers.getSigners();
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        trNum,
+        trDenom
+      );
+    });
+
+    it("should withdraw according to the specificed take rate", async () => {
+      await crescendo.flipSaleState();
+      await crescendo.buy(0, { value: initialPrice });
+      const before = await ethers.provider.getBalance(owner.address);
+
+      const tx = await crescendo.withdraw();
+      const receipt = await tx.wait();
+      const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
+
+      const after = await ethers.provider.getBalance(owner.address);
+      const withdrawn = after.sub(before).add(gas);
+      expect(withdrawn).to.equal(initialPrice.div(trDenom).mul(trNum));
+    });
+
+
+    it("should revert if a split has already been created", async () => {
+      const payouts = sortByAddress([
+        {
+          address: addr2.address,
+          percent: (1_000_000 / 100) * 90
+        },
+        {
+          address: addr3.address,
+          percent: (1_000_000 / 100) * 10
+        },
+      ]);
+
+      const addresses = payouts.map(payout => payout.address);
+      const percents = payouts.map(payout => payout.percent);
+      const distributorFee = 0;
+      split = [addresses, percents, distributorFee];
+
+      await crescendo.createSplit(...split);
+      await expect(crescendo.withdraw()).to.be.revertedWith('Cannot withdraw with an active split');
+    });
+
+    it("should revert if called by an account which is not the owner", async () => {
+      await expect(
+        crescendo.connect(addr2).withdraw()
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+  });
+
+  describe("withdrawFund()", async () => {
+    before(async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        trNum,
+        trDenom
+      );
+      await crescendo.flipSaleState();
+      await crescendo.buy(0, { value: initialPrice });
+    });
+
+    it("should withdraw all funds to the contract owner", async () => {
+      const before = await ethers.provider.getBalance(owner.address);
+
+      const tx = await crescendo.withdrawFund();
+      const receipt = await tx.wait();
+      const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
+
+      const after = await ethers.provider.getBalance(owner.address);
+      const withdrawn = after.sub(before).add(gas);
+      expect(withdrawn).to.equal(initialPrice);
+    });
+
+
+    it("should revert if a split has already been created", async () => {
+      await crescendo.createSplit(...split);
+      await expect(crescendo.withdrawFund()).to.be.revertedWith('Cannot withdraw with an active split');
+    });
+
+    it("should revert if called by an account which is not the owner", async () => {
+      await expect(
+        crescendo.connect(addr2).withdrawFund()
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+  });
+
+  describe("distributeAndWithdraw()", async () => {
+    before(async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        trNum,
+        trDenom
+      );
+      await crescendo.flipSaleState();
+      await crescendo.buy(0, { value: initialPrice });
+      await crescendo.createSplit(...split);
+    });
+
+    it("should transfer excess liquidity to the split, distribute to receipients, and withdraw", async () => {
+      const liquidity = await crescendo.liquidity();
+      const before2 = await ethers.provider.getBalance(addr2.address);
+      const before3 = await ethers.provider.getBalance(addr3.address);
+
+      await crescendo.distributeAndWithdraw(addr2.address, 1, [], ...split, addr1.address);
+      const after2 = await ethers.provider.getBalance(addr2.address);
+      expect(after2).to.equal(before2.add(liquidity.div(100).mul(90).sub(1)));
+
+      await crescendo.distributeAndWithdraw(addr3.address, 1, [], ...split, addr1.address);
+      const after3 = await ethers.provider.getBalance(addr3.address);
+      expect(after3).to.equal(before3.add(liquidity.div(100).mul(10).sub(1)));
+    });
+
+
+    it("should revert if a split has not yet been created", async () => {
+      const freshNFT: Contract = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        trNum,
+        trDenom
+      );
+
+      await expect(
+        freshNFT.distributeAndWithdraw(addr2.address, 1, [], ...split, addr1.address)
+      ).to.be.revertedWith('Split not created yet');
+    });
+  });
+
+  describe("distributeAndWithdrawFund()", async () => {
+    before(async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        trNum,
+        trDenom
+      );
+      await crescendo.flipSaleState();
+      await crescendo.buy(0, { value: initialPrice });
+      await crescendo.createSplit(...split);
+    });
+
+    it("should transfer all funds to the split, distribute to receipients, and withdraw", async () => {
+      const before2 = await ethers.provider.getBalance(addr2.address);
+      const before3 = await ethers.provider.getBalance(addr3.address);
+
+      await crescendo.distributeAndWithdrawFund(addr2.address, 1, [], ...split, addr1.address);
+      const after2 = await ethers.provider.getBalance(addr2.address);
+      expect(after2).to.equal(before2.add(initialPrice.div(100).mul(90)));
+
+      await crescendo.distributeAndWithdrawFund(addr3.address, 1, [], ...split, addr1.address);
+      const after3 = await ethers.provider.getBalance(addr3.address);
+      expect(after3).to.equal(before3.add(initialPrice.div(100).mul(10)));
+    });
+
+    it("should revert if a split has not yet been created", async () => {
+      const freshNFT: Contract = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        trNum,
+        trDenom
+      );
+
+      await expect(
+        freshNFT.distributeAndWithdrawFund(addr2.address, 1, [], ...split, addr1.address)
+      ).to.be.revertedWith('Split not created yet');
     });
   });
 

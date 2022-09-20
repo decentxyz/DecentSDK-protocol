@@ -146,8 +146,7 @@ export const deployDCNTCrescendo = async (
   step2: BigNumber,
   hitch: number,
   trNum: number,
-  trDenom: number,
-  payouts: string
+  trDenom: number
 ) => {
   const deployTx = await decentSDK.deployDCNTCrescendo(
     name,
@@ -158,8 +157,7 @@ export const deployDCNTCrescendo = async (
     step2,
     hitch,
     trNum,
-    trDenom,
-    payouts
+    trDenom
   );
 
   const receipt = await deployTx.wait();

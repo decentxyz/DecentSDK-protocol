@@ -116,8 +116,7 @@ describe("DCNTSDK", async () => {
         step2,
         hitch,
         trNum,
-        trDenom,
-        payouts
+        trDenom
       );
     });
 

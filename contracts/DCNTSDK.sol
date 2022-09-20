@@ -134,8 +134,7 @@ contract DCNTSDK is Ownable {
     uint256 _step2,
     uint256 _hitch,
     uint256 _trNum,
-    uint256 _trDenom,
-    address payable _payouts
+    uint256 _trDenom
   ) external payable {
     address DCNTCrescendoClone = Clones.clone(DCNTCrescendoImplementation);
     (bool success, ) = DCNTCrescendoClone.call{value: msg.value}(
@@ -151,7 +150,7 @@ contract DCNTSDK is Ownable {
         _hitch,
         _trNum,
         _trDenom,
-        _payouts
+        SplitMain
       )
     );
     require(success);

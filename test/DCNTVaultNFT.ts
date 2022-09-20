@@ -16,6 +16,7 @@ const unlockDate = theFuture.time();
 describe("DCNTVaultNFT", async () => {
   let owner: SignerWithAddress,
       sdk: Contract,
+      registry: Contract,
       dcntVaultNFT: Contract,
       nft: Contract,
       vault: Contract;
@@ -23,6 +24,7 @@ describe("DCNTVaultNFT", async () => {
   before(async () => {
     [owner] = await ethers.getSigners();
     sdk = await deployDCNTSDK();
+    registry = await ethers.getContractAt('DCNTRegistry', sdk.contractRegistry());
     dcntVaultNFT = await deployDCNTVaultNFT(sdk);
   });
 
@@ -64,6 +66,16 @@ describe("DCNTVaultNFT", async () => {
 
     it("should have the owner properly set on the DCNTVault deployment", async () => {
       expect(ethers.utils.getAddress(await vault.owner())).to.equal(owner.address);
+    });
+
+    it("should register the nft in the sdk contract registry", async () => {
+      const [registeredNFT, registeredVault] = await registry.query(owner.address);
+      expect(registeredNFT).to.equal(nft.address);
+    });
+
+    it("should register the vault in the sdk contract registry", async () => {
+      const [registeredNFT, registeredVault] = await registry.query(owner.address);
+      expect(registeredVault).to.equal(vault.address);
     });
 
     it("should optionally deploy and initialize a DCNT4907A contract", async () => {

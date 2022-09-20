@@ -2,7 +2,7 @@ const { network } = require("hardhat");
 import { ethers } from "hardhat";
 
 // set up DCNTSDK
-const DCNTSDK_ENDPOINT = '';
+const DCNTSDK_ENDPOINT = '0x7Bb8b7e30d5BEa38e0cacC07533aAF0D0ECb60B2';
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
@@ -11,6 +11,7 @@ async function main() {
   const DCNTCrescendo = await DCNTSDK.DCNTCrescendoImplementation();
   const DCNTVault = await DCNTSDK.DCNTVaultImplementation();
   const DCNTStaking = await DCNTSDK.DCNTStakingImplementation();
+  const DCNTRegistry = await DCNTSDK.contractRegistry();
   const SplitMain = await DCNTSDK.SplitMain();
 
   console.log('\nVerify DCNTSDK:');
@@ -21,6 +22,7 @@ async function main() {
     DCNTCrescendo,
     DCNTVault,
     DCNTStaking,
+    DCNTRegistry,
     SplitMain
   );
 
@@ -37,7 +39,10 @@ async function main() {
   console.log(`npx hardhat verify --network ${network.name} ${DCNTVault}`);
 
   console.log('\nVerify DCNTStaking:');
-  console.log(`npx hardhat verify --network ${network.name} ${DCNTStaking}\n`);
+  console.log(`npx hardhat verify --network ${network.name} ${DCNTStaking}`);
+
+  console.log('\nVerify DCNTRegistry:');
+  console.log(`npx hardhat verify --network ${network.name} ${DCNTRegistry}\n`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

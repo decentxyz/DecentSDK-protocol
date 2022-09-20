@@ -34,6 +34,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     bool public saleIsActive = false;
     string public baseURI;
     address public metadataRenderer;
+    uint256 public royaltyBPS;
 
     address public splitMain;
     address public splitWallet;
@@ -54,6 +55,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
         uint256 _maxTokens,
         uint256 _tokenPrice,
         uint256 _maxTokenPurchase,
+        uint256 _royaltyBPS,
         address _splitMain
     ) public initializer {
         _transferOwnership(_owner);
@@ -63,6 +65,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
         MAX_TOKENS = _maxTokens;
         tokenPrice = _tokenPrice;
         maxTokenPurchase = _maxTokenPurchase;
+        royaltyBPS = _royaltyBPS;
         splitMain = _splitMain;
     }
 
@@ -135,6 +138,32 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
         for (uint256 i = 0; i < numReserved; i++) {
             _safeMint(msg.sender, supply + i + 1);
         }
+    }
+
+    function royaltyInfo(
+        uint256 tokenId,
+        uint256 salePrice
+    )   external
+        view
+        returns (address receiver, uint256 royaltyAmount)
+    {
+        require(_exists(tokenId), "Nonexistent token");
+
+        if ( splitWallet != address(0) ) {
+            receiver = splitWallet;
+        } else {
+            receiver = owner();
+        }
+
+        uint256 royaltyPayment = (salePrice * royaltyBPS) / 10_000;
+
+        return (receiver, royaltyPayment);
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A) returns (bool) {
+        return
+            interfaceId == 0x2a55205a || // ERC2981 interface ID for ERC2981.
+            super.supportsInterface(interfaceId);
     }
 
   function _getSplitMain() internal virtual override returns(address) {

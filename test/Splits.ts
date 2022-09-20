@@ -10,6 +10,7 @@ const symbol = 'DCNT';
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('1');
 const maxTokenPurchase = 2;
+const royaltyBPS = 10_000;
 
 const scale = 1_000_000;
 const bigPercent = (num: BigNumber, perc: number) => num.div(100).mul(perc);
@@ -35,7 +36,8 @@ describe("Splits", async () => {
       symbol,
       maxTokens,
       tokenPrice,
-      maxTokenPurchase
+      maxTokenPurchase,
+      royaltyBPS
     );
 
     const payouts = sortByAddress([
@@ -73,7 +75,8 @@ describe("Splits", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
 
       await expect(
@@ -101,7 +104,8 @@ describe("Splits", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
 
       await expect(
@@ -134,7 +138,8 @@ describe("Splits", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
 
       await expect(
@@ -153,7 +158,8 @@ describe("Splits", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
     });
 
@@ -215,7 +221,8 @@ describe("Splits", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
 
       await expect(
@@ -246,7 +253,8 @@ describe("Splits", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
 
       await expect(

@@ -10,6 +10,7 @@ const symbol = 'DCNT';
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const royaltyBPS = 10_000;
 const vaultDistributionTokenAddress = ethers.constants.AddressZero;
 const unlockDate = theFuture.time();
 
@@ -45,6 +46,7 @@ describe("DCNTVaultNFT", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        royaltyBPS,
         vaultDistributionTokenAddress,
         unlockDate,
         supports4907
@@ -88,6 +90,7 @@ describe("DCNTVaultNFT", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        royaltyBPS,
         vaultDistributionTokenAddress,
         unlockDate,
         supports4907

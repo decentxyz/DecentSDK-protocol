@@ -63,6 +63,7 @@ contract DCNTVaultNFT is Ownable {
     uint256 _maxTokens,
     uint256 _tokenPrice,
     uint256 _maxTokenPurchase,
+    uint256 _royaltyBPS,
     address _vaultDistributionTokenAddress,
     uint256 _unlockDate,
     bool _supports4907
@@ -70,12 +71,13 @@ contract DCNTVaultNFT is Ownable {
     address deployedNFT;
     if ( _supports4907 ) {
       (bool success1, bytes memory data1) = _DCNTSDK.delegatecall(
-        abi.encodeWithSignature("deployDCNT4907A(string,string,uint256,uint256,uint256)",
+        abi.encodeWithSignature("deployDCNT4907A(string,string,uint256,uint256,uint256,uint256)",
           _name,
           _symbol,
           _maxTokens,
           _tokenPrice,
-          _maxTokenPurchase
+          _maxTokenPurchase,
+          _royaltyBPS
         )
       );
 
@@ -83,12 +85,13 @@ contract DCNTVaultNFT is Ownable {
       deployedNFT = abi.decode(data1, (address));
     } else {
       (bool success2, bytes memory data2) = _DCNTSDK.delegatecall(
-        abi.encodeWithSignature("deployDCNT721A(string,string,uint256,uint256,uint256)",
+        abi.encodeWithSignature("deployDCNT721A(string,string,uint256,uint256,uint256,uint256)",
           _name,
           _symbol,
           _maxTokens,
           _tokenPrice,
-          _maxTokenPurchase
+          _maxTokenPurchase,
+          _royaltyBPS
         )
       );
 

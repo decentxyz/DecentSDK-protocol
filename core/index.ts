@@ -109,14 +109,16 @@ export const deployDCNT721A = async (
   symbol: string,
   maxTokens: number,
   tokenPrice: BigNumber,
-  maxTokenPurchase: number
+  maxTokenPurchase: number,
+  royaltyBPS: number
 ) => {
   const deployTx = await decentSDK.deployDCNT721A(
     name,
     symbol,
     maxTokens,
     tokenPrice,
-    maxTokenPurchase
+    maxTokenPurchase,
+    royaltyBPS
   );
 
   const receipt = await deployTx.wait();
@@ -130,14 +132,16 @@ export const deployDCNT4907A = async (
   symbol: string,
   maxTokens: number,
   tokenPrice: BigNumber,
-  maxTokenPurchase: number
+  maxTokenPurchase: number,
+  royaltyBPS: number
 ) => {
   const deployTx = await decentSDK.deployDCNT4907A(
     name,
     symbol,
     maxTokens,
     tokenPrice,
-    maxTokenPurchase
+    maxTokenPurchase,
+    royaltyBPS
   );
 
   const receipt = await deployTx.wait();
@@ -220,6 +224,7 @@ export const DCNTVaultNFTCreate = async (
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  royaltyBPS: number,
   vaultDistributionTokenAddress: string,
   unlockDate: number,
   supports4907: boolean
@@ -231,6 +236,7 @@ export const DCNTVaultNFTCreate = async (
     maxTokens,
     tokenPrice,
     maxTokenPurchase,
+    royaltyBPS,
     vaultDistributionTokenAddress,
     unlockDate,
     supports4907

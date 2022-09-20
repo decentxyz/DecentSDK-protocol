@@ -10,6 +10,7 @@ const symbol = 'DCNT';
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const royaltyBPS = 10_00;
 
 describe("DCNT4907A", async () => {
   let owner: SignerWithAddress,
@@ -31,7 +32,8 @@ describe("DCNT4907A", async () => {
       symbol,
       maxTokens,
       tokenPrice,
-      maxTokenPurchase
+      maxTokenPurchase,
+      royaltyBPS
     );
   });
 
@@ -99,6 +101,26 @@ describe("DCNT4907A", async () => {
   describe("supportsInterface()", async () => {
     it('should support the interface for ERC4907', async function () {
       expect(await clone.supportsInterface('0xad092b5c')).to.eq(true);
+    });
+
+    it('should support the interface for ERC2981', async function () {
+      expect(await clone.supportsInterface('0x2a55205a')).to.eq(true);
+    });
+  });
+
+  describe("royaltyInfo()", async () => {
+    it('should calculate the royalty for the secondary sale', async function () {
+      const royalty = await clone.royaltyInfo(0, tokenPrice);
+      expect(royalty.royaltyAmount).to.eq(tokenPrice.div(10_000).mul(royaltyBPS));
+    });
+
+    it('should set owner as the receiver, unless there is a split', async function () {
+      const ownerRoyalty = await clone.royaltyInfo(0, tokenPrice);
+      expect(ownerRoyalty.receiver).to.eq(owner.address);
+
+      // await nft.createSplit(...split);
+      // const splitRoyalty = await nft.royaltyInfo(0, tokenPrice);
+      // expect(splitRoyalty.receiver).to.eq(await nft.splitWallet());
     });
   });
 });

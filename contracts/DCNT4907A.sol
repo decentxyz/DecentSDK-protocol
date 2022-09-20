@@ -34,7 +34,7 @@ contract DCNT4907A is DCNT721A, ERC4907A {
         public
         view
         virtual
-        override(ERC721A, ERC4907A)
+        override(DCNT721A, ERC4907A)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

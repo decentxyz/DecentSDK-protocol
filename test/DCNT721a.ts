@@ -10,6 +10,7 @@ const symbol = 'DCNT';
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const royaltyBPS = 10_00;
 
 describe("DCNT721A", async () => {
   let owner: SignerWithAddress,
@@ -36,7 +37,8 @@ describe("DCNT721A", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
     });
 
@@ -63,7 +65,8 @@ describe("DCNT721A", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
     });
 
@@ -149,7 +152,8 @@ describe("DCNT721A", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
       await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
@@ -176,12 +180,48 @@ describe("DCNT721A", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
 
       await expect(
         freshNFT.distributeAndWithdraw(addr2.address, 1, [], ...split, addr1.address)
       ).to.be.revertedWith('Split not created yet');
+    });
+  });
+
+  describe("supportsInterface()", async () => {
+    it('should support the interface for ERC2981', async function () {
+      expect(await nft.supportsInterface('0x2a55205a')).to.eq(true);
+    });
+  });
+
+  describe("royaltyInfo()", async () => {
+    it('should calculate the royalty for the secondary sale', async function () {
+      const royalty = await nft.royaltyInfo(0, tokenPrice);
+      expect(royalty.royaltyAmount).to.eq(tokenPrice.div(10_000).mul(royaltyBPS));
+    });
+
+    it('should set owner as the receiver, unless there is a split', async function () {
+      const freshNFT: Contract = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        royaltyBPS
+      );
+
+      await freshNFT.flipSaleState();
+      await freshNFT.mint(1, { value: tokenPrice });
+
+      const ownerRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
+      expect(ownerRoyalty.receiver).to.eq(owner.address);
+
+      await freshNFT.createSplit(...split);
+      const splitRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
+      expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
     });
   });
 });

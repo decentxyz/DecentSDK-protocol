@@ -62,6 +62,7 @@ describe("DCNTSDK", async () => {
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
+      const royaltyBPS = 1000;
 
       clone = await deployDCNT721A(
         sdk,
@@ -69,7 +70,8 @@ describe("DCNTSDK", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
     });
 
@@ -90,6 +92,7 @@ describe("DCNTSDK", async () => {
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
+      const royaltyBPS = 10_00;
 
       clone = await deployDCNT4907A(
         sdk,
@@ -97,7 +100,8 @@ describe("DCNTSDK", async () => {
         symbol,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase
+        maxTokenPurchase,
+        royaltyBPS
       );
     });
 

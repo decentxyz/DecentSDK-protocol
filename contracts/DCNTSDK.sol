@@ -77,18 +77,20 @@ contract DCNTSDK is Ownable {
     string memory _symbol,
     uint256 _maxTokens,
     uint256 _tokenPrice,
-    uint256 _maxTokenPurchase
+    uint256 _maxTokenPurchase,
+    uint256 _royaltyBPS
   ) external returns (address clone) {
     clone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256,address)",
+        "initialize(address,string,string,uint256,uint256,uint256,uint256,address)",
         msg.sender,
         _name,
         _symbol,
         _maxTokens,
         _tokenPrice,
         _maxTokenPurchase,
+        _royaltyBPS,
         SplitMain
       )
     );
@@ -103,18 +105,20 @@ contract DCNTSDK is Ownable {
     string memory _symbol,
     uint256 _maxTokens,
     uint256 _tokenPrice,
-    uint256 _maxTokenPurchase
+    uint256 _maxTokenPurchase,
+    uint256 _royaltyBPS
   ) external returns (address clone) {
     clone = Clones.clone(DCNT4907AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256,address)",
+        "initialize(address,string,string,uint256,uint256,uint256,uint256,address)",
         msg.sender,
         _name,
         _symbol,
         _maxTokens,
         _tokenPrice,
         _maxTokenPurchase,
+        _royaltyBPS,
         SplitMain
       )
     );

@@ -5,8 +5,6 @@ import {ERC20} from 'solmate/src/tokens/ERC20.sol';
 import '../splits/interfaces/ISplitMain.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "hardhat/console.sol";
-
 abstract contract Splits is Ownable {
   function _getSplitMain() internal virtual returns(address);
   function _getSplitWallet() internal virtual returns(address);

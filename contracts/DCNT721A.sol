@@ -19,9 +19,10 @@ import "./erc721a/ERC721A.sol";
 import "./interfaces/IMetadataRenderer.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./utils/Splits.sol";
 
 /// @title template NFT contract
-contract DCNT721A is ERC721A, Initializable, Ownable {
+contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     /// ============ Immutable storage ============
 
     /// ============ Mutable storage ============
@@ -33,6 +34,9 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
     bool public saleIsActive = false;
     string public baseURI;
     address public metadataRenderer;
+
+    address public splitMain;
+    address public splitWallet;
 
     /// ============ Events ============
 
@@ -49,7 +53,8 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
         string memory symbol,
         uint256 _maxTokens,
         uint256 _tokenPrice,
-        uint256 _maxTokenPurchase
+        uint256 _maxTokenPurchase,
+        address _splitMain
     ) public initializer {
         _transferOwnership(_owner);
         _name = name;
@@ -58,6 +63,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
         MAX_TOKENS = _maxTokens;
         tokenPrice = _tokenPrice;
         maxTokenPurchase = _maxTokenPurchase;
+        splitMain = _splitMain;
     }
 
     function mint(uint256 numberOfTokens) external payable {
@@ -88,6 +94,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
     }
 
     function withdraw() external onlyOwner {
+        require(_getSplitWallet() == address(0), "Cannot withdraw with an active split");
         payable(msg.sender).transfer(address(this).balance);
     }
 
@@ -129,4 +136,16 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
             _safeMint(msg.sender, supply + i + 1);
         }
     }
+
+  function _getSplitMain() internal virtual override returns(address) {
+    return splitMain;
+  }
+
+  function _getSplitWallet() internal virtual override returns(address) {
+    return splitWallet;
+  }
+
+  function _setSplitWallet(address _splitWallet) internal virtual override {
+    splitWallet = _splitWallet;
+  }
 }

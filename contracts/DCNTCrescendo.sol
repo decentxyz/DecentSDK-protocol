@@ -21,10 +21,11 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IBondingCurve.sol";
+import "./utils/Splits.sol";
 
 /// ========= Bonding Token =========
 
-contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable {
+contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits {
 
   // Token name
   string private _name;
@@ -50,8 +51,9 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable {
 
   bool public saleIsActive = false;
 
-  // address for take rate payouts
-  address payable public payouts;
+  // addresses for splits contract and wallet
+  address public splitMain;
+  address public splitWallet;
 
   /// ============ Constructor ============
 
@@ -66,13 +68,12 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable {
     uint256 _hitch,
     uint256 _trNum,
     uint256 _trDenom,
-    address payable _payouts
+    address _splitMain
   )
     public
     initializer
   {
     _transferOwnership(_owner);
-    payouts = _payouts;
     _currentPrice[0] = _initialPrice;
     step1 = _step1;
     step2 = _step2;
@@ -82,6 +83,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable {
     _name = name_;
     _symbol = symbol_;
     _setURI(uri_);
+    splitMain = _splitMain;
   }
 
   function calculateCurvedMintReturn(uint256 amount, uint256 id) public view override returns (uint256) {
@@ -150,14 +152,59 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable {
   }
 
   function withdrawFund() external onlyOwner {
+    require(_getSplitWallet() == address(0), "Cannot withdraw with an active split");
     payable(msg.sender).transfer(address(this).balance);
   }
 
-  function withdrawDividend() external {
+  function distributeAndWithdrawFund(
+    address account,
+    uint256 withdrawETH,
+    ERC20[] memory tokens,
+    address[] calldata accounts,
+    uint32[] calldata percentAllocations,
+    uint32 distributorFee,
+    address distributorAddress
+  ) public virtual requireSplit {
+    if (withdrawETH != 0) {
+      super._transferETHToSplit();
+      bytes memory payload = abi.encodeWithSignature(
+        "distributeETH(address,address[],uint32[],uint32,address)",
+        _getSplitWallet(),
+        accounts,
+        percentAllocations,
+        distributorFee,
+        distributorAddress
+      );
+      (bool success, ) = _getSplitMain().call(payload);
+      require(success);
+    }
+
+    for (uint256 i = 0; i < tokens.length; ++i) {
+      distributeERC20(
+        tokens[i],
+        accounts,
+        percentAllocations,
+        distributorFee,
+        distributorAddress
+      );
+    }
+
+    _withdraw(account, withdrawETH, tokens);
+  }
+
+  function withdraw() external onlyOwner {
+    require(_getSplitWallet() == address(0), "Cannot withdraw with an active split");
     uint256 toWithdraw = liquidity() - totalWithdrawn;
     totalWithdrawn += toWithdraw;
-    (bool success, ) = payouts.call{value: toWithdraw}("");
+    (bool success, ) = payable(msg.sender).call{value: toWithdraw}("");
     require(success, "Failed to send ether");
+  }
+
+  function _transferETHToSplit() internal override {
+    uint256 toWithdraw = liquidity() - totalWithdrawn;
+    totalWithdrawn += toWithdraw;
+    (bool success, ) = _getSplitWallet().call{ value: toWithdraw }("");
+    require(success, "Could not transfer ETH to split");
   }
 
   function liquidity() public view returns (uint256) {
@@ -186,5 +233,17 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable {
 
   function updateUri(string memory uri_) external onlyOwner {
     _setURI(uri_);
+  }
+
+  function _getSplitMain() internal virtual override returns(address) {
+    return splitMain;
+  }
+
+  function _getSplitWallet() internal virtual override returns(address) {
+    return splitWallet;
+  }
+
+  function _setSplitWallet(address _splitWallet) internal virtual override {
+    splitWallet = _splitWallet;
   }
 }

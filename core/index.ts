@@ -38,9 +38,11 @@ export type Implementations = {
 export const deployDCNTSDK = async (
   implementations?: Implementations,
   contractRegistry?: Contract,
+  splitMain?: Contract,
 ) => {
   implementations = implementations ?? await deployImplementations();
   contractRegistry = contractRegistry ?? await deployContract('DCNTRegistry');
+  splitMain = splitMain ?? await deployContract('SplitMain');
   const decentSDKFactory = await ethers.getContractFactory('DCNTSDK');
   const decentSDK = await decentSDKFactory.deploy(
     implementations.DCNT721A.address,
@@ -48,7 +50,8 @@ export const deployDCNTSDK = async (
     implementations.DCNTCrescendo.address,
     implementations.DCNTVault.address,
     implementations.DCNTStaking.address,
-    contractRegistry.address
+    contractRegistry.address,
+    splitMain.address
   );
   return await decentSDK.deployed();
 }
@@ -152,8 +155,7 @@ export const deployDCNTCrescendo = async (
   step2: BigNumber,
   hitch: number,
   trNum: number,
-  trDenom: number,
-  payouts: string
+  trDenom: number
 ) => {
   const deployTx = await decentSDK.deployDCNTCrescendo(
     name,
@@ -164,8 +166,7 @@ export const deployDCNTCrescendo = async (
     step2,
     hitch,
     trNum,
-    trDenom,
-    payouts
+    trDenom
   );
 
   const receipt = await deployTx.wait();
@@ -264,3 +265,7 @@ export const deployMockERC721 = async () => {
   );
   return await erc721Token.deployed();
 }
+
+export const sortByAddress = (arr: any[]) => arr.sort((a: any, b: any) => {
+  return a.address < b.address ? -1 : 1;
+});

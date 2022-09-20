@@ -2,7 +2,7 @@ const { network } = require("hardhat");
 import { ethers } from "hardhat";
 
 // set up DCNTSDK
-const DCNTSDK_ENDPOINT = '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707';
+const DCNTSDK_ENDPOINT = '';
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
@@ -11,6 +11,7 @@ async function main() {
   const DCNTCrescendo = await DCNTSDK.DCNTCrescendoImplementation();
   const DCNTVault = await DCNTSDK.DCNTVaultImplementation();
   const DCNTStaking = await DCNTSDK.DCNTStakingImplementation();
+  const SplitMain = await DCNTSDK.SplitMain();
 
   console.log('\nVerify DCNTSDK:');
   console.log(`npx hardhat verify --network ${network.name}`,
@@ -19,7 +20,8 @@ async function main() {
     DCNT4907A,
     DCNTCrescendo,
     DCNTVault,
-    DCNTStaking
+    DCNTStaking,
+    SplitMain
   );
 
   console.log('\nVerify DCNT721A:');

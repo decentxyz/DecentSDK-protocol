@@ -36,6 +36,9 @@ contract DCNTSDK is Ownable {
   /// @notice address of the associated registry
   address public contractRegistry;
 
+  /// @notice addresses for splits contract
+  address public SplitMain;
+
   /// ============ Events ============
 
   /// @notice Emitted after successfully deploying a contract
@@ -54,7 +57,8 @@ contract DCNTSDK is Ownable {
     address _DCNTCrescendoImplementation,
     address _DCNTVaultImplementation,
     address _DCNTStakingImplementation,
-    address _contractRegistry
+    address _contractRegistry,
+    address _SplitMain
   ) {
     DCNT721AImplementation = _DCNT721AImplementation;
     DCNT4907AImplementation = _DCNT4907AImplementation;
@@ -62,6 +66,7 @@ contract DCNTSDK is Ownable {
     DCNTVaultImplementation = _DCNTVaultImplementation;
     DCNTStakingImplementation = _DCNTStakingImplementation;
     contractRegistry = _contractRegistry;
+    SplitMain = _SplitMain;
   }
 
   /// ============ Functions ============
@@ -77,13 +82,14 @@ contract DCNTSDK is Ownable {
     clone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256)",
+        "initialize(address,string,string,uint256,uint256,uint256,address)",
         msg.sender,
         _name,
         _symbol,
         _maxTokens,
         _tokenPrice,
-        _maxTokenPurchase
+        _maxTokenPurchase,
+        SplitMain
       )
     );
     require(success);
@@ -102,13 +108,14 @@ contract DCNTSDK is Ownable {
     clone = Clones.clone(DCNT4907AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256)",
+        "initialize(address,string,string,uint256,uint256,uint256,address)",
         msg.sender,
         _name,
         _symbol,
         _maxTokens,
         _tokenPrice,
-        _maxTokenPurchase
+        _maxTokenPurchase,
+        SplitMain
       )
     );
     require(success);
@@ -126,8 +133,7 @@ contract DCNTSDK is Ownable {
     uint256 _step2,
     uint256 _hitch,
     uint256 _trNum,
-    uint256 _trDenom,
-    address payable _payouts
+    uint256 _trDenom
   ) external returns (address clone) {
     clone = Clones.clone(DCNTCrescendoImplementation);
     (bool success, ) = clone.call(
@@ -143,7 +149,7 @@ contract DCNTSDK is Ownable {
         _hitch,
         _trNum,
         _trDenom,
-        _payouts
+        SplitMain
       )
     );
     require(success);

@@ -36,9 +36,11 @@ export type Implementations = {
 };
 
 export const deployDCNTSDK = async (
-  implementations?: Implementations
+  implementations?: Implementations,
+  splitMain?: Contract
 ) => {
   implementations = implementations ?? await deployImplementations();
+  splitMain = splitMain ?? await deployContract('SplitMain');
   const decentSDKFactory = await ethers.getContractFactory('DCNTSDK');
   const decentSDK = await decentSDKFactory.deploy(
     implementations.DCNT721A.address,
@@ -46,6 +48,7 @@ export const deployDCNTSDK = async (
     implementations.DCNTCrescendo.address,
     implementations.DCNTVault.address,
     implementations.DCNTStaking.address,
+    splitMain.address
   );
   return await decentSDK.deployed();
 }
@@ -220,3 +223,7 @@ export const deployMockERC721 = async () => {
   );
   return await erc721Token.deployed();
 }
+
+export const sortByAddress = (arr: any[]) => arr.sort((a: any, b: any) => {
+  return a.address < b.address ? -1 : 1;
+});

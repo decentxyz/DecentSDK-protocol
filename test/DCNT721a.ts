@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT721A } from "../core";
+import { deployDCNTSDK, deployDCNT721A, sortByAddress } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -19,7 +19,8 @@ describe("DCNT721A", async () => {
       addr4: SignerWithAddress,
       sdk: Contract,
       clone: Contract,
-      nft: Contract;
+      nft: Contract,
+      split: any[];
 
   let overrides = { value: ethers.utils.parseEther("0.01") };
   let overrides2 = { value: ethers.utils.parseEther("0.02") };
@@ -116,6 +117,71 @@ describe("DCNT721A", async () => {
       const after = await addr1.getBalance();
       const withdrawn = after.sub(before).add(gas);
       expect(withdrawn).to.equal(ethers.utils.parseEther("0.04"));
+    });
+
+    it("should revert if a split has already been created", async () => {
+      const payouts = sortByAddress([
+        {
+          address: addr2.address,
+          percent: (1_000_000 / 100) * 90
+        },
+        {
+          address: addr3.address,
+          percent: (1_000_000 / 100) * 10
+        },
+      ]);
+
+      const addresses = payouts.map(payout => payout.address);
+      const percents = payouts.map(payout => payout.percent);
+      const distributorFee = 0;
+      split = [addresses, percents, distributorFee];
+
+      await nft.createSplit(...split);
+      await expect(nft.withdraw()).to.be.revertedWith('Cannot withdraw with an active split');
+    });
+  });
+
+  describe("distributeAndWithdraw()", async () => {
+    before(async () => {
+      nft = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase
+      );
+      await nft.flipSaleState();
+      await nft.mint(1, { value: tokenPrice });
+    });
+
+    it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
+      await nft.createSplit(...split);
+      const before2 = await ethers.provider.getBalance(addr2.address);
+      const before3 = await ethers.provider.getBalance(addr3.address);
+
+      await nft.distributeAndWithdraw(addr2.address, 1, [], ...split, addr1.address);
+      const after2 = await ethers.provider.getBalance(addr2.address);
+      expect(after2).to.equal(before2.add(tokenPrice.div(100).mul(90).sub(1)));
+
+      await nft.distributeAndWithdraw(addr3.address, 1, [], ...split, addr1.address);
+      const after3 = await ethers.provider.getBalance(addr3.address);
+      expect(after3).to.equal(before3.add(tokenPrice.div(100).mul(10).sub(1)));
+    });
+
+    it("should revert if a split has not yet been created", async () => {
+      const freshNFT: Contract = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase
+      );
+
+      await expect(
+        freshNFT.distributeAndWithdraw(addr2.address, 1, [], ...split, addr1.address)
+      ).to.be.revertedWith('Split not created yet');
     });
   });
 });

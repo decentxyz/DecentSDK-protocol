@@ -32,6 +32,9 @@ contract DCNTSDK is Ownable {
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
 
+  /// @notice addresses for splits contract
+  address public SplitMain;
+
   /// @notice contracts deployed by DecentSDK proxy factory
   address[] public allDCNT721A;
   address[] public allDCNT4907A;
@@ -56,13 +59,15 @@ contract DCNTSDK is Ownable {
     address _DCNT4907AImplementation,
     address _DCNTCrescendoImplementation,
     address _DCNTVaultImplementation,
-    address _DCNTStakingImplementation
+    address _DCNTStakingImplementation,
+    address _SplitMain
   ) {
     DCNT721AImplementation = _DCNT721AImplementation;
     DCNT4907AImplementation = _DCNT4907AImplementation;
     DCNTCrescendoImplementation = _DCNTCrescendoImplementation;
     DCNTVaultImplementation = _DCNTVaultImplementation;
     DCNTStakingImplementation = _DCNTStakingImplementation;
+    SplitMain = _SplitMain;
   }
 
   /// ============ Functions ============
@@ -78,13 +83,14 @@ contract DCNTSDK is Ownable {
     address DCNT721AClone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = DCNT721AClone.call{value: msg.value}(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256)",
+        "initialize(address,string,string,uint256,uint256,uint256,address)",
         msg.sender,
         _name,
         _symbol,
         _maxTokens,
         _tokenPrice,
-        _maxTokenPurchase
+        _maxTokenPurchase,
+        SplitMain
       )
     );
     require(success);
@@ -103,13 +109,14 @@ contract DCNTSDK is Ownable {
     address DCNT4907AClone = Clones.clone(DCNT4907AImplementation);
     (bool success, ) = DCNT4907AClone.call{value: msg.value}(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256)",
+        "initialize(address,string,string,uint256,uint256,uint256,address)",
         msg.sender,
         _name,
         _symbol,
         _maxTokens,
         _tokenPrice,
-        _maxTokenPurchase
+        _maxTokenPurchase,
+        SplitMain
       )
     );
     require(success);

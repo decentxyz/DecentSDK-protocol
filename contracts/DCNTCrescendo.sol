@@ -39,8 +39,8 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
   uint256 private step1;
   uint256 private step2;
   uint256 private hitch;
-  uint256 private trNum;
-  uint256 private trDenom;
+  uint256 private takeRateBPS;
+  uint256 public royaltyBPS;
 
   // id to supply
   mapping(uint256 => uint256) private _totalSupply;
@@ -55,6 +55,8 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
   address public splitMain;
   address public splitWallet;
 
+  uint256 constant bps = 100_00;
+
   /// ============ Constructor ============
 
   function initialize(
@@ -66,8 +68,8 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     uint256 _step1,
     uint256 _step2,
     uint256 _hitch,
-    uint256 _trNum,
-    uint256 _trDenom,
+    uint256 _takeRateBPS,
+    uint256 _royaltyBPS,
     address _splitMain
   )
     public
@@ -78,11 +80,11 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     step1 = _step1;
     step2 = _step2;
     hitch = _hitch;
-    trNum = _trNum;
-    trDenom = _trDenom;
+    takeRateBPS = _takeRateBPS;
     _name = name_;
     _symbol = symbol_;
     _setURI(uri_);
+    royaltyBPS = _royaltyBPS;
     splitMain = _splitMain;
   }
 
@@ -93,7 +95,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
 
   function calculateCurvedBurnReturn(uint256 amount, uint256 id) public view override returns (uint256) {
     require(amount == 1, "max amount is 1");
-    return (trDenom-trNum)*_currentPrice[id]/trDenom;
+    return (bps-takeRateBPS)*_currentPrice[id]/bps;
   }
 
   function buy(uint256 id) external payable {
@@ -208,11 +210,11 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
   }
 
   function liquidity() public view returns (uint256) {
-    return trNum*(address(this).balance + totalWithdrawn) / trDenom;
+    return takeRateBPS*(address(this).balance + totalWithdrawn) / bps;
   }
 
   function reserveAmt() public view returns (uint256) {
-    return (trDenom-trNum)*(address(this).balance + totalWithdrawn) / trDenom;
+    return (bps-takeRateBPS)*(address(this).balance + totalWithdrawn) / bps;
   }
 
   function name() external view returns (string memory) {
@@ -233,6 +235,32 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
 
   function updateUri(string memory uri_) external onlyOwner {
     _setURI(uri_);
+  }
+
+  function royaltyInfo(
+    uint256 tokenId,
+    uint256 salePrice
+  ) external
+    view
+    returns (address receiver, uint256 royaltyAmount)
+  {
+    require(tokenId == 0, "currently only one edition");
+
+    if ( splitWallet != address(0) ) {
+      receiver = splitWallet;
+    } else {
+      receiver = owner();
+    }
+
+    uint256 royaltyPayment = (salePrice * royaltyBPS) / bps;
+
+    return (receiver, royaltyPayment);
+  }
+
+  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155) returns (bool) {
+    return
+      interfaceId == 0x2a55205a || // ERC2981 interface ID for ERC2981.
+      super.supportsInterface(interfaceId);
   }
 
   function _getSplitMain() internal virtual override returns(address) {

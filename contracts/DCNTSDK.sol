@@ -136,8 +136,8 @@ contract DCNTSDK is Ownable {
     uint256 _step1,
     uint256 _step2,
     uint256 _hitch,
-    uint256 _trNum,
-    uint256 _trDenom
+    uint256 _takeRateBPS,
+    uint256 _royaltyBPS
   ) external returns (address clone) {
     clone = Clones.clone(DCNTCrescendoImplementation);
     (bool success, ) = clone.call(
@@ -151,8 +151,8 @@ contract DCNTSDK is Ownable {
         _step1,
         _step2,
         _hitch,
-        _trNum,
-        _trDenom,
+        _takeRateBPS,
+        _royaltyBPS,
         SplitMain
       )
     );

@@ -12,9 +12,11 @@ const initialPrice = ethers.utils.parseEther('0.05');
 const step1 = ethers.utils.parseEther("0.005");
 const step2 = ethers.utils.parseEther("0.05");
 const hitch = 20;
-const [trNum,trDenom] = [3,20];
+const takeRateBPS = 15_00;
+const royaltyBPS = 10_00;
+const bps = 100_00;
 
-const calculateCurvedBurnReturn = (price: BigNumber) => price.mul(trDenom-trNum).div(trDenom);
+const calculateCurvedBurnReturn = (price: BigNumber) => price.mul(bps-takeRateBPS).div(bps);
 
 describe("DCNTCrescendo", async () => {
   let owner: SignerWithAddress,
@@ -38,8 +40,8 @@ describe("DCNTCrescendo", async () => {
       step1,
       step2,
       hitch,
-      trNum,
-      trDenom
+      takeRateBPS,
+      royaltyBPS
     );
   });
 
@@ -63,15 +65,13 @@ describe("DCNTCrescendo", async () => {
         step1: await ethers.provider.getStorageAt(clone.address, 6),
         step2: await ethers.provider.getStorageAt(clone.address, 7),
         hitch: parseInt(await ethers.provider.getStorageAt(clone.address, 8)),
-        trNum: parseInt(await ethers.provider.getStorageAt(clone.address, 9)),
-        trDenom: parseInt(await ethers.provider.getStorageAt(clone.address, 10)),
+        takeRateBPS: parseInt(await ethers.provider.getStorageAt(clone.address, 9)),
       }
 
       expect(state.step1).to.equal(step1);
       expect(state.step2).to.equal(step2);
       expect(state.hitch).to.equal(hitch);
-      expect(state.trNum).to.equal(trNum);
-      expect(state.trDenom).to.equal(trDenom);
+      expect(state.takeRateBPS).to.equal(takeRateBPS);
       expect(state.initialPrice).to.equal(initialPrice);
     });
   });
@@ -87,8 +87,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
     });
 
@@ -134,8 +134,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
 
       await crescendo.flipSaleState();
@@ -197,8 +197,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
     });
 
@@ -213,7 +213,7 @@ describe("DCNTCrescendo", async () => {
 
       const after = await ethers.provider.getBalance(owner.address);
       const withdrawn = after.sub(before).add(gas);
-      expect(withdrawn).to.equal(initialPrice.div(trDenom).mul(trNum));
+      expect(withdrawn).to.equal(initialPrice.div(bps).mul(takeRateBPS));
     });
 
 
@@ -256,8 +256,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -299,8 +299,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -332,8 +332,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
 
       await expect(
@@ -353,8 +353,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -384,8 +384,8 @@ describe("DCNTCrescendo", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        royaltyBPS
       );
 
       await expect(
@@ -394,4 +394,41 @@ describe("DCNTCrescendo", async () => {
     });
   });
 
+  describe("supportsInterface()", async () => {
+    it('should support the interface for ERC2981', async function () {
+      expect(await crescendo.supportsInterface('0x2a55205a')).to.eq(true);
+    });
+  });
+
+  describe("royaltyInfo()", async () => {
+    it('should calculate the royalty for the secondary sale', async function () {
+      const royalty = await crescendo.royaltyInfo(0, initialPrice);
+      expect(royalty.royaltyAmount).to.eq(initialPrice.div(10_000).mul(royaltyBPS));
+    });
+
+    it('should set owner as the receiver, unless there is a split', async function () {
+      const freshNFT: Contract = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        takeRateBPS,
+        royaltyBPS
+      );
+
+      await freshNFT.flipSaleState();
+      await freshNFT.buy(0, { value: initialPrice });
+
+      const ownerRoyalty = await freshNFT.royaltyInfo(0, initialPrice);
+      expect(ownerRoyalty.receiver).to.eq(owner.address);
+
+      await freshNFT.createSplit(...split);
+      const splitRoyalty = await freshNFT.royaltyInfo(0, initialPrice);
+      expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
+    });
+  });
 });

@@ -125,7 +125,7 @@ describe("DCNTSDK", async () => {
       const step2 = ethers.utils.parseEther("0.05");
       const hitch = 20;
       const [trNum,trDenom] = [3,20];
-      const payouts = ethers.constants.AddressZero;
+      const royaltyBPS = 10_00;
 
       clone = await deployDCNTCrescendo(
         sdk,

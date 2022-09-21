@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNTCrescendo, sortByAddress } from "../core";
+import { deployDCNTSDK, deployDCNTCrescendo, theFuture, sortByAddress } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -13,6 +13,7 @@ const step1 = ethers.utils.parseEther("0.005");
 const step2 = ethers.utils.parseEther("0.05");
 const hitch = 20;
 const takeRateBPS = 15_00;
+const unlockDate = theFuture.time();
 const royaltyBPS = 10_00;
 const bps = 100_00;
 
@@ -41,6 +42,7 @@ describe("DCNTCrescendo", async () => {
       step2,
       hitch,
       takeRateBPS,
+      unlockDate,
       royaltyBPS
     );
   });
@@ -88,6 +90,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
     });
@@ -135,6 +138,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
 
@@ -198,6 +202,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
     });
@@ -257,6 +262,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
       await crescendo.flipSaleState();
@@ -286,6 +292,27 @@ describe("DCNTCrescendo", async () => {
         crescendo.connect(addr2).withdrawFund()
       ).to.be.revertedWith('Ownable: caller is not the owner');
     });
+
+    it("should revert if crescendo is still locked", async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        takeRateBPS,
+        theFuture.time() + theFuture.oneDay,
+        royaltyBPS
+      );
+
+      await crescendo.flipSaleState();
+      await crescendo.buy(0, { value: initialPrice });
+
+      await expect(crescendo.withdrawFund()).to.be.revertedWith('Crescendo is still locked');
+    });
   });
 
   describe("distributeAndWithdraw()", async () => {
@@ -300,6 +327,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
       await crescendo.flipSaleState();
@@ -321,7 +349,6 @@ describe("DCNTCrescendo", async () => {
       expect(after3).to.equal(before3.add(liquidity.div(100).mul(10).sub(1)));
     });
 
-
     it("should revert if a split has not yet been created", async () => {
       const freshNFT: Contract = await deployDCNTCrescendo(
         sdk,
@@ -333,6 +360,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
 
@@ -354,6 +382,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
       await crescendo.flipSaleState();
@@ -385,12 +414,74 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
 
       await expect(
         freshNFT.distributeAndWithdrawFund(addr2.address, 1, [], ...split, addr1.address)
       ).to.be.revertedWith('Split not created yet');
+    });
+
+    it("should revert if crescendo is still locked", async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        takeRateBPS,
+        theFuture.time() + theFuture.oneDay,
+        royaltyBPS
+      );
+
+      await crescendo.flipSaleState();
+      await crescendo.buy(0, { value: initialPrice });
+      await crescendo.createSplit(...split);
+
+      await expect(
+        crescendo.distributeAndWithdrawFund(addr2.address, 1, [], ...split, addr1.address)
+      ).to.be.revertedWith('Crescendo is still locked');
+    });
+  });
+
+  describe("transferFundToSplit()", async () => {
+    it("should transfer ETH and ERC20 to the split", async () => {
+      await theFuture.travel(theFuture.oneDay);
+      await theFuture.arrive();
+      expect(await ethers.provider.getBalance(crescendo.address)).to.equal(initialPrice);
+      await crescendo.transferFundToSplit(1, []);
+      expect(await ethers.provider.getBalance(crescendo.splitWallet())).to.equal(initialPrice);
+    });
+
+    it("should revert if a split has not yet been created", async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        takeRateBPS,
+        theFuture.time() + theFuture.oneDay,
+        royaltyBPS
+      );
+
+      await expect(
+        crescendo.transferFundToSplit(1, [])
+      ).to.be.revertedWith('Split not created yet');
+    });
+
+    it("should revert if crescendo is still locked", async () => {
+      await crescendo.createSplit(...split);
+      await expect(
+        crescendo.transferFundToSplit(1, [])
+      ).to.be.revertedWith('Crescendo is still locked');
     });
   });
 
@@ -417,6 +508,7 @@ describe("DCNTCrescendo", async () => {
         step2,
         hitch,
         takeRateBPS,
+        unlockDate,
         royaltyBPS
       );
 

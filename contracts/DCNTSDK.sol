@@ -19,6 +19,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./interfaces/IDCNTRegistry.sol";
+import "./utils/CrescendoConfig.sol";
 
 contract DCNTSDK is Ownable {
 
@@ -132,26 +133,18 @@ contract DCNTSDK is Ownable {
     string memory _name,
     string memory _symbol,
     string memory _uri,
-    uint256 _initialPrice,
-    uint256 _step1,
-    uint256 _step2,
-    uint256 _hitch,
-    uint256 _takeRateBPS,
+    CrescendoConfig memory _config,
     uint256 _royaltyBPS
   ) external returns (address clone) {
     clone = Clones.clone(DCNTCrescendoImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,string,uint256,uint256,uint256,uint256,uint256,uint256,address)",
+        "initialize(address,string,string,string,(uint256,uint256,uint256,uint256,uint256,uint256),uint256,address)",
         msg.sender,
         _name,
         _symbol,
         _uri,
-        _initialPrice,
-        _step1,
-        _step2,
-        _hitch,
-        _takeRateBPS,
+        _config,
         _royaltyBPS,
         SplitMain
       )

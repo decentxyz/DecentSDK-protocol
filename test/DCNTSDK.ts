@@ -124,8 +124,9 @@ describe("DCNTSDK", async () => {
       const step1 = ethers.utils.parseEther("0.005");
       const step2 = ethers.utils.parseEther("0.05");
       const hitch = 20;
-      const [trNum,trDenom] = [3,20];
+      const takeRateBPS = 15_00;
       const royaltyBPS = 10_00;
+      const unlockDate = theFuture.time();
 
       clone = await deployDCNTCrescendo(
         sdk,
@@ -136,8 +137,9 @@ describe("DCNTSDK", async () => {
         step1,
         step2,
         hitch,
-        trNum,
-        trDenom
+        takeRateBPS,
+        unlockDate,
+        royaltyBPS
       );
     });
 

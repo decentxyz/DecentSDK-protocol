@@ -21,6 +21,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IBondingCurve.sol";
+import "./utils/CrescendoConfig.sol";
 import "./utils/Splits.sol";
 
 /// ========= Bonding Token =========
@@ -51,6 +52,8 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
 
   bool public saleIsActive = false;
 
+  uint256 public unlockDate;
+
   // addresses for splits contract and wallet
   address public splitMain;
   address public splitWallet;
@@ -64,11 +67,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     string memory name_,
     string memory symbol_,
     string memory uri_,
-    uint256 _initialPrice,
-    uint256 _step1,
-    uint256 _step2,
-    uint256 _hitch,
-    uint256 _takeRateBPS,
+    CrescendoConfig memory _config,
     uint256 _royaltyBPS,
     address _splitMain
   )
@@ -76,11 +75,12 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     initializer
   {
     _transferOwnership(_owner);
-    _currentPrice[0] = _initialPrice;
-    step1 = _step1;
-    step2 = _step2;
-    hitch = _hitch;
-    takeRateBPS = _takeRateBPS;
+    _currentPrice[0] = _config.initialPrice;
+    step1 = _config.step1;
+    step2 = _config.step2;
+    hitch = _config.hitch;
+    takeRateBPS = _config.takeRateBPS;
+    unlockDate = _config.unlockDate;
     _name = name_;
     _symbol = symbol_;
     _setURI(uri_);
@@ -154,6 +154,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
   }
 
   function withdrawFund() external onlyOwner {
+    require(block.timestamp >= unlockDate, 'Crescendo is still locked');
     require(_getSplitWallet() == address(0), "Cannot withdraw with an active split");
     payable(msg.sender).transfer(address(this).balance);
   }
@@ -167,6 +168,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     uint32 distributorFee,
     address distributorAddress
   ) public virtual requireSplit {
+    require(block.timestamp >= unlockDate, 'Crescendo is still locked');
     if (withdrawETH != 0) {
       super._transferETHToSplit();
       bytes memory payload = abi.encodeWithSignature(
@@ -200,6 +202,20 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     totalWithdrawn += toWithdraw;
     (bool success, ) = payable(msg.sender).call{value: toWithdraw}("");
     require(success, "Failed to send ether");
+  }
+
+  function transferFundToSplit(
+    uint256 transferETH,
+    ERC20[] memory tokens
+  ) public virtual requireSplit {
+    require(block.timestamp >= unlockDate, 'Crescendo is still locked');
+    if (transferETH != 0) {
+      super._transferETHToSplit();
+    }
+
+    for (uint256 i = 0; i < tokens.length; ++i) {
+      _transferERC20ToSplit(tokens[i]);
+    }
   }
 
   function _transferETHToSplit() internal override {

@@ -159,17 +159,21 @@ export const deployDCNTCrescendo = async (
   step2: BigNumber,
   hitch: number,
   takeRateBPS: number,
+  unlockDate: number,
   royaltyBPS: number,
 ) => {
   const deployTx = await decentSDK.deployDCNTCrescendo(
     name,
     symbol,
     uri,
-    initialPrice,
-    step1,
-    step2,
-    hitch,
-    takeRateBPS,
+    {
+      initialPrice,
+      step1,
+      step2,
+      hitch,
+      takeRateBPS,
+      unlockDate,
+    },
     royaltyBPS
   );
 

@@ -196,16 +196,13 @@ contract DCNTCrescendo is
     ) public virtual requireSplit onlyUnlocked {
         if (withdrawETH != 0) {
             super._transferETHToSplit();
-            bytes memory payload = abi.encodeWithSignature(
-                "distributeETH(address,address[],uint32[],uint32,address)",
+            ISplitMain(_getSplitMain()).distributeETH(
                 _getSplitWallet(),
                 accounts,
                 percentAllocations,
                 distributorFee,
                 distributorAddress
             );
-            (bool success, ) = _getSplitMain().call(payload);
-            require(success);
         }
 
         for (uint256 i = 0; i < tokens.length; ++i) {

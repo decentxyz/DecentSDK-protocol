@@ -6,6 +6,16 @@
 - copy `.env.example` to `.env` and add your variables
 - `npx hardhat run scripts/deployDCNTSDK.ts --network optimism_testnet` to deploy the DecentSDK
 
+### Testing
+
+- `npm i` to install packages
+- `npx hardhat test`
+
+### Prettying
+
+- `npm i` to install packages
+- `npx prettier --write 'contracts/**/*.sol'`
+
 ### Adding a new SDK Module
 
 1. add contracts to `/contracts` folder

@@ -20,6 +20,8 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IBondingCurve.sol";
+import "./interfaces/IMetadataRenderer.sol";
+
 import "./storage/CrescendoConfig.sol";
 import "./utils/Splits.sol";
 
@@ -63,6 +65,9 @@ contract DCNTCrescendo is
   address public splitWallet;
 
   uint256 constant bps = 100_00;
+
+  /// @notice DCNTMetadataRenderer address
+  address public metadataRenderer;
 
   /// ============ Constructor ============
 
@@ -166,13 +171,18 @@ contract DCNTCrescendo is
     saleIsActive = !saleIsActive;
   }
 
-  function withdrawFund() external onlyOwner {
-    require(block.timestamp >= unlockDate, "Crescendo is still locked");
+  function withdrawFund() external onlyOwner onlyUnlocked {
     require(
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"
     );
     payable(msg.sender).transfer(address(this).balance);
+  }
+
+  /// @notice only when crescendo is unlocked
+  modifier onlyUnlocked() {
+    require(block.timestamp >= unlockDate, "Crescendo is still locked");
+    _;
   }
 
   function distributeAndWithdrawFund(
@@ -183,20 +193,16 @@ contract DCNTCrescendo is
     uint32[] calldata percentAllocations,
     uint32 distributorFee,
     address distributorAddress
-  ) public virtual requireSplit {
-    require(block.timestamp >= unlockDate, "Crescendo is still locked");
+  ) public virtual requireSplit onlyUnlocked {
     if (withdrawETH != 0) {
       super._transferETHToSplit();
-      bytes memory payload = abi.encodeWithSignature(
-        "distributeETH(address,address[],uint32[],uint32,address)",
+      ISplitMain(_getSplitMain()).distributeETH(
         _getSplitWallet(),
         accounts,
         percentAllocations,
         distributorFee,
         distributorAddress
       );
-      (bool success, ) = _getSplitMain().call(payload);
-      require(success);
     }
 
     for (uint256 i = 0; i < tokens.length; ++i) {
@@ -227,8 +233,8 @@ contract DCNTCrescendo is
     public
     virtual
     requireSplit
+    onlyUnlocked
   {
-    require(block.timestamp >= unlockDate, "Crescendo is still locked");
     if (transferETH != 0) {
       super._transferETHToSplit();
     }
@@ -263,6 +269,9 @@ contract DCNTCrescendo is
   }
 
   function uri(uint256) public view override returns (string memory) {
+    if (metadataRenderer != address(0)) {
+      return IMetadataRenderer(metadataRenderer).tokenURI(1);
+    }
     return _uri;
   }
 
@@ -272,6 +281,10 @@ contract DCNTCrescendo is
 
   function updateUri(string memory uri_) external onlyOwner {
     _setURI(uri_);
+  }
+
+  function setMetadataRenderer(address _metadataRenderer) external onlyOwner {
+    metadataRenderer = _metadataRenderer;
   }
 
   function royaltyInfo(uint256 tokenId, uint256 salePrice)

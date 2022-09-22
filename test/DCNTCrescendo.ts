@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNTCrescendo, theFuture, sortByAddress } from "../core";
+import { deployDCNTSDK, deployDCNTCrescendo, theFuture, sortByAddress, deployDCNTMetadataRenderer } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -27,6 +27,7 @@ describe("DCNTCrescendo", async () => {
       sdk: Contract,
       clone: Contract,
       crescendo: Contract,
+      metadataRenderer: Contract,
       split: any[];
 
   before(async () => {
@@ -521,6 +522,51 @@ describe("DCNTCrescendo", async () => {
       await freshNFT.createSplit(...split);
       const splitRoyalty = await freshNFT.royaltyInfo(0, initialPrice);
       expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
+    });
+  });
+
+  describe("metadataRenderer()", async () => {
+    before(async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        takeRateBPS,
+        unlockDate,
+        royaltyBPS
+      );
+
+      metadataRenderer = await deployDCNTMetadataRenderer();
+    });
+
+    it("should have metadataRenderer", async () => {
+      expect(await crescendo.metadataRenderer()).to.equal(ethers.constants.AddressZero);
+    });
+
+    it("should setMetadataRenderer", async () => {
+      await crescendo.setMetadataRenderer(metadataRenderer.address);
+      expect(await crescendo.metadataRenderer()).to.equal(metadataRenderer.address);
+    });
+
+    it("should revert if non-owner tries to setmetadataRenderer", async () => {
+      await expect(crescendo.connect(addr3).setMetadataRenderer(addr3.address)).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+
+    it("should use metadataRenderer for uri response", async () => {
+      expect(await crescendo.metadataRenderer()).to.equal(metadataRenderer.address);
+      const nullMetadataRendererURI = "data:application/json;base64,eyJuYW1lIjogIiAxIiwgImRlc2NyaXB0aW9uIjogIiIsICJwcm9wZXJ0aWVzIjogeyJudW1iZXIiOiAxLCAibmFtZSI6ICIifX0="
+      expect(await crescendo.uri(0)).to.equal(nullMetadataRendererURI);
+    });
+
+    it("should remove metadata renderer", async () => {
+      expect(await crescendo.setMetadataRenderer(ethers.constants.AddressZero))
+      expect(await crescendo.metadataRenderer()).to.equal(ethers.constants.AddressZero);
+      expect(await crescendo.uri(0)).to.equal(uri);
     });
   });
 });

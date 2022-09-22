@@ -38,16 +38,13 @@ abstract contract Splits is Ownable {
     address distributorAddress
   ) public virtual requireSplit {
     _transferETHToSplit();
-    bytes memory payload = abi.encodeWithSignature(
-      "distributeETH(address,address[],uint32[],uint32,address)",
+    ISplitMain(_getSplitMain()).distributeETH(
       _getSplitWallet(),
       accounts,
       percentAllocations,
       distributorFee,
       distributorAddress
     );
-    (bool success, ) = _getSplitMain().call(payload);
-    require(success);
   }
 
   function distributeERC20(

@@ -7,7 +7,6 @@ import { deployDCNTSDK, deployDCNTCrescendo, theFuture, sortByAddress, deployDCN
 
 const name = 'Decent';
 const symbol = 'DCNT';
-const uri = 'http://localhost/{id}.json'
 const initialPrice = ethers.utils.parseEther('0.05');
 const step1 = ethers.utils.parseEther("0.005");
 const step2 = ethers.utils.parseEther("0.05");
@@ -16,6 +15,8 @@ const takeRateBPS = 15_00;
 const unlockDate = theFuture.time();
 const royaltyBPS = 10_00;
 const bps = 100_00;
+const metadataRendererInit = null;
+const metadataURI = 'http://localhost/{id}.json';
 
 const calculateCurvedBurnReturn = (price: BigNumber) => price.mul(bps-takeRateBPS).div(bps);
 
@@ -37,14 +38,15 @@ describe("DCNTCrescendo", async () => {
       sdk,
       name,
       symbol,
-      uri,
       initialPrice,
       step1,
       step2,
       hitch,
       takeRateBPS,
       unlockDate,
-      royaltyBPS
+      royaltyBPS,
+      metadataURI,
+      metadataRendererInit
     );
   });
 
@@ -57,7 +59,7 @@ describe("DCNTCrescendo", async () => {
       // public state
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
-      expect(await clone.uri(0)).to.equal(uri);
+      expect(await clone.uri(0)).to.equal(metadataURI);
 
       // private state
       const key = ethers.utils.defaultAbiCoder.encode(["uint256","uint256"],[0,12]);
@@ -85,14 +87,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 
@@ -133,14 +136,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await crescendo.flipSaleState();
@@ -197,14 +201,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 
@@ -257,14 +262,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -299,14 +305,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         theFuture.time() + theFuture.oneDay,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await crescendo.flipSaleState();
@@ -322,14 +329,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -355,14 +363,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -377,14 +386,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -409,14 +419,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -429,14 +440,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         theFuture.time() + theFuture.oneDay,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await crescendo.flipSaleState();
@@ -463,14 +475,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         theFuture.time() + theFuture.oneDay,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -503,14 +516,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await freshNFT.flipSaleState();
@@ -531,14 +545,15 @@ describe("DCNTCrescendo", async () => {
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       metadataRenderer = await deployDCNTMetadataRenderer();
@@ -559,14 +574,14 @@ describe("DCNTCrescendo", async () => {
 
     it("should use metadataRenderer for uri response", async () => {
       expect(await crescendo.metadataRenderer()).to.equal(metadataRenderer.address);
-      const nullMetadataRendererURI = "data:application/json;base64,eyJuYW1lIjogIiAxIiwgImRlc2NyaXB0aW9uIjogIiIsICJwcm9wZXJ0aWVzIjogeyJudW1iZXIiOiAxLCAibmFtZSI6ICIifX0="
+      const nullMetadataRendererURI = "data:application/json;base64,eyJuYW1lIjogIkRlY2VudCAxIiwgImRlc2NyaXB0aW9uIjogIiIsICJwcm9wZXJ0aWVzIjogeyJudW1iZXIiOiAxLCAibmFtZSI6ICJEZWNlbnQifX0=";
       expect(await crescendo.uri(0)).to.equal(nullMetadataRendererURI);
     });
 
     it("should remove metadata renderer", async () => {
       expect(await crescendo.setMetadataRenderer(ethers.constants.AddressZero))
       expect(await crescendo.metadataRenderer()).to.equal(ethers.constants.AddressZero);
-      expect(await crescendo.uri(0)).to.equal(uri);
+      expect(await crescendo.uri(0)).to.equal(metadataURI);
     });
   });
 });

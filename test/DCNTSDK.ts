@@ -138,19 +138,22 @@ describe("DCNTSDK", async () => {
       const takeRateBPS = 15_00;
       const royaltyBPS = 10_00;
       const unlockDate = theFuture.time();
+      const metadataURI = 'http://localhost/metadata/';
+      const metadataRendererInit = null;
 
       clone = await deployDCNTCrescendo(
         sdk,
         name,
         symbol,
-        uri,
         initialPrice,
         step1,
         step2,
         hitch,
         takeRateBPS,
         unlockDate,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 

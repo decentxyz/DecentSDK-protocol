@@ -85,7 +85,13 @@ contract DCNTSDK is Ownable {
     clone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,(string,string,uint256,uint256,uint256,uint256),(string,bytes),address,address)",
+        "initialize("
+          "address,"
+          "(string,string,uint256,uint256,uint256,uint256),"
+          "(string,bytes),"
+          "address,"
+          "address"
+        ")",
         msg.sender,
         _editionConfig,
         _metadataConfig,
@@ -106,7 +112,13 @@ contract DCNTSDK is Ownable {
     clone = Clones.clone(DCNT4907AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,(string,string,uint256,uint256,uint256,uint256),(string,bytes),address,address)",
+        "initialize("
+          "address,"
+          "(string,string,uint256,uint256,uint256,uint256),"
+          "(string,bytes),"
+          "address,"
+          "address"
+        ")",
         msg.sender,
         _editionConfig,
         _metadataConfig,
@@ -121,22 +133,23 @@ contract DCNTSDK is Ownable {
 
   // deploy and initialize a Crescendo clone
   function deployDCNTCrescendo(
-    string memory _name,
-    string memory _symbol,
-    string memory _uri,
     CrescendoConfig memory _config,
-    uint256 _royaltyBPS
+    MetadataConfig memory _metadataConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNTCrescendoImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,string,(uint256,uint256,uint256,uint256,uint256,uint256),uint256,address)",
+        "initialize("
+          "address,"
+          "(string,string,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+          "(string,bytes),"
+          "address,"
+          "address"
+        ")",
         msg.sender,
-        _name,
-        _symbol,
-        _uri,
         _config,
-        _royaltyBPS,
+        _metadataConfig,
+        metadataRenderer,
         SplitMain
       )
     );

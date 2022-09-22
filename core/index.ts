@@ -187,7 +187,6 @@ export const deployDCNTCrescendo = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
-  uri: string,
   initialPrice: BigNumber,
   step1: BigNumber,
   step2: BigNumber,
@@ -195,20 +194,36 @@ export const deployDCNTCrescendo = async (
   takeRateBPS: number,
   unlockDate: number,
   royaltyBPS: number,
+  metadataURI: string,
+  metadata: MetadataInit | null
 ) => {
+  const metadataRendererInit = metadata != null
+    ? ethers.utils.AbiCoder.prototype.encode(
+        ['string', 'string', 'string'],
+        [
+          metadata.description,
+          metadata.imageURI,
+          metadata.animationURI
+        ]
+      )
+    : [];
+
   const deployTx = await decentSDK.deployDCNTCrescendo(
-    name,
-    symbol,
-    uri,
     {
+      name,
+      symbol,
       initialPrice,
       step1,
       step2,
       hitch,
       takeRateBPS,
       unlockDate,
+      royaltyBPS,
     },
-    royaltyBPS
+    {
+      metadataURI,
+      metadataRendererInit,
+    }
   );
 
   const receipt = await deployTx.wait();

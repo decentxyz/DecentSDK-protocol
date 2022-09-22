@@ -23,6 +23,7 @@ import "./interfaces/IBondingCurve.sol";
 import "./interfaces/IMetadataRenderer.sol";
 
 import "./storage/CrescendoConfig.sol";
+import "./storage/MetadataConfig.sol";
 import "./utils/Splits.sol";
 
 /// ========= Bonding Token =========
@@ -73,11 +74,12 @@ contract DCNTCrescendo is
 
   function initialize(
     address _owner,
-    string memory name_,
-    string memory symbol_,
-    string memory uri_,
+    // string memory name_,
+    // string memory symbol_,
+    // string memory uri_,
     CrescendoConfig memory _config,
-    uint256 _royaltyBPS,
+    MetadataConfig memory _metadataConfig,
+    address _metadataRenderer,
     address _splitMain
   ) public initializer {
     _transferOwnership(_owner);
@@ -87,11 +89,22 @@ contract DCNTCrescendo is
     hitch = _config.hitch;
     takeRateBPS = _config.takeRateBPS;
     unlockDate = _config.unlockDate;
-    _name = name_;
-    _symbol = symbol_;
-    _setURI(uri_);
-    royaltyBPS = _royaltyBPS;
+    _name = _config.name;
+    _symbol = _config.symbol;
+    royaltyBPS = _config.royaltyBPS;
     splitMain = _splitMain;
+
+    if (
+      _metadataRenderer != address(0) &&
+      _metadataConfig.metadataRendererInit.length > 0
+    ) {
+      metadataRenderer = _metadataRenderer;
+      IMetadataRenderer(_metadataRenderer).initializeWithData(
+        _metadataConfig.metadataRendererInit
+      );
+    } else {
+      _setURI(_metadataConfig.metadataURI);
+    }
   }
 
   function calculateCurvedMintReturn(uint256 amount, uint256 id)

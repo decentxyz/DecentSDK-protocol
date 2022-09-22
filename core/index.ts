@@ -61,7 +61,6 @@ export const deployDCNTMetadataRenderer = async (
 ) => {
   implementations = implementations ?? await deployImplementations();
   const sharedNFTLogic = await deploySharedNFTLogic();
-  console.log("SharedNFTLogic deployed to: ", sharedNFTLogic.address);
   const decentMetadataRendererFactory = await ethers.getContractFactory('DCNTMetadataRenderer');
   const decentMetadataRenderer = await decentMetadataRendererFactory.deploy(sharedNFTLogic.address);
   return await decentMetadataRenderer.deployed();

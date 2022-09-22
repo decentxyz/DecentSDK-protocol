@@ -19,7 +19,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./interfaces/IDCNTRegistry.sol";
-import "./utils/CrescendoConfig.sol";
+import "./storage/EditionConfig.sol";
+import "./storage/MetadataConfig.sol";
+import "./storage/CrescendoConfig.sol";
 
 contract DCNTSDK is Ownable {
 
@@ -33,6 +35,9 @@ contract DCNTSDK is Ownable {
   address public DCNTCrescendoImplementation;
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
+
+  /// @notice address of the metadata renderer
+  address public metadataRenderer;
 
   /// @notice address of the associated registry
   address public contractRegistry;
@@ -58,6 +63,7 @@ contract DCNTSDK is Ownable {
     address _DCNTCrescendoImplementation,
     address _DCNTVaultImplementation,
     address _DCNTStakingImplementation,
+    address _metadataRenderer,
     address _contractRegistry,
     address _SplitMain
   ) {
@@ -66,6 +72,7 @@ contract DCNTSDK is Ownable {
     DCNTCrescendoImplementation = _DCNTCrescendoImplementation;
     DCNTVaultImplementation = _DCNTVaultImplementation;
     DCNTStakingImplementation = _DCNTStakingImplementation;
+    metadataRenderer = _metadataRenderer;
     contractRegistry = _contractRegistry;
     SplitMain = _SplitMain;
   }
@@ -74,24 +81,17 @@ contract DCNTSDK is Ownable {
 
   // deploy and initialize an erc721a clone
   function deployDCNT721A(
-    string memory _name,
-    string memory _symbol,
-    uint256 _maxTokens,
-    uint256 _tokenPrice,
-    uint256 _maxTokenPurchase,
-    uint256 _royaltyBPS
+    EditionConfig memory _editionConfig,
+    MetadataConfig memory _metadataConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256,uint256,address)",
+        "initialize(address,(string,string,uint256,uint256,uint256,uint256),(string,bytes),address,address)",
         msg.sender,
-        _name,
-        _symbol,
-        _maxTokens,
-        _tokenPrice,
-        _maxTokenPurchase,
-        _royaltyBPS,
+        _editionConfig,
+        _metadataConfig,
+        metadataRenderer,
         SplitMain
       )
     );
@@ -102,24 +102,17 @@ contract DCNTSDK is Ownable {
 
   // deploy and initialize an erc4907a clone
   function deployDCNT4907A(
-    string memory _name,
-    string memory _symbol,
-    uint256 _maxTokens,
-    uint256 _tokenPrice,
-    uint256 _maxTokenPurchase,
-    uint256 _royaltyBPS
+    EditionConfig memory _editionConfig,
+    MetadataConfig memory _metadataConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNT4907AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
-        "initialize(address,string,string,uint256,uint256,uint256,uint256,address)",
+        "initialize(address,(string,string,uint256,uint256,uint256,uint256),(string,bytes),address,address)",
         msg.sender,
-        _name,
-        _symbol,
-        _maxTokens,
-        _tokenPrice,
-        _maxTokenPurchase,
-        _royaltyBPS,
+        _editionConfig,
+        _metadataConfig,
+        metadataRenderer,
         SplitMain
       )
     );

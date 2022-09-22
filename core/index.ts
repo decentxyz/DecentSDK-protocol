@@ -35,12 +35,20 @@ export type Implementations = {
   DCNTStaking: Contract;
 };
 
+export type MetadataInit = {
+  description: string;
+  imageURI: string;
+  animationURI: string;
+}
+
 export const deployDCNTSDK = async (
   implementations?: Implementations,
+  metadataRenderer?: Contract,
   contractRegistry?: Contract,
   splitMain?: Contract,
 ) => {
   implementations = implementations ?? await deployImplementations();
+  metadataRenderer = metadataRenderer ?? await deployDCNTMetadataRenderer();
   contractRegistry = contractRegistry ?? await deployContract('DCNTRegistry');
   splitMain = splitMain ?? await deployContract('SplitMain');
   const decentSDKFactory = await ethers.getContractFactory('DCNTSDK');
@@ -50,29 +58,17 @@ export const deployDCNTSDK = async (
     implementations.DCNTCrescendo.address,
     implementations.DCNTVault.address,
     implementations.DCNTStaking.address,
+    metadataRenderer.address,
     contractRegistry.address,
     splitMain.address
   );
   return await decentSDK.deployed();
 }
 
-export const deployDCNTMetadataRenderer = async (
-  implementations?: Implementations
-) => {
-  implementations = implementations ?? await deployImplementations();
-  const sharedNFTLogic = await deploySharedNFTLogic();
-  console.log("SharedNFTLogic deployed to: ", sharedNFTLogic.address);
+export const deployDCNTMetadataRenderer = async () => {
+  const sharedNFTLogic = await deployContract('SharedNFTLogic');
   const decentMetadataRendererFactory = await ethers.getContractFactory('DCNTMetadataRenderer');
   const decentMetadataRenderer = await decentMetadataRendererFactory.deploy(sharedNFTLogic.address);
-  return await decentMetadataRenderer.deployed();
-}
-
-export const deploySharedNFTLogic = async (
-  implementations?: Implementations
-) => {
-  implementations = implementations ?? await deployImplementations();
-  const decentMetadataRendererFactory = await ethers.getContractFactory('SharedNFTLogic');
-  const decentMetadataRenderer = await decentMetadataRendererFactory.deploy();
   return await decentMetadataRenderer.deployed();
 }
 
@@ -110,15 +106,34 @@ export const deployDCNT721A = async (
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
-  royaltyBPS: number
+  royaltyBPS: number,
+  metadataURI: string,
+  metadata: MetadataInit | null
 ) => {
+  const metadataRendererInit = metadata != null
+    ? ethers.utils.AbiCoder.prototype.encode(
+        ['string', 'string', 'string'],
+        [
+          metadata.description,
+          metadata.imageURI,
+          metadata.animationURI
+        ]
+      )
+    : [];
+
   const deployTx = await decentSDK.deployDCNT721A(
-    name,
-    symbol,
-    maxTokens,
-    tokenPrice,
-    maxTokenPurchase,
-    royaltyBPS
+    {
+      name,
+      symbol,
+      maxTokens,
+      tokenPrice,
+      maxTokenPurchase,
+      royaltyBPS,
+    },
+    {
+      metadataURI,
+      metadataRendererInit,
+    }
   );
 
   const receipt = await deployTx.wait();
@@ -133,15 +148,34 @@ export const deployDCNT4907A = async (
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
-  royaltyBPS: number
+  royaltyBPS: number,
+  metadataURI: string,
+  metadata: MetadataInit | null
 ) => {
+  const metadataRendererInit = metadata != null
+    ? ethers.utils.AbiCoder.prototype.encode(
+        ['string', 'string', 'string'],
+        [
+          metadata.description,
+          metadata.imageURI,
+          metadata.animationURI
+        ]
+      )
+    : [];
+
   const deployTx = await decentSDK.deployDCNT4907A(
-    name,
-    symbol,
-    maxTokens,
-    tokenPrice,
-    maxTokenPurchase,
-    royaltyBPS
+    {
+      name,
+      symbol,
+      maxTokens,
+      tokenPrice,
+      maxTokenPurchase,
+      royaltyBPS,
+    },
+    {
+      metadataURI,
+      metadataRendererInit,
+    }
   );
 
   const receipt = await deployTx.wait();
@@ -279,3 +313,9 @@ export const deployMockERC721 = async () => {
 export const sortByAddress = (arr: any[]) => arr.sort((a: any, b: any) => {
   return a.address < b.address ? -1 : 1;
 });
+
+export const base64decode = (data: string) => {
+  let decoded = data.replace('data:application/json;base64,','');
+  decoded = Buffer.from(decoded, 'base64').toString('ascii');
+  return decoded;
+}

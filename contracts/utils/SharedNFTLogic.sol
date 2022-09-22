@@ -38,12 +38,14 @@ contract SharedNFTLogic is IOnChainMetadata {
 
     /// Generate edition metadata from storage information as base64-json blob
     /// Combines the media data and metadata
+    /// @param name the token name
     /// @param tokenOfEdition Token ID for specific token
     /// @param songMetadata song metadata
     /// @param projectMetadata project metadata
     /// @param credits The credits of the track
     /// @param tags The tags of the track
     function createMetadataEdition(
+        string memory name,
         uint256 tokenOfEdition,
         SongMetadata memory songMetadata,
         ProjectMetadata memory projectMetadata,
@@ -51,7 +53,7 @@ contract SharedNFTLogic is IOnChainMetadata {
         string[] memory tags
     ) external pure returns (string memory) {
         bytes memory json = createMetadataJSON(
-            songMetadata.songPublishingData.title,
+            name,
             tokenOfEdition,
             songMetadata,
             projectMetadata,
@@ -82,7 +84,7 @@ contract SharedNFTLogic is IOnChainMetadata {
         if (isMusicNft) {
             return
                 createMusicMetadataJSON(
-                    name,
+                    songMetadata.songPublishingData.title,
                     tokenOfEdition,
                     songMetadata,
                     projectMetadata,

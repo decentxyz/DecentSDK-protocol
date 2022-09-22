@@ -21,7 +21,7 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IBondingCurve.sol";
-import "./utils/CrescendoConfig.sol";
+import "./storage/CrescendoConfig.sol";
 import "./utils/Splits.sol";
 
 /// ========= Bonding Token =========

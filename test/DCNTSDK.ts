@@ -11,6 +11,7 @@ import {
   deployDCNTCrescendo,
   deployDCNTVault,
   deployDCNTStaking,
+  deployDCNTMetadataRenderer,
   deployContract,
   theFuture
 } from "../core";
@@ -18,6 +19,7 @@ import {
 describe("DCNTSDK", async () => {
   let owner: SignerWithAddress,
       implementations: any,
+      metadataRenderer: Contract,
       contractRegistry: Contract,
       sdk: Contract,
       clone: Contract;
@@ -25,8 +27,9 @@ describe("DCNTSDK", async () => {
   before(async () => {
     [owner] = await ethers.getSigners();
     implementations = await deployImplementations();
+    metadataRenderer = await deployDCNTMetadataRenderer();
     contractRegistry = await deployContract('DCNTRegistry');
-    sdk = await deployDCNTSDK(implementations, contractRegistry);
+    sdk = await deployDCNTSDK(implementations, metadataRenderer, contractRegistry);
   });
 
   describe("constructor()", async () => {
@@ -63,6 +66,8 @@ describe("DCNTSDK", async () => {
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
       const royaltyBPS = 1000;
+      const metadataURI = 'http://localhost/metadata/';
+      const metadataRendererInit = null;
 
       clone = await deployDCNT721A(
         sdk,
@@ -71,7 +76,9 @@ describe("DCNTSDK", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 
@@ -93,6 +100,8 @@ describe("DCNTSDK", async () => {
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
       const royaltyBPS = 10_00;
+      const metadataURI = 'http://localhost/metadata/';
+      const metadataRendererInit = null;
 
       clone = await deployDCNT4907A(
         sdk,
@@ -101,7 +110,9 @@ describe("DCNTSDK", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 

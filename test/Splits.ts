@@ -11,6 +11,8 @@ const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('1');
 const maxTokenPurchase = 2;
 const royaltyBPS = 10_000;
+const metadataURI = "http://localhost/metadata/";
+const metadataRendererInit = null;
 
 const scale = 1_000_000;
 const bigPercent = (num: BigNumber, perc: number) => num.div(100).mul(perc);
@@ -37,7 +39,9 @@ describe("Splits", async () => {
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
-      royaltyBPS
+      royaltyBPS,
+      metadataURI,
+      metadataRendererInit
     );
 
     const payouts = sortByAddress([
@@ -76,7 +80,9 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -105,7 +111,9 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -139,7 +147,9 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -159,7 +169,9 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 
@@ -222,7 +234,9 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -254,7 +268,9 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(

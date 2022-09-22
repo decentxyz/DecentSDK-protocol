@@ -22,12 +22,14 @@ import "../interfaces/IOnChainMetadata.sol";
 contract ISharedNFTLogic is IOnChainMetadata {
     /// Generate edition metadata from storage information as base64-json blob
     /// Combines the media data and metadata
+    /// @param name the token name
     /// @param tokenOfEdition Token ID for specific token
     /// @param songMetadata song metadata
     /// @param projectMetadata project metadata
     /// @param credits The credits of the track
     /// @param tags The tags of the track
     function createMetadataEdition(
+        string memory name,
         uint256 tokenOfEdition,
         SongMetadata memory songMetadata,
         ProjectMetadata memory projectMetadata,

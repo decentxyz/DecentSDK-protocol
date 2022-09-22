@@ -18,6 +18,7 @@ import "./interfaces/IMetadataRenderer.sol";
 import {MusicMetadata} from "./utils/MusicMetadata.sol";
 import {Credits} from "./utils/Credits.sol";
 import {ISharedNFTLogic} from "./interfaces/ISharedNFTLogic.sol";
+import 'erc721a/contracts/IERC721A.sol';
 
 /// @notice DCNTMetadataRenderer for editions support
 contract DCNTMetadataRenderer is IMetadataRenderer, MusicMetadata, Credits {
@@ -130,6 +131,7 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MusicMetadata, Credits {
     {
         return
             sharedNFTLogic.createMetadataEdition({
+                name: IERC721A(target).name(),
                 tokenOfEdition: tokenId,
                 songMetadata: songMetadatas[target],
                 projectMetadata: projectMetadatas[target],

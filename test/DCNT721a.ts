@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT721A, sortByAddress } from "../core";
+import { deployDCNTSDK, deployDCNT721A, sortByAddress, base64decode } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -11,6 +11,12 @@ const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
 const royaltyBPS = 10_00;
+const metadataRendererInit = {
+  description: "This is the Decent unit test NFT",
+  imageURI: "http://localhost/image.jpg",
+  animationURI: "http://localhost/song.mp3",
+};
+const metadataURI = "http://localhost/metadata/";
 
 describe("DCNT721A", async () => {
   let owner: SignerWithAddress,
@@ -21,6 +27,7 @@ describe("DCNT721A", async () => {
       sdk: Contract,
       clone: Contract,
       nft: Contract,
+      metadataRenderer: Contract,
       split: any[];
 
   let overrides = { value: ethers.utils.parseEther("0.01") };
@@ -31,6 +38,7 @@ describe("DCNT721A", async () => {
     before(async () => {
       [owner] = await ethers.getSigners();
       sdk = await deployDCNTSDK();
+      metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', sdk.metadataRenderer());
       clone = await deployDCNT721A(
         sdk,
         name,
@@ -38,7 +46,9 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 
@@ -53,6 +63,31 @@ describe("DCNT721A", async () => {
       expect(await clone.tokenPrice()).to.equal(tokenPrice);
       expect(await clone.maxTokenPurchase()).to.equal(maxTokenPurchase);
     });
+
+    it("should initialize the edition with the metadata renderer", async () => {
+      const response = await metadataRenderer.tokenURITarget(0, clone.address);
+      let decoded = base64decode(response);
+      const meta = JSON.parse(decoded);
+      expect(meta.name).to.equal(`${name} 0`);
+    });
+
+    it("should optionally set the base token URI", async () => {
+      clone = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        royaltyBPS,
+        metadataURI,
+        null
+      );
+
+      await clone.flipSaleState();
+      await clone.mint(1, { value: tokenPrice });
+      expect(await clone.tokenURI(0)).to.equal(`${metadataURI}0`);
+    });
   });
 
   describe("mint()", async () => {
@@ -66,7 +101,9 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
     });
 
@@ -108,6 +145,19 @@ describe("DCNT721A", async () => {
       await expect(nft.connect(addr2).flipSaleState()).to.be.revertedWith(
         'Ownable: caller is not the owner'
       );
+    });
+  });
+
+  describe("tokenURI()", async () => {
+    it("should return basic on chain matadata rendered as a base64 url", async () => {
+      const response = await nft.tokenURI(0);
+      const decoded = base64decode(response);
+      const meta = JSON.parse(decoded);
+
+      expect(meta.name).to.equal(`${name} 0`);
+      expect(meta.description).to.equal(metadataRendererInit.description);
+      expect(meta.image).to.equal(`${metadataRendererInit.imageURI}?id=0`);
+      expect(meta.animation_url).to.equal(`${metadataRendererInit.animationURI}?id=0`);
     });
   });
 
@@ -153,7 +203,9 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
       await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
@@ -181,7 +233,9 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await expect(
@@ -210,7 +264,9 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
-        royaltyBPS
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
       );
 
       await freshNFT.flipSaleState();

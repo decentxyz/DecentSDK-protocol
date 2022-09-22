@@ -19,6 +19,8 @@ import "./erc721a/ERC721A.sol";
 import "./interfaces/IMetadataRenderer.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./storage/EditionConfig.sol";
+import "./storage/MetadataConfig.sol";
 import "./utils/Splits.sol";
 
 /// @title template NFT contract
@@ -50,23 +52,27 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
 
     function initialize(
         address _owner,
-        string memory name,
-        string memory symbol,
-        uint256 _maxTokens,
-        uint256 _tokenPrice,
-        uint256 _maxTokenPurchase,
-        uint256 _royaltyBPS,
+        EditionConfig memory _editionConfig,
+        MetadataConfig memory _metadataConfig,
+        address _metadataRenderer,
         address _splitMain
     ) public initializer {
         _transferOwnership(_owner);
-        _name = name;
-        _symbol = symbol;
+        _name = _editionConfig.name;
+        _symbol = _editionConfig.symbol;
         _currentIndex = _startTokenId();
-        MAX_TOKENS = _maxTokens;
-        tokenPrice = _tokenPrice;
-        maxTokenPurchase = _maxTokenPurchase;
-        royaltyBPS = _royaltyBPS;
+        MAX_TOKENS = _editionConfig.maxTokens;
+        tokenPrice = _editionConfig.tokenPrice;
+        maxTokenPurchase = _editionConfig.maxTokenPurchase;
+        royaltyBPS = _editionConfig.royaltyBPS;
         splitMain = _splitMain;
+
+        if ( _metadataRenderer != address(0) && _metadataConfig.metadataRendererInit.length > 0 ) {
+            metadataRenderer = _metadataRenderer;
+            IMetadataRenderer(_metadataRenderer).initializeWithData(_metadataConfig.metadataRendererInit);
+        } else {
+            baseURI = _metadataConfig.metadataURI;
+        }
     }
 
     function mint(uint256 numberOfTokens) external payable {

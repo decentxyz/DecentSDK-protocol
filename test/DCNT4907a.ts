@@ -11,6 +11,8 @@ const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
 const royaltyBPS = 10_00;
+const metadataURI = "http://localhost/metadata/";
+const metadataRendererInit = null;
 
 describe("DCNT4907A", async () => {
   let owner: SignerWithAddress,
@@ -33,7 +35,9 @@ describe("DCNT4907A", async () => {
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
-      royaltyBPS
+      royaltyBPS,
+      metadataURI,
+      metadataRendererInit
     );
   });
 

@@ -1,4 +1,7 @@
 {
+  "prettier": {
+
+  },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.2",
     "dotenv": "^16.0.1",
@@ -7,6 +10,8 @@
     "solmate": "^6.5.0"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^1.0.2"
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "prettier": "^2.7.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.24"
   }
 }

@@ -550,9 +550,8 @@ describe("DCNTCrescendo", async () => {
       expect(await crescendo.metadataRenderer()).to.equal(addr2.address);
     });
 
-    // it("should revert if non-owner tries to setmetadataRenderer", async () => {
-    //   await crescendo.setMetadataRenderer(addr2.address);
-    //   expect(await crescendo.metadataRenderer()).to.equal(ethers.constants.AddressZero);
-    // });
+    it("should revert if non-owner tries to setmetadataRenderer", async () => {
+      await expect(crescendo.connect(addr3).setMetadataRenderer(addr3.address)).to.be.revertedWith('Ownable: caller is not the owner');
+    });
   });
 });

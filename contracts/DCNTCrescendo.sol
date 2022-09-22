@@ -27,8 +27,8 @@ import "./utils/Splits.sol";
 
 /// ========= Bonding Token =========
 
-contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
-{
+contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits {
+  
     // Token name
     string private _name;
 

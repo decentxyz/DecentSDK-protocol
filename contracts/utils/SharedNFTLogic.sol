@@ -361,11 +361,10 @@ contract SharedNFTLogic is IOnChainMetadata {
             );
     }
 
-    function _formatPublishingData(PublishingData memory _data)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function _formatPublishingData(
+        PublishingData memory _data,
+        string memory artistName
+    ) internal pure returns (bytes memory) {
         return
             abi.encodePacked(
                 '"title": "',
@@ -381,7 +380,7 @@ contract SharedNFTLogic is IOnChainMetadata {
                 '", "originalReleaseDate": "',
                 _data.releaseDate,
                 '", "name": "',
-                _data.title,
+                _data.name,
                 '"'
             );
     }

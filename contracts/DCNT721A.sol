@@ -103,6 +103,23 @@ contract DCNT721A is ERC721A, Initializable, Ownable {
         metadataRenderer = _metadataRenderer;
     }
 
+    function setMetadataRendererAndBulkUpdate(
+        address _metadataRenderer,
+        IMetadataRenderer.SongMetadata calldata _songMetadata,
+        IMetadataRenderer.ProjectMetadata calldata _projectMetadata,
+        string[] calldata _tags,
+        IMetadataRenderer.Credit[] calldata _credits
+    ) external onlyOwner {
+        metadataRenderer = _metadataRenderer;
+        IMetadataRenderer(_metadataRenderer).bulkUpdate(
+            address(this),
+            _songMetadata,
+            _projectMetadata,
+            _tags,
+            _credits
+        );
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view

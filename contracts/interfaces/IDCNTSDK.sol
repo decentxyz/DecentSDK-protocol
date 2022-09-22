@@ -2,14 +2,19 @@
 pragma solidity ^0.8.0;
 
 interface IDCNTSDK {
-
   /// @notice implementation addresses for base contracts
   function DCNT721AImplementation() external returns (address);
+
   function DCNT4907AImplementation() external returns (address);
+
   function DCNTCrescendoImplementation() external returns (address);
+
   function DCNTVaultImplementation() external returns (address);
+
   function DCNTStakingImplementation() external returns (address);
+
   function contractRegistry() external returns (address);
+
   function SplitMain() external returns (address);
 
   /// ============ Functions ============

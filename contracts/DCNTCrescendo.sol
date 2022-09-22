@@ -13,7 +13,6 @@ pragma solidity ^0.8.0;
 
 */
 
-
 /// ============ Imports ============
 
 import "solmate/src/tokens/ERC1155.sol";
@@ -26,8 +25,13 @@ import "./utils/Splits.sol";
 
 /// ========= Bonding Token =========
 
-contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits {
-
+contract DCNTCrescendo is
+  IBondingCurve,
+  ERC1155,
+  Initializable,
+  Ownable,
+  Splits
+{
   // Token name
   string private _name;
 
@@ -70,10 +74,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     CrescendoConfig memory _config,
     uint256 _royaltyBPS,
     address _splitMain
-  )
-    public
-    initializer
-  {
+  ) public initializer {
     _transferOwnership(_owner);
     _currentPrice[0] = _config.initialPrice;
     step1 = _config.step1;
@@ -88,25 +89,37 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     splitMain = _splitMain;
   }
 
-  function calculateCurvedMintReturn(uint256 amount, uint256 id) public view override returns (uint256) {
+  function calculateCurvedMintReturn(uint256 amount, uint256 id)
+    public
+    view
+    override
+    returns (uint256)
+  {
     require(amount == 1, "max amount is 1");
     return _currentPrice[id];
   }
 
-  function calculateCurvedBurnReturn(uint256 amount, uint256 id) public view override returns (uint256) {
+  function calculateCurvedBurnReturn(uint256 amount, uint256 id)
+    public
+    view
+    override
+    returns (uint256)
+  {
     require(amount == 1, "max amount is 1");
-    return (bps-takeRateBPS)*_currentPrice[id]/bps;
+    return ((bps - takeRateBPS) * _currentPrice[id]) / bps;
   }
 
   function buy(uint256 id) external payable {
     require(saleIsActive, "Sale must be active to buy");
-    uint256 price = calculateCurvedMintReturn(1,id);
+    uint256 price = calculateCurvedMintReturn(1, id);
     require(msg.value >= price, "Insufficient funds");
     require(id == 0, "currently only one edition");
 
     // allow for slippage
     if (msg.value - price > 0) {
-      (bool success, ) = payable(msg.sender).call{value: (msg.value - price)}("");
+      (bool success, ) = payable(msg.sender).call{value: (msg.value - price)}(
+        ""
+      );
       require(success, "Failed to send ether");
     }
 
@@ -115,7 +128,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     emit CurvedMint(msg.sender, 1, id, price);
 
     // update supply / price
-    if (totalSupply(id) < hitch){
+    if (totalSupply(id) < hitch) {
       _currentPrice[id] += step1;
     } else {
       _currentPrice[id] += step2;
@@ -138,7 +151,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     emit CurvedBurn(msg.sender, 1, id, price);
 
     // update supply / price
-    if (totalSupply(id) < hitch){
+    if (totalSupply(id) < hitch) {
       _currentPrice[id] -= step1;
     } else {
       _currentPrice[id] -= step2;
@@ -154,8 +167,11 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
   }
 
   function withdrawFund() external onlyOwner {
-    require(block.timestamp >= unlockDate, 'Crescendo is still locked');
-    require(_getSplitWallet() == address(0), "Cannot withdraw with an active split");
+    require(block.timestamp >= unlockDate, "Crescendo is still locked");
+    require(
+      _getSplitWallet() == address(0),
+      "Cannot withdraw with an active split"
+    );
     payable(msg.sender).transfer(address(this).balance);
   }
 
@@ -168,7 +184,7 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     uint32 distributorFee,
     address distributorAddress
   ) public virtual requireSplit {
-    require(block.timestamp >= unlockDate, 'Crescendo is still locked');
+    require(block.timestamp >= unlockDate, "Crescendo is still locked");
     if (withdrawETH != 0) {
       super._transferETHToSplit();
       bytes memory payload = abi.encodeWithSignature(
@@ -197,18 +213,22 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
   }
 
   function withdraw() external onlyOwner {
-    require(_getSplitWallet() == address(0), "Cannot withdraw with an active split");
+    require(
+      _getSplitWallet() == address(0),
+      "Cannot withdraw with an active split"
+    );
     uint256 toWithdraw = liquidity() - totalWithdrawn;
     totalWithdrawn += toWithdraw;
     (bool success, ) = payable(msg.sender).call{value: toWithdraw}("");
     require(success, "Failed to send ether");
   }
 
-  function transferFundToSplit(
-    uint256 transferETH,
-    ERC20[] memory tokens
-  ) public virtual requireSplit {
-    require(block.timestamp >= unlockDate, 'Crescendo is still locked');
+  function transferFundToSplit(uint256 transferETH, ERC20[] memory tokens)
+    public
+    virtual
+    requireSplit
+  {
+    require(block.timestamp >= unlockDate, "Crescendo is still locked");
     if (transferETH != 0) {
       super._transferETHToSplit();
     }
@@ -221,48 +241,47 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
   function _transferETHToSplit() internal override {
     uint256 toWithdraw = liquidity() - totalWithdrawn;
     totalWithdrawn += toWithdraw;
-    (bool success, ) = _getSplitWallet().call{ value: toWithdraw }("");
+    (bool success, ) = _getSplitWallet().call{value: toWithdraw}("");
     require(success, "Could not transfer ETH to split");
   }
 
   function liquidity() public view returns (uint256) {
-    return takeRateBPS*(address(this).balance + totalWithdrawn) / bps;
+    return (takeRateBPS * (address(this).balance + totalWithdrawn)) / bps;
   }
 
   function reserveAmt() public view returns (uint256) {
-    return (bps-takeRateBPS)*(address(this).balance + totalWithdrawn) / bps;
+    return
+      ((bps - takeRateBPS) * (address(this).balance + totalWithdrawn)) / bps;
   }
 
   function name() external view returns (string memory) {
-      return _name;
+    return _name;
   }
 
   function symbol() external view returns (string memory) {
-      return _symbol;
+    return _symbol;
   }
 
   function uri(uint256) public view override returns (string memory) {
-      return _uri;
+    return _uri;
   }
 
   function _setURI(string memory newuri) private {
-      _uri = newuri;
+    _uri = newuri;
   }
 
   function updateUri(string memory uri_) external onlyOwner {
     _setURI(uri_);
   }
 
-  function royaltyInfo(
-    uint256 tokenId,
-    uint256 salePrice
-  ) external
+  function royaltyInfo(uint256 tokenId, uint256 salePrice)
+    external
     view
     returns (address receiver, uint256 royaltyAmount)
   {
     require(tokenId == 0, "currently only one edition");
 
-    if ( splitWallet != address(0) ) {
+    if (splitWallet != address(0)) {
       receiver = splitWallet;
     } else {
       receiver = owner();
@@ -273,17 +292,23 @@ contract DCNTCrescendo is IBondingCurve, ERC1155, Initializable, Ownable, Splits
     return (receiver, royaltyPayment);
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155) returns (bool) {
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC1155)
+    returns (bool)
+  {
     return
       interfaceId == 0x2a55205a || // ERC2981 interface ID for ERC2981.
       super.supportsInterface(interfaceId);
   }
 
-  function _getSplitMain() internal virtual override returns(address) {
+  function _getSplitMain() internal virtual override returns (address) {
     return splitMain;
   }
 
-  function _getSplitWallet() internal virtual override returns(address) {
+  function _getSplitWallet() internal virtual override returns (address) {
     return splitWallet;
   }
 

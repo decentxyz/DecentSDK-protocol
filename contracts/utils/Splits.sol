@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8;
 
-import {ERC20} from 'solmate/src/tokens/ERC20.sol';
-import '../splits/interfaces/ISplitMain.sol';
+import {ERC20} from "solmate/src/tokens/ERC20.sol";
+import "../splits/interfaces/ISplitMain.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract Splits is Ownable {
-  function _getSplitMain() internal virtual returns(address);
-  function _getSplitWallet() internal virtual returns(address);
+  function _getSplitMain() internal virtual returns (address);
+
+  function _getSplitWallet() internal virtual returns (address);
+
   function _setSplitWallet(address _splitWallet) internal virtual;
 
-  function createSplit (
+  function createSplit(
     address[] calldata accounts,
     uint32[] calldata percentAllocations,
     uint32 distributorFee
@@ -25,7 +27,7 @@ abstract contract Splits is Ownable {
     );
     (bool success, bytes memory returnData) = _getSplitMain().call(payload);
     require(success, "Could not create split");
-    (address splitAddress) = abi.decode(returnData, (address));
+    address splitAddress = abi.decode(returnData, (address));
     _setSplitWallet(splitAddress);
   }
 
@@ -100,10 +102,11 @@ abstract contract Splits is Ownable {
     _withdraw(account, withdrawETH, tokens);
   }
 
-  function transferToSplit(
-    uint256 transferETH,
-    ERC20[] memory tokens
-  ) public virtual requireSplit {
+  function transferToSplit(uint256 transferETH, ERC20[] memory tokens)
+    public
+    virtual
+    requireSplit
+  {
     if (transferETH != 0) {
       _transferETHToSplit();
     }
@@ -114,7 +117,7 @@ abstract contract Splits is Ownable {
   }
 
   function _transferETHToSplit() internal virtual {
-    (bool success, ) = _getSplitWallet().call{ value: address(this).balance }("");
+    (bool success, ) = _getSplitWallet().call{value: address(this).balance}("");
     require(success, "Could not transfer ETH to split");
   }
 
@@ -123,7 +126,7 @@ abstract contract Splits is Ownable {
     token.transfer(_getSplitWallet(), balance);
   }
 
-  function _withdraw (
+  function _withdraw(
     address account,
     uint256 withdrawETH,
     ERC20[] memory tokens

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import {ISplitMain} from './interfaces/ISplitMain.sol';
-import {ERC20} from 'solmate/src/tokens/ERC20.sol';
-import {SafeTransferLib} from 'solmate/src/utils/SafeTransferLib.sol';
+import {ISplitMain} from "./interfaces/ISplitMain.sol";
+import {ERC20} from "solmate/src/tokens/ERC20.sol";
+import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
 
 /**
  * ERRORS
@@ -70,7 +70,7 @@ contract SplitWallet {
    *  ETH introduced since fn call is restricted to SplitMain
    *  @param amount Amount to send
    */
-  function sendETHToMain(uint256 amount) external payable onlySplitMain() {
+  function sendETHToMain(uint256 amount) external payable onlySplitMain {
     address(splitMain).safeTransferETH(amount);
   }
 
@@ -83,7 +83,7 @@ contract SplitWallet {
   function sendERC20ToMain(ERC20 token, uint256 amount)
     external
     payable
-    onlySplitMain()
+    onlySplitMain
   {
     token.safeTransfer(address(splitMain), amount);
   }

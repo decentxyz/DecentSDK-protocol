@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.4;
 
-import {ISplitMain} from './interfaces/ISplitMain.sol';
-import {SplitWallet} from './SplitWallet.sol';
-import {Clones} from './libraries/Clones.sol';
-import {ERC20} from 'solmate/src/tokens/ERC20.sol';
-import {SafeTransferLib} from 'solmate/src/utils/SafeTransferLib.sol';
+import {ISplitMain} from "./interfaces/ISplitMain.sol";
+import {SplitWallet} from "./SplitWallet.sol";
+import {Clones} from "./libraries/Clones.sol";
+import {ERC20} from "solmate/src/tokens/ERC20.sol";
+import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
 
 /**
 

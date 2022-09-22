@@ -13,7 +13,6 @@ pragma solidity ^0.8.0;
 
 */
 
-
 /// ============ Imports ============
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -21,7 +20,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IDCNTSDK.sol";
 
 contract DCNTVaultNFT is Ownable {
-
   /// ============ Immutable storage ============
 
   /// @notice implementation addresses for base contracts
@@ -69,9 +67,10 @@ contract DCNTVaultNFT is Ownable {
     bool _supports4907
   ) external returns (address nft, address vault) {
     address deployedNFT;
-    if ( _supports4907 ) {
+    if (_supports4907) {
       (bool success1, bytes memory data1) = _DCNTSDK.delegatecall(
-        abi.encodeWithSignature("deployDCNT4907A(string,string,uint256,uint256,uint256,uint256)",
+        abi.encodeWithSignature(
+          "deployDCNT4907A(string,string,uint256,uint256,uint256,uint256)",
           _name,
           _symbol,
           _maxTokens,
@@ -85,7 +84,8 @@ contract DCNTVaultNFT is Ownable {
       deployedNFT = abi.decode(data1, (address));
     } else {
       (bool success2, bytes memory data2) = _DCNTSDK.delegatecall(
-        abi.encodeWithSignature("deployDCNT721A(string,string,uint256,uint256,uint256,uint256)",
+        abi.encodeWithSignature(
+          "deployDCNT721A(string,string,uint256,uint256,uint256,uint256)",
           _name,
           _symbol,
           _maxTokens,
@@ -100,7 +100,8 @@ contract DCNTVaultNFT is Ownable {
     }
 
     (bool success, bytes memory data) = _DCNTSDK.delegatecall(
-      abi.encodeWithSignature("deployDCNTVault(address,address,uint256,uint256)",
+      abi.encodeWithSignature(
+        "deployDCNTVault(address,address,uint256,uint256)",
         _vaultDistributionTokenAddress,
         deployedNFT,
         _maxTokens,
@@ -115,9 +116,13 @@ contract DCNTVaultNFT is Ownable {
     return (deployedNFT, deployedVault);
   }
 
-  function bytesToAddress(bytes memory _bytes) private pure returns (address addr) {
+  function bytesToAddress(bytes memory _bytes)
+    private
+    pure
+    returns (address addr)
+  {
     assembly {
-      addr := mload(add(_bytes,32))
+      addr := mload(add(_bytes, 32))
     }
   }
 }

@@ -11,6 +11,11 @@
 - `npm i` to install packages
 - `npx hardhat test`
 
+### Prettying
+
+- `npm i` to install packages
+- `npx prettier --write 'contracts/**/*.sol'`
+
 ### Adding a new SDK Module
 
 1. add contracts to `/contracts` folder

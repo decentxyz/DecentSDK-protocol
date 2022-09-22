@@ -1,6 +1,6 @@
 {
   "prettier": {
-
+    "tabWidth": 2
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.2",

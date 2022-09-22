@@ -97,7 +97,10 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     }
 
     function withdraw() external onlyOwner {
-        require(_getSplitWallet() == address(0), "Cannot withdraw with an active split");
+        require(
+            _getSplitWallet() == address(0),
+            "Cannot withdraw with an active split"
+        );
         payable(msg.sender).transfer(address(this).balance);
     }
 
@@ -140,16 +143,14 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
         }
     }
 
-    function royaltyInfo(
-        uint256 tokenId,
-        uint256 salePrice
-    )   external
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        external
         view
         returns (address receiver, uint256 royaltyAmount)
     {
         require(_exists(tokenId), "Nonexistent token");
 
-        if ( splitWallet != address(0) ) {
+        if (splitWallet != address(0)) {
             receiver = splitWallet;
         } else {
             receiver = owner();
@@ -160,21 +161,27 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
         return (receiver, royaltyPayment);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721A)
+        returns (bool)
+    {
         return
             interfaceId == 0x2a55205a || // ERC2981 interface ID for ERC2981.
             super.supportsInterface(interfaceId);
     }
 
-  function _getSplitMain() internal virtual override returns(address) {
-    return splitMain;
-  }
+    function _getSplitMain() internal virtual override returns (address) {
+        return splitMain;
+    }
 
-  function _getSplitWallet() internal virtual override returns(address) {
-    return splitWallet;
-  }
+    function _getSplitWallet() internal virtual override returns (address) {
+        return splitWallet;
+    }
 
-  function _setSplitWallet(address _splitWallet) internal virtual override {
-    splitWallet = _splitWallet;
-  }
+    function _setSplitWallet(address _splitWallet) internal virtual override {
+        splitWallet = _splitWallet;
+    }
 }

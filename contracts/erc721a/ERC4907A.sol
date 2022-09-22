@@ -4,8 +4,8 @@
 
 pragma solidity ^0.8.4;
 
-import 'erc721a/contracts/extensions/IERC4907A.sol';
-import './ERC721A.sol';
+import "erc721a/contracts/extensions/IERC4907A.sol";
+import "./ERC721A.sol";
 
 /**
  * @title ERC4907A
@@ -42,9 +42,12 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
         address owner = ownerOf(tokenId);
         if (_msgSenderERC721A() != owner)
             if (!isApprovedForAll(owner, _msgSenderERC721A()))
-                if (getApproved(tokenId) != _msgSenderERC721A()) revert SetUserCallerNotOwnerNorApproved();
+                if (getApproved(tokenId) != _msgSenderERC721A())
+                    revert SetUserCallerNotOwnerNorApproved();
 
-        _packedUserInfo[tokenId] = (uint256(expires) << _BITPOS_EXPIRES) | uint256(uint160(user));
+        _packedUserInfo[tokenId] =
+            (uint256(expires) << _BITPOS_EXPIRES) |
+            uint256(uint160(user));
 
         emit UpdateUser(tokenId, user, expires);
     }
@@ -53,7 +56,13 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
      * @dev Returns the user address for `tokenId`.
      * The zero address indicates that there is no user or if the user is expired.
      */
-    function userOf(uint256 tokenId) public view virtual override returns (address) {
+    function userOf(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (address)
+    {
         uint256 packed = _packedUserInfo[tokenId];
         assembly {
             // Branchless `packed *= (block.timestamp <= expires ? 1 : 0)`.
@@ -71,23 +80,41 @@ abstract contract ERC4907A is ERC721A, IERC4907A {
     /**
      * @dev Returns the user's expires of `tokenId`.
      */
-    function userExpires(uint256 tokenId) public view virtual override returns (uint256) {
+    function userExpires(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _packedUserInfo[tokenId] >> _BITPOS_EXPIRES;
     }
 
     /**
      * @dev Override of {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721A, IERC721A)
+        returns (bool)
+    {
         // The interface ID for ERC4907 is `0xad092b5c`,
         // as defined in [ERC4907](https://eips.ethereum.org/EIPS/eip-4907).
-        return super.supportsInterface(interfaceId) || interfaceId == 0xad092b5c;
+        return
+            super.supportsInterface(interfaceId) || interfaceId == 0xad092b5c;
     }
 
     /**
      * @dev Returns the user address for `tokenId`, ignoring the expiry status.
      */
-    function _explicitUserOf(uint256 tokenId) internal view virtual returns (address) {
+    function _explicitUserOf(uint256 tokenId)
+        internal
+        view
+        virtual
+        returns (address)
+    {
         return address(uint160(_packedUserInfo[tokenId]));
     }
 }

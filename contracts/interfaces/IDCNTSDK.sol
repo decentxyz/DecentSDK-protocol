@@ -9,6 +9,7 @@ interface IDCNTSDK {
   function DCNTCrescendoImplementation() external returns (address);
   function DCNTVaultImplementation() external returns (address);
   function DCNTStakingImplementation() external returns (address);
+  function metadataRenderer() external returns (address);
   function contractRegistry() external returns (address);
   function SplitMain() external returns (address);
 

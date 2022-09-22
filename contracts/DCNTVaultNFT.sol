@@ -19,6 +19,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IDCNTSDK.sol";
+import "./storage/EditionConfig.sol";
+import "./storage/MetadataConfig.sol";
 
 contract DCNTVaultNFT is Ownable {
 
@@ -30,6 +32,9 @@ contract DCNTVaultNFT is Ownable {
   address public DCNTCrescendoImplementation;
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
+
+  /// @notice address of the metadata renderer
+  address public metadataRenderer;
 
   /// @notice address of the associated registry
   address public contractRegistry;
@@ -50,6 +55,7 @@ contract DCNTVaultNFT is Ownable {
     DCNT721AImplementation = sdk.DCNT721AImplementation();
     DCNT4907AImplementation = sdk.DCNT4907AImplementation();
     DCNTVaultImplementation = sdk.DCNTVaultImplementation();
+    metadataRenderer = sdk.metadataRenderer();
     contractRegistry = sdk.contractRegistry();
     SplitMain = sdk.SplitMain();
   }
@@ -58,12 +64,8 @@ contract DCNTVaultNFT is Ownable {
 
   function create(
     address _DCNTSDK,
-    string memory _name,
-    string memory _symbol,
-    uint256 _maxTokens,
-    uint256 _tokenPrice,
-    uint256 _maxTokenPurchase,
-    uint256 _royaltyBPS,
+    EditionConfig memory _editionConfig,
+    MetadataConfig memory _metadataConfig,
     address _vaultDistributionTokenAddress,
     uint256 _unlockDate,
     bool _supports4907
@@ -71,13 +73,10 @@ contract DCNTVaultNFT is Ownable {
     address deployedNFT;
     if ( _supports4907 ) {
       (bool success1, bytes memory data1) = _DCNTSDK.delegatecall(
-        abi.encodeWithSignature("deployDCNT4907A(string,string,uint256,uint256,uint256,uint256)",
-          _name,
-          _symbol,
-          _maxTokens,
-          _tokenPrice,
-          _maxTokenPurchase,
-          _royaltyBPS
+        abi.encodeWithSignature(
+          "deployDCNT4907A((string,string,uint256,uint256,uint256,uint256),(string,bytes))",
+          _editionConfig,
+          _metadataConfig
         )
       );
 
@@ -85,13 +84,10 @@ contract DCNTVaultNFT is Ownable {
       deployedNFT = abi.decode(data1, (address));
     } else {
       (bool success2, bytes memory data2) = _DCNTSDK.delegatecall(
-        abi.encodeWithSignature("deployDCNT721A(string,string,uint256,uint256,uint256,uint256)",
-          _name,
-          _symbol,
-          _maxTokens,
-          _tokenPrice,
-          _maxTokenPurchase,
-          _royaltyBPS
+        abi.encodeWithSignature(
+          "deployDCNT721A((string,string,uint256,uint256,uint256,uint256),(string,bytes))",
+          _editionConfig,
+          _metadataConfig
         )
       );
 
@@ -100,10 +96,11 @@ contract DCNTVaultNFT is Ownable {
     }
 
     (bool success, bytes memory data) = _DCNTSDK.delegatecall(
-      abi.encodeWithSignature("deployDCNTVault(address,address,uint256,uint256)",
+      abi.encodeWithSignature(
+        "deployDCNTVault(address,address,uint256,uint256)",
         _vaultDistributionTokenAddress,
         deployedNFT,
-        _maxTokens,
+        _editionConfig.maxTokens,
         _unlockDate
       )
     );

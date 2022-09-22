@@ -11,6 +11,8 @@ const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
 const royaltyBPS = 10_000;
+const metadataURI = 'http://localhost/metadata/';
+const metadataRendererInit = null;
 const vaultDistributionTokenAddress = ethers.constants.AddressZero;
 const unlockDate = theFuture.time();
 
@@ -47,6 +49,8 @@ describe("DCNTVaultNFT", async () => {
         tokenPrice,
         maxTokenPurchase,
         royaltyBPS,
+        metadataURI,
+        metadataRendererInit,
         vaultDistributionTokenAddress,
         unlockDate,
         supports4907
@@ -91,6 +95,8 @@ describe("DCNTVaultNFT", async () => {
         tokenPrice,
         maxTokenPurchase,
         royaltyBPS,
+        metadataURI,
+        metadataRendererInit,
         vaultDistributionTokenAddress,
         unlockDate,
         supports4907

@@ -263,18 +263,37 @@ export const DCNTVaultNFTCreate = async (
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
   royaltyBPS: number,
+  metadataURI: string,
+  metadata: MetadataInit | null,
   vaultDistributionTokenAddress: string,
   unlockDate: number,
   supports4907: boolean
 ) => {
+  const metadataRendererInit = metadata != null
+    ? ethers.utils.AbiCoder.prototype.encode(
+        ['string', 'string', 'string'],
+        [
+          metadata.description,
+          metadata.imageURI,
+          metadata.animationURI
+        ]
+      )
+    : [];
+
   const deployTx = await dcntVaultNFT.create(
     decentSDK.address,
-    name,
-    symbol,
-    maxTokens,
-    tokenPrice,
-    maxTokenPurchase,
-    royaltyBPS,
+    {
+      name,
+      symbol,
+      maxTokens,
+      tokenPrice,
+      maxTokenPurchase,
+      royaltyBPS,
+    },
+    {
+      metadataURI,
+      metadataRendererInit,
+    },
     vaultDistributionTokenAddress,
     unlockDate,
     supports4907

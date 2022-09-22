@@ -523,4 +523,36 @@ describe("DCNTCrescendo", async () => {
       expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
     });
   });
+
+  describe("metadataRenderer()", async () => {
+    before(async () => {
+      crescendo = await deployDCNTCrescendo(
+        sdk,
+        name,
+        symbol,
+        uri,
+        initialPrice,
+        step1,
+        step2,
+        hitch,
+        takeRateBPS,
+        unlockDate,
+        royaltyBPS
+      );
+    });
+
+    it("should have metadataRenderer", async () => {
+      expect(await crescendo.metadataRenderer()).to.equal(ethers.constants.AddressZero);
+    });
+
+    it("should setMetadataRenderer", async () => {
+      await crescendo.setMetadataRenderer(addr2.address);
+      expect(await crescendo.metadataRenderer()).to.equal(addr2.address);
+    });
+
+    // it("should revert if non-owner tries to setmetadataRenderer", async () => {
+    //   await crescendo.setMetadataRenderer(addr2.address);
+    //   expect(await crescendo.metadataRenderer()).to.equal(ethers.constants.AddressZero);
+    // });
+  });
 });

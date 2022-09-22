@@ -18,16 +18,12 @@ abstract contract Splits is Ownable {
     uint32 distributorFee
   ) public virtual onlyOwner {
     require(_getSplitWallet() == address(0), "Split already created");
-    bytes memory payload = abi.encodeWithSignature(
-      "createSplit(address[],uint32[],uint32,address)",
+    address splitAddress = ISplitMain(_getSplitMain()).createSplit(
       accounts,
       percentAllocations,
       distributorFee,
       address(this)
     );
-    (bool success, bytes memory returnData) = _getSplitMain().call(payload);
-    require(success, "Could not create split");
-    address splitAddress = abi.decode(returnData, (address));
     _setSplitWallet(splitAddress);
   }
 
@@ -55,8 +51,7 @@ abstract contract Splits is Ownable {
     address distributorAddress
   ) public virtual requireSplit {
     _transferERC20ToSplit(token);
-    bytes memory payload = abi.encodeWithSignature(
-      "distributeERC20(address,address,address[],uint32[],uint32,address)",
+    ISplitMain(_getSplitMain()).distributeERC20(
       _getSplitWallet(),
       token,
       accounts,
@@ -64,8 +59,6 @@ abstract contract Splits is Ownable {
       distributorFee,
       distributorAddress
     );
-    (bool success, ) = _getSplitMain().call(payload);
-    require(success);
   }
 
   function distributeAndWithdraw(
@@ -128,14 +121,11 @@ abstract contract Splits is Ownable {
     uint256 withdrawETH,
     ERC20[] memory tokens
   ) internal virtual {
-    bytes memory payload = abi.encodeWithSignature(
-      "withdraw(address,uint256,address[])",
+    ISplitMain(_getSplitMain()).withdraw(
       account,
       withdrawETH,
       tokens
     );
-    (bool success, ) = _getSplitMain().call(payload);
-    require(success, "Could not withdraw from split");
   }
 
   modifier requireSplit() {

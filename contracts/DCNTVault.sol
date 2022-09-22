@@ -13,7 +13,6 @@ pragma solidity ^0.8.0;
 
 */
 
-
 /// ============ Imports ============
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -21,11 +20,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-
 /// @title Decentralized Creator Nonfungible Token Vault Wrapper (DCNT VWs)
 /// @notice claimable ERC20s for NFT holders after vault expiration
 contract DCNTVault is Ownable, Initializable {
-
   /// ============ Immutable storage ============
 
   /// ============ Mutable storage ============
@@ -85,22 +82,32 @@ contract DCNTVault is Ownable, Initializable {
   }
 
   // (total vault balance) * (nfts_owned/total_nfts)
-  function _pendingPayment(uint256 numNftVaultKeys, uint256 totalReceived) private view returns (uint256) {
+  function _pendingPayment(uint256 numNftVaultKeys, uint256 totalReceived)
+    private
+    view
+    returns (uint256)
+  {
     return (totalReceived * numNftVaultKeys) / nftTotalSupply;
   }
 
   function _claimMany(address to, uint256[] memory tokenIds) private {
-    require(block.timestamp >= unlockDate, 'vault is still locked');
-    require(vaultBalance() > 0, 'vault is empty');
-    for (uint256 i = 0; i < tokenIds.length; i++){
-      require(nftVaultKey.ownerOf(tokenIds[i]) == to, 'address does not own token');
-      require(!hasClaimedTokenId[tokenIds[i]], 'token already claimed');
+    require(block.timestamp >= unlockDate, "vault is still locked");
+    require(vaultBalance() > 0, "vault is empty");
+    for (uint256 i = 0; i < tokenIds.length; i++) {
+      require(
+        nftVaultKey.ownerOf(tokenIds[i]) == to,
+        "address does not own token"
+      );
+      require(!hasClaimedTokenId[tokenIds[i]], "token already claimed");
       hasClaimedTokenId[tokenIds[i]] = true;
     }
 
-    uint256 amount = _pendingPayment(tokenIds.length, vaultBalance() + totalReleased());
-    require(amount > 0, 'address has no claimable tokens');
-    require(vaultDistributionToken.transfer(to, amount), 'Transfer failed');
+    uint256 amount = _pendingPayment(
+      tokenIds.length,
+      vaultBalance() + totalReleased()
+    );
+    require(amount > 0, "address has no claimable tokens");
+    require(vaultDistributionToken.transfer(to, amount), "Transfer failed");
     _totalReleased += amount;
     emit Claimed(to, amount);
   }
@@ -126,10 +133,14 @@ contract DCNTVault is Ownable, Initializable {
     payable(msg.sender).transfer(address(this).balance);
   }
 
-  function _asSingletonArray(uint256 element) private pure returns (uint256[] memory) {
-      uint256[] memory array = new uint256[](1);
-      array[0] = element;
+  function _asSingletonArray(uint256 element)
+    private
+    pure
+    returns (uint256[] memory)
+  {
+    uint256[] memory array = new uint256[](1);
+    array[0] = element;
 
-      return array;
+    return array;
   }
 }

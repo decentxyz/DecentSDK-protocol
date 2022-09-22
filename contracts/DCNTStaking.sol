@@ -13,7 +13,6 @@ pragma solidity ^0.8.0;
 
 */
 
-
 /// ============ Imports ============
 
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -23,8 +22,12 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver {
-
+contract DCNTStaking is
+  Initializable,
+  Ownable,
+  ReentrancyGuard,
+  IERC721Receiver
+{
   uint256 public totalStaked;
 
   // struct to store a stake's token, owner, and earning values
@@ -54,10 +57,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     address _token,
     uint256 _vaultDuration,
     uint256 _totalSupply
-  )
-    public
-    initializer
-  {
+  ) public initializer {
     _transferOwnership(_owner);
     nftAddress = _nft;
     erc20Address = _token;
@@ -72,8 +72,14 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     for (uint256 i; i != tokenIds.length; i++) {
       tokenId = tokenIds[i];
       require(vault[tokenId].owner == address(0), "already staked");
-      require(IERC721(nftAddress).ownerOf(tokenId) == msg.sender, "not your token");
-      require(IERC721(nftAddress).getApproved(tokenId) == address(this), "not approved for transfer");
+      require(
+        IERC721(nftAddress).ownerOf(tokenId) == msg.sender,
+        "not your token"
+      );
+      require(
+        IERC721(nftAddress).getApproved(tokenId) == address(this),
+        "not approved for transfer"
+      );
 
       IERC721(nftAddress).safeTransferFrom(msg.sender, address(this), tokenId);
       emit NFTStaked(msg.sender, tokenId, block.timestamp);
@@ -101,18 +107,25 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
   }
 
   function claim(uint256[] calldata tokenIds) external nonReentrant {
-      _claim(msg.sender, tokenIds, false);
+    _claim(msg.sender, tokenIds, false);
   }
 
-  function claimForAddress(address account, uint256[] calldata tokenIds) external nonReentrant {
-      _claim(account, tokenIds, false);
+  function claimForAddress(address account, uint256[] calldata tokenIds)
+    external
+    nonReentrant
+  {
+    _claim(account, tokenIds, false);
   }
 
   function unstake(uint256[] calldata tokenIds) external nonReentrant {
-      _claim(msg.sender, tokenIds, true);
+    _claim(msg.sender, tokenIds, true);
   }
 
-  function _claim(address account, uint256[] calldata tokenIds, bool _unstake) internal {
+  function _claim(
+    address account,
+    uint256[] calldata tokenIds,
+    bool _unstake
+  ) internal {
     uint256 tokenId;
     uint256 earned = 0;
 
@@ -130,7 +143,6 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
         tokenId: uint24(tokenId),
         timestamp: uint48(currentTime)
       });
-
     }
     if (earned > 0) {
       IERC20(erc20Address).transfer(account, earned);
@@ -152,12 +164,16 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     uint256 payout = totalFunding / totalSupply / vaultDays;
     uint256 stakeDuration = min(block.timestamp, vaultEnd) - stakedAt;
 
-    return payout * stakeDuration / 1 days;
+    return (payout * stakeDuration) / 1 days;
   }
 
-  function earningInfo(address account, uint256[] calldata tokenIds) external view returns (uint256) {
-     uint256 tokenId;
-     uint256 earned = 0;
+  function earningInfo(address account, uint256[] calldata tokenIds)
+    external
+    view
+    returns (uint256)
+  {
+    uint256 tokenId;
+    uint256 earned = 0;
 
     for (uint256 i; i != tokenIds.length; i++) {
       tokenId = tokenIds[i];
@@ -173,7 +189,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
   function balanceOf(address account) external view returns (uint256) {
     uint256 balance = 0;
 
-    for(uint256 i = 0; i <= totalSupply; i++) {
+    for (uint256 i = 0; i <= totalSupply; i++) {
       if (vault[i].owner == account) {
         balance++;
       }
@@ -182,12 +198,15 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
   }
 
   // return nft tokens staked of owner
-  function tokensOfOwner(address account) external view returns (uint256[] memory ownerTokens) {
-
+  function tokensOfOwner(address account)
+    external
+    view
+    returns (uint256[] memory ownerTokens)
+  {
     uint256[] memory tmp = new uint256[](totalSupply);
 
     uint256 index = 0;
-    for(uint256 tokenId = 0; tokenId <= totalSupply; tokenId++) {
+    for (uint256 tokenId = 0; tokenId <= totalSupply; tokenId++) {
       if (vault[tokenId].owner == account) {
         tmp[index] = vault[tokenId].tokenId;
         index++;
@@ -195,7 +214,7 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
     }
 
     uint256[] memory tokens = new uint256[](index);
-    for(uint256 i; i != index; i++) {
+    for (uint256 i; i != index; i++) {
       tokens[i] = tmp[i];
     }
 
@@ -204,17 +223,17 @@ contract DCNTStaking is Initializable, Ownable, ReentrancyGuard, IERC721Receiver
 
   function min(uint256 a, uint256 b) internal pure returns (uint256) {
     return a >= b ? b : a;
-}
+  }
 
   function onERC721Received(
-      address,
-      address,
-      // address from,
-      uint256,
-      bytes calldata
-    ) external pure override returns (bytes4) {
-      // require(from == address(0x0), "Cannot send nfts to Vault directly");
-      return IERC721Receiver.onERC721Received.selector;
+    address,
+    address,
+    // address from,
+    uint256,
+    bytes calldata
+  ) external pure override returns (bytes4) {
+    // require(from == address(0x0), "Cannot send nfts to Vault directly");
+    return IERC721Receiver.onERC721Received.selector;
   }
 
   function withdraw(uint256 amount) external onlyOwner {

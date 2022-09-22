@@ -13,13 +13,11 @@ pragma solidity ^0.8.0;
 
 */
 
-
 /// ============ Imports ============
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract DCNTRegistry {
-
   using EnumerableSet for EnumerableSet.AddressSet;
 
   mapping(address => EnumerableSet.AddressSet) private contracts;
@@ -32,14 +30,11 @@ contract DCNTRegistry {
     string key
   );
 
-  event Remove(
-    address indexed deployer,
-    address indexed deployment
-  );
+  event Remove(address indexed deployer, address indexed deployment);
 
   /// ============ Constructor ============
 
-  constructor() { }
+  constructor() {}
 
   /// ============ Functions ============
 
@@ -53,18 +48,13 @@ contract DCNTRegistry {
     emit Register(_deployer, _deployment, _key);
   }
 
-  function remove(
-    address _deployer,
-    address _deployment
-  ) external {
+  function remove(address _deployer, address _deployment) external {
     bool removed = contracts[_deployer].remove(_deployment);
     require(removed, "Removal was unsuccessful");
     emit Remove(_deployer, _deployment);
   }
 
-  function query(
-    address _deployer
-  ) external view returns (address[] memory) {
+  function query(address _deployer) external view returns (address[] memory) {
     return contracts[_deployer].values();
   }
 }

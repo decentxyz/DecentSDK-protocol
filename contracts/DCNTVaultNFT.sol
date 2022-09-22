@@ -13,7 +13,6 @@ pragma solidity ^0.8.0;
 
 */
 
-
 /// ============ Imports ============
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -23,7 +22,6 @@ import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
 
 contract DCNTVaultNFT is Ownable {
-
   /// ============ Immutable storage ============
 
   /// @notice implementation addresses for base contracts
@@ -71,7 +69,7 @@ contract DCNTVaultNFT is Ownable {
     bool _supports4907
   ) external returns (address nft, address vault) {
     address deployedNFT;
-    if ( _supports4907 ) {
+    if (_supports4907) {
       (bool success1, bytes memory data1) = _DCNTSDK.delegatecall(
         abi.encodeWithSignature(
           "deployDCNT4907A((string,string,uint256,uint256,uint256,uint256),(string,bytes))",
@@ -112,9 +110,13 @@ contract DCNTVaultNFT is Ownable {
     return (deployedNFT, deployedVault);
   }
 
-  function bytesToAddress(bytes memory _bytes) private pure returns (address addr) {
+  function bytesToAddress(bytes memory _bytes)
+    private
+    pure
+    returns (address addr)
+  {
     assembly {
-      addr := mload(add(_bytes,32))
+      addr := mload(add(_bytes, 32))
     }
   }
 }

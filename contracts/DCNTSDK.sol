@@ -13,7 +13,6 @@ pragma solidity ^0.8.0;
 
 */
 
-
 /// ============ Imports ============
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -24,7 +23,6 @@ import "./storage/MetadataConfig.sol";
 import "./storage/CrescendoConfig.sol";
 
 contract DCNTSDK is Ownable {
-
   /// ============ Immutable storage ============
 
   /// ============ Mutable storage ============
@@ -96,7 +94,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNT721A');
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, "DCNT721A");
     emit DeployDCNT721A(clone);
   }
 
@@ -117,7 +115,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNT4907A');
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, "DCNT4907A");
     emit DeployDCNT4907A(clone);
   }
 
@@ -143,7 +141,11 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNTCrescendo');
+    IDCNTRegistry(contractRegistry).register(
+      msg.sender,
+      clone,
+      "DCNTCrescendo"
+    );
     emit DeployDCNTCrescendo(clone);
   }
 
@@ -156,7 +158,8 @@ contract DCNTSDK is Ownable {
   ) external returns (address clone) {
     clone = Clones.clone(DCNTVaultImplementation);
     (bool success, ) = clone.call(
-      abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
+      abi.encodeWithSignature(
+        "initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _vaultDistributionTokenAddress,
         _nftVaultKeyAddress,
@@ -165,7 +168,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNTVault');
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, "DCNTVault");
     emit DeployDCNTVault(clone);
   }
 
@@ -178,7 +181,8 @@ contract DCNTSDK is Ownable {
   ) external returns (address clone) {
     clone = Clones.clone(DCNTStakingImplementation);
     (bool success, ) = clone.call(
-      abi.encodeWithSignature("initialize(address,address,address,uint256,uint256)",
+      abi.encodeWithSignature(
+        "initialize(address,address,address,uint256,uint256)",
         msg.sender,
         _nft,
         _token,
@@ -187,7 +191,7 @@ contract DCNTSDK is Ownable {
       )
     );
     require(success);
-    IDCNTRegistry(contractRegistry).register(msg.sender, clone, 'DCNTStaking');
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, "DCNTStaking");
     emit DeployDCNTStaking(clone);
   }
 }

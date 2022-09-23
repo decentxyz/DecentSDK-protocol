@@ -42,10 +42,10 @@ export type MetadataInit = {
 }
 
 export const deployDCNTSDK = async (
-  implementations?: Implementations,
-  metadataRenderer?: Contract,
-  contractRegistry?: Contract,
-  splitMain?: Contract
+  implementations?: Implementations | null,
+  metadataRenderer?: Contract | null,
+  contractRegistry?: Contract | null,
+  splitMain?: Contract | null
 ) => {
   implementations = implementations ?? await deployImplementations();
   metadataRenderer = metadataRenderer ?? await deployDCNTMetadataRenderer();

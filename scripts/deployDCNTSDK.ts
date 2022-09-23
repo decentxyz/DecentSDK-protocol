@@ -1,15 +1,37 @@
-import { ethers } from "hardhat";
-import { deployDCNTSDK, deployImplementations } from "../core";
-
-// set up splits for the chain you are deploying to
-// const SPLIT_MAIN = '';
+import { ethers, network } from "hardhat";
+import { deployDCNTSDK, deployContract, deployDCNTVaultNFT } from "../core";
 
 async function main() {
-  // const implementations = await deployImplementations();
-  // const splitMain = await ethers.getContractAt('SplitMain', SPLIT_MAIN);
-  // const sdk = await deployDCNTSDK(implementations, splitMain);
-  const sdk = await deployDCNTSDK();
-  console.log("DCNTSDK deployed to: ", sdk.address);
+  // get split main contract or deploy our own for local testing
+  const splitMain = ['localhost', 'hardhat'].includes(network.name)
+    ? await deployContract('SplitMain')
+    : await ethers.getContractAt('SplitMain', '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE');
+
+  const sdk = await deployDCNTSDK(
+    null, // proxy implementations
+    null, // metadata renderer
+    null, // contract registry
+    splitMain, // split main
+  );
+
+  const metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', await sdk.metadataRenderer());
+  const registry = await ethers.getContractAt('DCNTRegistry', await sdk.contractRegistry());
+  const vaultNFT = await deployDCNTVaultNFT(sdk);
+
+  const contracts = {
+    DCNTSDK: sdk.address,
+    DCNT721A: await sdk.DCNT721AImplementation(),
+    DCNT4907A: await sdk.DCNT4907AImplementation(),
+    DCNTCrescendo: await sdk.DCNTCrescendoImplementation(),
+    DCNTVault: await sdk.DCNTVaultImplementation(),
+    DCNTStaking: await sdk.DCNTStakingImplementation(),
+    DCNTMetadataRenderer: metadataRenderer.address,
+    DCNTRegistry: registry.address,
+    DCNTVaultNFT: vaultNFT.address,
+    SplitMain: await sdk.SplitMain(),
+  }
+
+  console.log(JSON.stringify(contracts, null, 2));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

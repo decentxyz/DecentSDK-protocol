@@ -10,6 +10,13 @@ const symbol = 'TOKEN';
 const maxTokens = 25;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const royaltyBPS = 10_00;
+const metadataRendererInit = {
+  description: "This is the description for TOKEN.",
+  imageURI: "http://localhost/image.jpg",
+  animationURI: "http://localhost/song.mp3",
+};
+const metadataURI = "http://localhost/metadata/";
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
@@ -19,7 +26,10 @@ async function main() {
     symbol,
     maxTokens,
     tokenPrice,
-    maxTokenPurchase
+    maxTokenPurchase,
+    royaltyBPS,
+    metadataURI,
+    metadataRendererInit
   );
   console.log("DCNT721A deployed to: ", DCNT721A.address);
 }

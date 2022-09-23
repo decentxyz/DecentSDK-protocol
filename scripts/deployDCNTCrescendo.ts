@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployDCNTCrescendo } from "../core";
+import { deployDCNTCrescendo, theFuture } from "../core";
 
 // set up DCNTSDK
 const DCNTSDK_ENDPOINT = '';
@@ -7,13 +7,19 @@ const DCNTSDK_ENDPOINT = '';
 // set up DCNTCrescendo
 const name = 'Token Name';
 const symbol = 'TOKEN';
-const uri = 'http://localhost/{id}.json';
 const initialPrice = ethers.utils.parseEther('0.05');
 const step1 = ethers.utils.parseEther("0.005");
 const step2 = ethers.utils.parseEther("0.05");
 const hitch = 20;
-const [trNum,trDenom] = [3,20];
-const payouts = ethers.constants.AddressZero;
+const takeRateBPS = 15_00;
+const unlockDate = theFuture.time();
+const royaltyBPS = 10_00;
+const metadataRendererInit = {
+  description: "This is the description for TOKEN.",
+  imageURI: "http://localhost/image.jpg",
+  animationURI: "http://localhost/song.mp3",
+};
+const metadataURI = "http://localhost/{id}.json";
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
@@ -21,14 +27,15 @@ async function main() {
     DCNTSDK,
     name,
     symbol,
-    uri,
     initialPrice,
     step1,
     step2,
     hitch,
-    trNum,
-    trDenom,
-    payouts
+    takeRateBPS,
+    unlockDate,
+    royaltyBPS,
+    metadataURI,
+    metadataRendererInit
   );
   console.log("DCNTCrescendo deployed to: ", DCNTCrescendo.address);
 }

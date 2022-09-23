@@ -1,7 +1,10 @@
-import { deployDCNTMetadataRenderer } from "../core";
+import { deployContract, deployDCNTMetadataRenderer } from "../core";
 
 async function main() {
-  const metadataRenderer = await deployDCNTMetadataRenderer();
+  const sharedNFTLogic = await deployContract('SharedNFTLogic');
+  console.log("SharedNFTLogic deployed to: ", sharedNFTLogic.address);
+
+  const metadataRenderer = await deployDCNTMetadataRenderer(sharedNFTLogic);
   console.log("DCNTMetadataRenderer deployed to: ", metadataRenderer.address);
 }
 

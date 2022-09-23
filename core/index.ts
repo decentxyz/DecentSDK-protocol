@@ -45,7 +45,7 @@ export const deployDCNTSDK = async (
   implementations?: Implementations,
   metadataRenderer?: Contract,
   contractRegistry?: Contract,
-  splitMain?: Contract,
+  splitMain?: Contract
 ) => {
   implementations = implementations ?? await deployImplementations();
   metadataRenderer = metadataRenderer ?? await deployDCNTMetadataRenderer();
@@ -65,8 +65,10 @@ export const deployDCNTSDK = async (
   return await decentSDK.deployed();
 }
 
-export const deployDCNTMetadataRenderer = async () => {
-  const sharedNFTLogic = await deployContract('SharedNFTLogic');
+export const deployDCNTMetadataRenderer = async (
+  sharedNFTLogic?: Contract
+) => {
+  sharedNFTLogic = sharedNFTLogic ?? await deployContract('SharedNFTLogic');
   const decentMetadataRendererFactory = await ethers.getContractFactory('DCNTMetadataRenderer');
   const decentMetadataRenderer = await decentMetadataRendererFactory.deploy(sharedNFTLogic.address);
   return await decentMetadataRenderer.deployed();

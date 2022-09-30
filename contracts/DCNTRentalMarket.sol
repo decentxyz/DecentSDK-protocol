@@ -57,7 +57,11 @@ contract DCNTRentalMarket {
     return rentables[_rentable][_tokenId];
   }
 
-  function rent(address _rentable, uint256 _tokenId, uint256 _days) external payable {
+  function rent(
+    address _rentable,
+    uint256 _tokenId,
+    uint256 _days
+  ) external payable {
     Rentable memory rentable = rentables[_rentable][_tokenId];
 
     // check for token approval

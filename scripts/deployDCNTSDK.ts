@@ -17,6 +17,7 @@ async function main() {
   const metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', await sdk.metadataRenderer());
   const registry = await ethers.getContractAt('DCNTRegistry', await sdk.contractRegistry());
   const vaultNFT = await deployDCNTVaultNFT(sdk);
+  const rentalMarket = await deployContract('DCNTRentalMarket');
 
   const contracts = {
     DCNTSDK: sdk.address,
@@ -28,6 +29,7 @@ async function main() {
     DCNTMetadataRenderer: metadataRenderer.address,
     DCNTRegistry: registry.address,
     DCNTVaultNFT: vaultNFT.address,
+    DCNTRentalMarket: rentalMarket.address,
     SplitMain: await sdk.SplitMain(),
   }
 

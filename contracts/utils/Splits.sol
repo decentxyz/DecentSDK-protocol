@@ -17,12 +17,13 @@ abstract contract Splits is Ownable {
     uint32[] calldata percentAllocations,
     uint32 distributorFee
   ) public virtual onlyOwner {
+    require(_getSplitMain() != address(0), 'SplitMain not set');
     require(_getSplitWallet() == address(0), "Split already created");
     address splitAddress = ISplitMain(_getSplitMain()).createSplit(
       accounts,
       percentAllocations,
       distributorFee,
-      address(this)
+      msg.sender
     );
     _setSplitWallet(splitAddress);
   }

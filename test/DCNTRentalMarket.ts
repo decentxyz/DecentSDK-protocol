@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT4907A, deployContract, theFuture } from "../core";
+import { deployDCNTSDK, deployDCNT4907A, deployMockERC721, deployContract, theFuture } from "../core";
 
 const rentalPrice = ethers.utils.parseEther('0.01');
 const name = 'Decent';
@@ -62,6 +62,14 @@ describe("DCNTRentalMarket", async () => {
       expect(rentable.pricePerDay).to.equal(rentalPrice);
     });
 
+    it("should revert if nft does not support the interface for ERC4907", async () => {
+      const mock = await deployMockERC721();
+      await mock.connect(fan).mintNft(1);
+      await expect(
+        rentalMarket.connect(fan).setRentable(mock.address, 0, true, rentalPrice, 1, 30)
+      ).to.be.revertedWith('NFT does not support ERC4907');
+    });
+
     it("should revert if the rental market has not been approved by token owner", async () => {
       await nft.connect(fan).mint(1, { value: tokenPrice });
       await expect(
@@ -73,6 +81,18 @@ describe("DCNTRentalMarket", async () => {
       await expect(
         rentalMarket.connect(renter).setRentable(nft.address, 0, true, rentalPrice, 1, 30)
       ).to.be.revertedWith('Must be token owner to set rentable');
+    });
+  });
+
+  describe("toggleListed()", async () => {
+    it("should toggle the listed state of the rentable ", async () => {
+      await rentalMarket.connect(fan).toggleListed(nft.address, 0);
+      let rentable = await rentalMarket.getRentable(nft.address, 0);
+      expect(rentable.isListed).to.equal(false);
+
+      await rentalMarket.connect(fan).toggleListed(nft.address, 0);
+      rentable = await rentalMarket.getRentable(nft.address, 0);
+      expect(rentable.isListed).to.equal(true);
     });
   });
 

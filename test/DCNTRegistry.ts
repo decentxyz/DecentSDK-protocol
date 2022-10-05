@@ -5,7 +5,7 @@ import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { deployDCNTSDK, theFuture, deployMockERC721 } from "../core";
 
-describe("DCNTVaultNFT", async () => {
+describe("DCNTRegistry", async () => {
   let owner: SignerWithAddress,
       sdk: Contract,
       registry: Contract,

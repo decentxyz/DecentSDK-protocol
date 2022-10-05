@@ -88,8 +88,10 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
       "Purchase would exceed max supply"
     );
     require(mintIndex <= MAX_TOKENS, "SOLD OUT");
-    require(numberOfTokens <= maxTokenPurchase, "Exceeded max number per mint");
     require(msg.value >= (tokenPrice * numberOfTokens), "Insufficient funds");
+    if ( maxTokenPurchase != 0 ) {
+      require(numberOfTokens <= maxTokenPurchase, "Exceeded max number per mint");
+    }
 
     _safeMint(msg.sender, numberOfTokens);
     for (uint256 i = 0; i < numberOfTokens; i++) {

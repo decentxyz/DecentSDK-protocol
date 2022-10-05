@@ -13,10 +13,6 @@ const config: HardhatUserConfig = {
       url: process.env.GOERLI_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },
-    rinkeby: {
-      url: process.env.RINKEBY_URL,
-      accounts: [process.env.PRIVATE_KEY as string]
-    },
     polygon: {
       url: process.env.POLYGON_MAINNET_URL,
       accounts: [process.env.PRIVATE_KEY as string]
@@ -46,7 +42,6 @@ const config: HardhatUserConfig = {
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY as string,
       goerli: process.env.ETHERSCAN_KEY as string,
-      rinkeby: process.env.ETHERSCAN_KEY as string,
       polygon: process.env.POLYGONSCAN_KEY as string,
       polygonMumbai: process.env.POLYGONSCAN_KEY as string,
       optimism_testnet: process.env.OPTIMISMSCAN_KEY as string,

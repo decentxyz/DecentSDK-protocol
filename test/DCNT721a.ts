@@ -138,6 +138,24 @@ describe("DCNT721A", async () => {
         "Purchase would exceed max supply"
       );
     });
+
+    it("should allow unlimited mints if maxTokenPurchase is set to 0", async () => {
+      const freshNFT: Contract = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokens,
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit
+      );
+
+      await freshNFT.flipSaleState();
+      await freshNFT.mint(maxTokens, { value: tokenPrice.mul(maxTokens) });
+      expect(await freshNFT.balanceOf(addr1.address)).to.equal(maxTokens);
+    });
   });
 
   describe("flipSaleState()", async () => {

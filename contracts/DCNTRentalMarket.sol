@@ -96,7 +96,7 @@ contract DCNTRentalMarket {
   function rent(
     address _nft,
     uint256 _tokenId,
-    uint256 _days
+    uint16 _days
   ) external payable {
     Rentable memory rentable = rentables[_nft][_tokenId];
 

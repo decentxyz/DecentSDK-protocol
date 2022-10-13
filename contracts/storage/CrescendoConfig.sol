@@ -10,5 +10,6 @@ struct CrescendoConfig {
   uint256 hitch;
   uint256 takeRateBPS;
   uint256 unlockDate;
+  uint256 saleStart;
   uint256 royaltyBPS;
 }

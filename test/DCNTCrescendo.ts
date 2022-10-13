@@ -13,6 +13,7 @@ const step2 = ethers.utils.parseEther("0.05");
 const hitch = 20;
 const takeRateBPS = 15_00;
 const unlockDate = theFuture.time();
+let saleStart = theFuture.time();
 const royaltyBPS = 10_00;
 const bps = 100_00;
 const metadataRendererInit = null;
@@ -32,8 +33,10 @@ describe("DCNTCrescendo", async () => {
       split: any[];
 
   before(async () => {
-    [owner] = await ethers.getSigners();
+    [owner, addr2] = await ethers.getSigners();
     sdk = await deployDCNTSDK();
+    await theFuture.reset();
+    saleStart = theFuture.time() + theFuture.oneDay
     clone = await deployDCNTCrescendo(
       sdk,
       name,
@@ -44,6 +47,7 @@ describe("DCNTCrescendo", async () => {
       hitch,
       takeRateBPS,
       unlockDate,
+      saleStart,
       royaltyBPS,
       metadataURI,
       metadataRendererInit
@@ -93,14 +97,25 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
     });
 
+    it("should not allow sales until after the start date", async () => {
+      await expect(crescendo.buy(0)).to.be.revertedWith(
+        'Sales are not active yet.'
+      );
+      await expect(crescendo.sell(0)).to.be.revertedWith(
+        'Sales are not active yet.'
+      );
+      await theFuture.travel(theFuture.oneDay);
+      await theFuture.arrive();
+    });
+
     it("should mint the user an nft", async () => {
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
       expect(await crescendo.calculateCurvedMintReturn(1,0)).to.equal(initialPrice.add(step1));
       expect(await crescendo.balanceOf(owner.address,0)).to.equal(1);
@@ -142,12 +157,12 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
 
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
     });
 
@@ -194,6 +209,25 @@ describe("DCNTCrescendo", async () => {
     });
   });
 
+  describe("flipSaleState()", async () => {
+    it("should prevent non-owner from flipping state", async () => {
+      await expect(crescendo.connect(addr2).flipSaleState()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
+    });
+
+    it("should prevent a user from buying or selling", async () => {
+      await crescendo.flipSaleState();
+      await expect(crescendo.buy(0)).to.be.revertedWith(
+        'Sale must be active to buy or sell'
+      );
+      await expect(crescendo.sell(0)).to.be.revertedWith(
+        'Sale must be active to buy or sell'
+      );
+      await crescendo.flipSaleState();
+    });
+  });
+
   describe("withdraw()", async () => {
     before(async () => {
       [addr1, addr2, addr3] = await ethers.getSigners();
@@ -207,6 +241,7 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -214,7 +249,6 @@ describe("DCNTCrescendo", async () => {
     });
 
     it("should withdraw according to the specificed take rate", async () => {
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
       const before = await ethers.provider.getBalance(owner.address);
 
@@ -268,11 +302,11 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
     });
 
@@ -311,14 +345,13 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         theFuture.time() + theFuture.oneDay,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
 
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
-
       await expect(crescendo.withdrawFund()).to.be.revertedWith('Crescendo is still locked');
     });
   });
@@ -335,11 +368,11 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
       await crescendo.createSplit(...split);
     });
@@ -369,6 +402,7 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -392,11 +426,11 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
       await crescendo.createSplit(...split);
     });
@@ -425,6 +459,7 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -446,12 +481,12 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         theFuture.time() + theFuture.oneDay,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
 
-      await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
       await crescendo.createSplit(...split);
 
@@ -481,6 +516,7 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         theFuture.time() + theFuture.oneDay,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -522,12 +558,12 @@ describe("DCNTCrescendo", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
       );
 
-      await freshNFT.flipSaleState();
       await freshNFT.buy(0, { value: initialPrice });
 
       const ownerRoyalty = await freshNFT.royaltyInfo(0, initialPrice);
@@ -552,6 +588,7 @@ describe("DCNTCrescendo", async () => {
         takeRateBPS,
         unlockDate,
         royaltyBPS,
+        saleStart,
         metadataURI,
         metadataRendererInit
       );

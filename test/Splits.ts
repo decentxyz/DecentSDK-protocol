@@ -3,13 +3,14 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT4907A, deployMockERC20, sortByAddress } from "../core";
+import { deployDCNTSDK, deployDCNT4907A, theFuture, deployMockERC20, sortByAddress } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('1');
 const maxTokenPurchase = 2;
+const saleStart = theFuture.time();
 const royaltyBPS = 10_000;
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
@@ -39,6 +40,7 @@ describe("Splits", async () => {
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      saleStart,
       royaltyBPS,
       metadataURI,
       metadataRendererInit
@@ -80,6 +82,7 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -93,7 +96,6 @@ describe("Splits", async () => {
 
   describe("distributeETH()", async () => {
     it("should transfer ETH to the split and distribute to receipients", async () => {
-      await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);
 
@@ -111,6 +113,7 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -147,6 +150,7 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -169,6 +173,7 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -178,7 +183,6 @@ describe("Splits", async () => {
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
       nft.createSplit(...split);
 
-      await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);
 
@@ -234,6 +238,7 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit
@@ -268,6 +273,7 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit

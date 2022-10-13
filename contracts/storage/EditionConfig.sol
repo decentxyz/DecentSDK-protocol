@@ -7,5 +7,6 @@ struct EditionConfig {
   uint256 maxTokens;
   uint256 tokenPrice;
   uint256 maxTokenPurchase;
+  uint256 saleStart;
   uint256 royaltyBPS;
 }

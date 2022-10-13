@@ -87,7 +87,7 @@ contract DCNTSDK is Ownable {
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,uint256,uint256,uint256,uint256),"
+          "(string,string,uint256,uint256,uint256,uint256,uint256),"
           "(string,bytes),"
           "address,"
           "address"
@@ -114,7 +114,7 @@ contract DCNTSDK is Ownable {
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,uint256,uint256,uint256,uint256),"
+          "(string,string,uint256,uint256,uint256,uint256,uint256),"
           "(string,bytes),"
           "address,"
           "address"
@@ -141,7 +141,7 @@ contract DCNTSDK is Ownable {
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+          "(string,string,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
           "(string,bytes),"
           "address,"
           "address"

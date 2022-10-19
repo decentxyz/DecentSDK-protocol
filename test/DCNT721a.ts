@@ -59,7 +59,7 @@ describe("DCNT721A", async () => {
       expect(ethers.utils.getAddress(await clone.owner())).to.equal(owner.address);
     });
 
-    it("should have the EIP-5553 based parent IP set to empty by default", async () => {
+    it("should have the EIP-5553 based parent IP set", async () => {
       expect(await clone.parentIP()).to.equal(parentIP.address);
     });
 
@@ -94,6 +94,21 @@ describe("DCNT721A", async () => {
       expect(meta.name).to.equal(`${name} 0`);
     });
 
+    it("should allow empty parent IP", async () => {
+      clone = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        royaltyBPS,
+        metadataURI,
+        null,
+      );
+
+      expect(await clone.parentIP()).to.equal('0x0000000000000000000000000000000000000000');
+    });
     it("should optionally set the base token URI", async () => {
       clone = await deployDCNT721A(
         sdk,

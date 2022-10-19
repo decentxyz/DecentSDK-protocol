@@ -55,6 +55,7 @@ describe("DCNT4907A", async () => {
       expect(await clone.MAX_TOKENS()).to.equal(maxTokens);
       expect(await clone.tokenPrice()).to.equal(tokenPrice);
       expect(await clone.maxTokenPurchase()).to.equal(maxTokenPurchase);
+      expect(await clone.parentIP()).to.equal(parentIP.address);
     });
   });
 

@@ -29,7 +29,8 @@ async function main() {
     maxTokenPurchase,
     royaltyBPS,
     metadataURI,
-    metadataRendererInit
+    metadataRendererInit,
+    null
   );
   console.log("DCNT721A deployed to: ", DCNT721A.address);
 }

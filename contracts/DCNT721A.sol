@@ -40,6 +40,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
 
   address public splitMain;
   address public splitWallet;
+  address public parentIP;
 
   /// ============ Events ============
 
@@ -66,6 +67,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     maxTokenPurchase = _editionConfig.maxTokenPurchase;
     royaltyBPS = _editionConfig.royaltyBPS;
     splitMain = _splitMain;
+    parentIP = _metadataConfig.parentIP;
 
     if (
       _metadataRenderer != address(0) &&

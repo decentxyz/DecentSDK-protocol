@@ -101,6 +101,7 @@ export const deployDCNTVaultNFT = async (decentSDK: Contract) => {
   return await tx.deployed();
 }
 
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const deployDCNT721A = async (
   decentSDK: Contract,
   name: string,
@@ -110,7 +111,8 @@ export const deployDCNT721A = async (
   maxTokenPurchase: number,
   royaltyBPS: number,
   metadataURI: string,
-  metadata: MetadataInit | null
+  metadata: MetadataInit | null,
+  parentIP: string =EMPTY_ADDRESS
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -135,6 +137,7 @@ export const deployDCNT721A = async (
     {
       metadataURI,
       metadataRendererInit,
+      parentIP
     }
   );
 
@@ -152,7 +155,9 @@ export const deployDCNT4907A = async (
   maxTokenPurchase: number,
   royaltyBPS: number,
   metadataURI: string,
-  metadata: MetadataInit | null
+  metadata: MetadataInit | null,
+  parentIP: string=EMPTY_ADDRESS
+
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -177,6 +182,7 @@ export const deployDCNT4907A = async (
     {
       metadataURI,
       metadataRendererInit,
+      parentIP
     }
   );
 
@@ -197,7 +203,8 @@ export const deployDCNTCrescendo = async (
   unlockDate: number,
   royaltyBPS: number,
   metadataURI: string,
-  metadata: MetadataInit | null
+  metadata: MetadataInit | null,
+  parentIP: string=EMPTY_ADDRESS
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -225,6 +232,7 @@ export const deployDCNTCrescendo = async (
     {
       metadataURI,
       metadataRendererInit,
+      parentIP
     }
   );
 
@@ -284,7 +292,8 @@ export const DCNTVaultNFTCreate = async (
   metadata: MetadataInit | null,
   vaultDistributionTokenAddress: string,
   unlockDate: number,
-  supports4907: boolean
+  supports4907: boolean,
+  parentIP:string =EMPTY_ADDRESS
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -310,6 +319,7 @@ export const DCNTVaultNFTCreate = async (
     {
       metadataURI,
       metadataRendererInit,
+      parentIP
     },
     vaultDistributionTokenAddress,
     unlockDate,

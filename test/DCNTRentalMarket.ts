@@ -21,12 +21,14 @@ describe("DCNTRentalMarket", async () => {
       renter: SignerWithAddress,
       sdk: Contract,
       nft: Contract,
-      rentalMarket: Contract;
+      rentalMarket: Contract,
+      parentIP: Contract
 
   describe("constructor()", async () => {
     before(async () => {
       [owner, fan, renter] = await ethers.getSigners();
       sdk = await deployDCNTSDK();
+      parentIP = await deployMockERC721();
       nft = await deployDCNT4907A(
         sdk,
         name,
@@ -36,7 +38,8 @@ describe("DCNTRentalMarket", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        parentIP.address
       );
       await nft.flipSaleState();
       await nft.connect(fan).mint(1, { value: tokenPrice });

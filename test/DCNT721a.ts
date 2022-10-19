@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT721A, sortByAddress, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNT721A,deployMockERC721, sortByAddress, base64decode } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -28,7 +28,8 @@ describe("DCNT721A", async () => {
       clone: Contract,
       nft: Contract,
       metadataRenderer: Contract,
-      split: any[];
+      split: any[],
+      parentIP: Contract;
 
   let overrides = { value: ethers.utils.parseEther("0.01") };
   let overrides2 = { value: ethers.utils.parseEther("0.02") };
@@ -38,6 +39,7 @@ describe("DCNT721A", async () => {
     before(async () => {
       [owner] = await ethers.getSigners();
       sdk = await deployDCNTSDK();
+      parentIP = await deployMockERC721();
       metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', sdk.metadataRenderer());
       clone = await deployDCNT721A(
         sdk,
@@ -48,12 +50,33 @@ describe("DCNT721A", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        parentIP.address
       );
     });
 
     it("should have the owner set as the EOA deploying the contract", async () => {
       expect(ethers.utils.getAddress(await clone.owner())).to.equal(owner.address);
+    });
+
+    it("should have the EIP-5553 based parent IP set to empty by default", async () => {
+      expect(await clone.parentIP()).to.equal(parentIP.address);
+    });
+
+    it("should optionally allow the EIP-5553 based parent IP to be empty", async () => {
+      const nftWithNoParent = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        royaltyBPS,
+        metadataURI,
+        metadataRendererInit,
+        
+      );
+      expect(await nftWithNoParent.parentIP()).to.equal('0x0000000000000000000000000000000000000000');
     });
 
     it("should initialize state which would otherwise be set in constructor", async () => {
@@ -81,7 +104,7 @@ describe("DCNT721A", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        null
+        null,
       );
 
       await clone.flipSaleState();
@@ -103,7 +126,7 @@ describe("DCNT721A", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
     });
 
@@ -149,7 +172,7 @@ describe("DCNT721A", async () => {
         maxTokens,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await freshNFT.flipSaleState();
@@ -223,7 +246,7 @@ describe("DCNT721A", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
       await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
@@ -253,7 +276,7 @@ describe("DCNT721A", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await expect(
@@ -284,7 +307,7 @@ describe("DCNT721A", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await freshNFT.flipSaleState();

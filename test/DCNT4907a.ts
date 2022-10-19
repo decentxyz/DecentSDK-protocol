@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT4907A, theFuture } from "../core";
+import { deployDCNTSDK, deployDCNT4907A, theFuture, deployMockERC721 } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -23,11 +23,13 @@ describe("DCNT4907A", async () => {
       sdk: Contract,
       clone: Contract,
       nft: Contract,
-      expiration: number;
+      expiration: number,
+      parentIP: Contract;
 
   before(async () => {
     [owner] = await ethers.getSigners();
     sdk = await deployDCNTSDK();
+    parentIP = await deployMockERC721()
     clone = await deployDCNT4907A(
       sdk,
       name,
@@ -37,7 +39,8 @@ describe("DCNT4907A", async () => {
       maxTokenPurchase,
       royaltyBPS,
       metadataURI,
-      metadataRendererInit
+      metadataRendererInit,
+      parentIP.address
     );
   });
 

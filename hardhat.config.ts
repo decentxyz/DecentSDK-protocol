@@ -1,5 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+require("@matterlabs/hardhat-zksync-deploy");
+require("@matterlabs/hardhat-zksync-solc");
 require("dotenv").config();
 import './tasks'
 
@@ -38,6 +40,9 @@ const config: HardhatUserConfig = {
       url: process.env.ARBITRUM_TESTNET_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },
+    hardhat: {
+      zksync: true,
+    },
   },
   etherscan: {
     apiKey: {
@@ -71,6 +76,25 @@ const config: HardhatUserConfig = {
     currency: 'USD',
     coinmarketcap: process.env.COINMARKETCAP_KEY,
     enabled: false
+  },
+  zksolc: {
+    version: "1.2.0",
+    compilerSource: "binary",
+    settings: {
+      optimizer: {
+        enabled: true,
+      },
+      experimental: {
+        dockerImage: "matterlabs/zksolc",
+        tag: "v1.2.0"
+      }
+    },
+  },
+  zkSyncDeploy: {
+    zkSyncNetwork: 'http://localhost:3050',
+    ethNetwork: 'http://localhost:8545',
+    // zkSyncNetwork: "https://zksync2-testnet.zksync.dev",
+    // ethNetwork: "goerli",
   },
 };
 

@@ -3,11 +3,14 @@
     "tabWidth": 2
   },
   "dependencies": {
+    "@matterlabs/hardhat-zksync-deploy": "^0.5.2",
+    "@matterlabs/hardhat-zksync-solc": "^0.3.10",
     "@openzeppelin/contracts": "^4.7.2",
     "dotenv": "^16.0.1",
     "erc721a": "^4.2.2",
     "hardhat": "^2.10.1",
-    "solmate": "^6.5.0"
+    "solmate": "^6.5.0",
+    "zksync-web3": "^0.11.1"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",

@@ -23,10 +23,7 @@ import "./storage/MetadataConfig.sol";
 import "./storage/CrescendoConfig.sol";
 
 contract DCNTSDK is Ownable {
-  /// ============ Immutable storage ============
-
-  /// ============ Mutable storage ============
-
+  /// ============ Storage ===========
   /// @notice implementation addresses for base contracts
   address public DCNT721AImplementation;
   address public DCNT4907AImplementation;

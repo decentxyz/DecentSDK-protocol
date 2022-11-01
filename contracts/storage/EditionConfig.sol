@@ -9,4 +9,5 @@ struct EditionConfig {
   uint256 maxTokenPurchase;
   uint256 saleStart;
   uint256 royaltyBPS;
+  bool adjustableCap;
 }

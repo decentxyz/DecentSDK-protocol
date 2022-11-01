@@ -10,4 +10,6 @@ struct EditionConfig {
   uint256 saleStart;
   uint256 royaltyBPS;
   bool adjustableCap;
+  uint256 presaleStart;
+  uint256 presaleEnd;
 }

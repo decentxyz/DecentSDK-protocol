@@ -40,6 +40,8 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
   string public baseURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
+  uint256 public presaleStart;
+  uint256 public presaleEnd;
 
   address public splitMain;
   address public splitWallet;
@@ -86,6 +88,8 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     adjustableCap = _editionConfig.adjustableCap;
     splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
+    presaleStart = _editionConfig.presaleStart;
+    presaleEnd = _editionConfig.presaleEnd;
 
     if (
       _metadataRenderer != address(0) &&
@@ -146,7 +150,6 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     }
   }
  
-  // do a little bit more here
   function mintPresale(
     uint256 quantity,
     uint256 maxQuantity,
@@ -157,6 +160,13 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     payable
     verifyTokenGate(true) 
   {
+    require (block.timestamp >= presaleStart && block.timestamp <= presaleEnd, 'not presale');
+    uint256 mintIndex = _nextTokenId();
+    require(!saleIsPaused, "Sale must be active to mint");
+    require(
+      mintIndex + quantity <= MAX_TOKENS,
+      "Purchase would exceed max supply"
+    );
     require (MerkleProof.verify(
         merkleProof,
         presaleMerkleRoot,
@@ -167,7 +177,13 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
       ), 'not approved');
 
     require(msg.value >= (pricePerToken * quantity), "Insufficient funds");
-    require(balanceOf(msg.sender) <= maxQuantity, 'minted too many');
+    require(balanceOf(msg.sender) + quantity <= maxQuantity, 'minted too many');
+    _safeMint(msg.sender, quantity);
+    unchecked {
+      for (uint256 i = 0; i < quantity; i++) {
+        emit Minted(msg.sender, mintIndex++);
+      }
+    }
   }
 
   function flipSaleState() external onlyOwner {

@@ -6,10 +6,17 @@
 - copy `.env.example` to `.env` and add your variables
 - `npx hardhat run scripts/deployDCNTSDK.ts --network optimism_testnet` to deploy the DecentSDK
 
-### Testing
+### Testing - Hardhat
 
 - `npm i` to install packages
 - `npx hardhat test`
+
+### Testing - Foundry
+
+- Install [Foundry](https://github.com/foundry-rs/foundry)
+- `foundryup`
+- `yarn build`
+- `yarn test`
 
 ### Prettying
 

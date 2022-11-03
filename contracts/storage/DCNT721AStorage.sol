@@ -7,7 +7,7 @@ import './TokenGateConfig.sol';
 
 contract DCNT721AStorage {
   // everything needed related the to token
-  // EditionConfig public editionConfig;
+  EditionConfig public editionConfig;
 
   // token data
   // MetadataConfig public metadataConfig;

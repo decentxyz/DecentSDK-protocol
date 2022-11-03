@@ -1,9 +1,10 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+require('hardhat-contract-sizer');
 require("dotenv").config();
 import './tasks'
 
-const config: HardhatUserConfig = {
+const config = {
   solidity: "0.8.9",
   networks: {
     mainnet: {
@@ -71,6 +72,13 @@ const config: HardhatUserConfig = {
     currency: 'USD',
     coinmarketcap: process.env.COINMARKETCAP_KEY,
     enabled: false
+  },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+    only: [],
   },
 };
 

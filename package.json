@@ -7,6 +7,7 @@
     "dotenv": "^16.0.1",
     "erc721a": "^4.2.2",
     "hardhat": "^2.10.1",
+    "hardhat-contract-sizer": "^2.6.1",
     "solmate": "^6.5.0"
   },
   "devDependencies": {

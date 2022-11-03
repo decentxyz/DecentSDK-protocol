@@ -101,7 +101,6 @@ export const deployDCNTVaultNFT = async (decentSDK: Contract) => {
   return await tx.deployed();
 }
 
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const deployDCNT721A = async (
   decentSDK: Contract,
   name: string,
@@ -112,7 +111,7 @@ export const deployDCNT721A = async (
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
-  parentIP: string =EMPTY_ADDRESS
+  parentIP: string = ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -156,7 +155,7 @@ export const deployDCNT4907A = async (
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
-  parentIP: string=EMPTY_ADDRESS
+  parentIP: string= ethers.constants.AddressZero
 
 ) => {
   const metadataRendererInit = metadata != null
@@ -204,7 +203,7 @@ export const deployDCNTCrescendo = async (
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
-  parentIP: string=EMPTY_ADDRESS
+  parentIP: string= ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -293,7 +292,7 @@ export const DCNTVaultNFTCreate = async (
   vaultDistributionTokenAddress: string,
   unlockDate: number,
   supports4907: boolean,
-  parentIP:string =EMPTY_ADDRESS
+  parentIP:string = ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(

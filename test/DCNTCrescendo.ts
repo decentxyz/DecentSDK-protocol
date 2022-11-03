@@ -32,7 +32,6 @@ describe("DCNTCrescendo", async () => {
       split: any[],
       parentIP: Contract;
 
-
   before(async () => {
     [owner] = await ethers.getSigners();
     sdk = await deployDCNTSDK();
@@ -64,7 +63,7 @@ describe("DCNTCrescendo", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
       expect(await clone.uri(0)).to.equal(metadataURI);
-      
+
       //EIP 5553 parent IP
       expect(await clone.parentIP()).to.equal(parentIP.address);
 
@@ -151,7 +150,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       await crescendo.flipSaleState();
@@ -216,7 +215,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
     });
 
@@ -277,7 +276,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -320,7 +319,7 @@ describe("DCNTCrescendo", async () => {
         theFuture.time() + theFuture.oneDay,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       await crescendo.flipSaleState();
@@ -344,7 +343,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -378,7 +377,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       await expect(
@@ -401,7 +400,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -434,7 +433,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       await expect(
@@ -455,7 +454,7 @@ describe("DCNTCrescendo", async () => {
         theFuture.time() + theFuture.oneDay,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       await crescendo.flipSaleState();
@@ -490,7 +489,7 @@ describe("DCNTCrescendo", async () => {
         theFuture.time() + theFuture.oneDay,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       await expect(
@@ -531,7 +530,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       await freshNFT.flipSaleState();
@@ -560,7 +559,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit,
+        metadataRendererInit
       );
 
       metadataRenderer = await deployDCNTMetadataRenderer();

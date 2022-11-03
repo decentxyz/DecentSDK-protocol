@@ -21,6 +21,9 @@ export const theFuture = (() => {
         await ethers.provider.send('evm_mine', []);
       }
     },
+    reset: async () => {
+      future = await time.latest();
+    },
     oneDay: 60 * 60 * 24,
     oneMonth: 60 * 60 * 24 * 30,
     oneYear: 60 * 60 * 24 * 365,
@@ -108,6 +111,7 @@ export const deployDCNT721A = async (
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  saleStart: number,
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -131,6 +135,7 @@ export const deployDCNT721A = async (
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      saleStart,
       royaltyBPS,
     },
     {
@@ -152,6 +157,7 @@ export const deployDCNT4907A = async (
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  saleStart: number,
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -176,6 +182,7 @@ export const deployDCNT4907A = async (
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      saleStart,
       royaltyBPS,
     },
     {
@@ -200,6 +207,7 @@ export const deployDCNTCrescendo = async (
   hitch: number,
   takeRateBPS: number,
   unlockDate: number,
+  saleStart: number,
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -226,6 +234,7 @@ export const deployDCNTCrescendo = async (
       hitch,
       takeRateBPS,
       unlockDate,
+      saleStart,
       royaltyBPS,
     },
     {
@@ -286,6 +295,7 @@ export const DCNTVaultNFTCreate = async (
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  saleStart: number,
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -313,6 +323,7 @@ export const DCNTVaultNFTCreate = async (
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      saleStart,
       royaltyBPS,
     },
     {

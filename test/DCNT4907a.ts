@@ -10,6 +10,7 @@ const symbol = 'DCNT';
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const saleStart = theFuture.time();
 const royaltyBPS = 10_00;
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
@@ -37,6 +38,7 @@ describe("DCNT4907A", async () => {
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      saleStart,
       royaltyBPS,
       metadataURI,
       metadataRendererInit,
@@ -62,7 +64,6 @@ describe("DCNT4907A", async () => {
   describe("setUser()", async () => {
     before(async () => {
       [addr1, addr2] = await ethers.getSigners();
-      await clone.flipSaleState();
       await clone.mint(1, { value: tokenPrice });
       expiration = theFuture.time() + theFuture.oneDay;
       await clone.setUser(0, addr2.address, expiration);

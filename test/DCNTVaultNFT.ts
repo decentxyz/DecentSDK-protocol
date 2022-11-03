@@ -10,6 +10,7 @@ const symbol = 'DCNT';
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const saleStart = theFuture.time();
 const royaltyBPS = 10_000;
 const metadataURI = 'http://localhost/metadata/';
 const metadataRendererInit = null;
@@ -48,6 +49,7 @@ describe("DCNTVaultNFT", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit,
@@ -94,6 +96,7 @@ describe("DCNTVaultNFT", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit,

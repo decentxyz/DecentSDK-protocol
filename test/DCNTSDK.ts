@@ -68,7 +68,8 @@ describe("DCNTSDK", async () => {
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
-      const royaltyBPS = 1000;
+      const saleStart = theFuture.time();
+      const royaltyBPS = 10_00;
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
 
@@ -79,6 +80,7 @@ describe("DCNTSDK", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit,
@@ -103,6 +105,7 @@ describe("DCNTSDK", async () => {
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
+      const saleStart = theFuture.time();
       const royaltyBPS = 10_00;
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
@@ -114,6 +117,7 @@ describe("DCNTSDK", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit,
@@ -141,8 +145,9 @@ describe("DCNTSDK", async () => {
       const step2 = ethers.utils.parseEther("0.05");
       const hitch = 20;
       const takeRateBPS = 15_00;
-      const royaltyBPS = 10_00;
       const unlockDate = theFuture.time();
+      const saleStart = theFuture.time();
+      const royaltyBPS = 10_00;
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
 
@@ -156,6 +161,7 @@ describe("DCNTSDK", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit,

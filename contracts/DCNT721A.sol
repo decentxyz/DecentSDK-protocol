@@ -33,7 +33,8 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
   uint256 public tokenPrice;
   uint256 public maxTokenPurchase;
 
-  bool public saleIsActive = false;
+  uint256 public saleStart;
+  bool public saleIsPaused;
   string public baseURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
@@ -65,6 +66,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     MAX_TOKENS = _editionConfig.maxTokens;
     tokenPrice = _editionConfig.tokenPrice;
     maxTokenPurchase = _editionConfig.maxTokenPurchase;
+    saleStart = _editionConfig.saleStart;
     royaltyBPS = _editionConfig.royaltyBPS;
     splitMain = _splitMain;
     parentIP = _metadataConfig.parentIP;
@@ -84,7 +86,8 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
 
   function mint(uint256 numberOfTokens) external payable {
     uint256 mintIndex = totalSupply();
-    require(saleIsActive, "Sale must be active to mint");
+    require(block.timestamp >= saleStart, "Sales are not active yet.");
+    require(!saleIsPaused, "Sale must be active to mint");
     require(
       mintIndex + numberOfTokens <= MAX_TOKENS,
       "Purchase would exceed max supply"
@@ -102,7 +105,11 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
   }
 
   function flipSaleState() external onlyOwner {
-    saleIsActive = !saleIsActive;
+    saleIsPaused = !saleIsPaused;
+  }
+
+  function saleIsActive() external view returns(bool _saleIsActive) {
+    _saleIsActive = (block.timestamp >= saleStart) && (!saleIsPaused);
   }
 
   function withdraw() external onlyOwner {

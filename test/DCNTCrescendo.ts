@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNTCrescendo, theFuture, sortByAddress, deployDCNTMetadataRenderer } from "../core";
+import { deployDCNTSDK, deployDCNTCrescendo, theFuture, sortByAddress, deployDCNTMetadataRenderer, deployMockERC721 } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -29,11 +29,14 @@ describe("DCNTCrescendo", async () => {
       clone: Contract,
       crescendo: Contract,
       metadataRenderer: Contract,
-      split: any[];
+      split: any[],
+      parentIP: Contract;
+
 
   before(async () => {
     [owner] = await ethers.getSigners();
     sdk = await deployDCNTSDK();
+    parentIP = await deployMockERC721();
     clone = await deployDCNTCrescendo(
       sdk,
       name,
@@ -46,7 +49,8 @@ describe("DCNTCrescendo", async () => {
       unlockDate,
       royaltyBPS,
       metadataURI,
-      metadataRendererInit
+      metadataRendererInit,
+      parentIP.address
     );
   });
 
@@ -60,6 +64,9 @@ describe("DCNTCrescendo", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
       expect(await clone.uri(0)).to.equal(metadataURI);
+      
+      //EIP 5553 parent IP
+      expect(await clone.parentIP()).to.equal(parentIP.address);
 
       // private state
       const key = ethers.utils.defaultAbiCoder.encode(["uint256","uint256"],[0,12]);
@@ -144,7 +151,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await crescendo.flipSaleState();
@@ -209,7 +216,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
     });
 
@@ -270,7 +277,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -313,7 +320,7 @@ describe("DCNTCrescendo", async () => {
         theFuture.time() + theFuture.oneDay,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await crescendo.flipSaleState();
@@ -337,7 +344,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -371,7 +378,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await expect(
@@ -394,7 +401,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
       await crescendo.flipSaleState();
       await crescendo.buy(0, { value: initialPrice });
@@ -427,7 +434,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await expect(
@@ -448,7 +455,7 @@ describe("DCNTCrescendo", async () => {
         theFuture.time() + theFuture.oneDay,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await crescendo.flipSaleState();
@@ -483,7 +490,7 @@ describe("DCNTCrescendo", async () => {
         theFuture.time() + theFuture.oneDay,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await expect(
@@ -524,7 +531,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       await freshNFT.flipSaleState();
@@ -553,7 +560,7 @@ describe("DCNTCrescendo", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
       );
 
       metadataRenderer = await deployDCNTMetadataRenderer();

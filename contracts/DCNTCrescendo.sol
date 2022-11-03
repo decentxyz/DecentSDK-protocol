@@ -70,6 +70,7 @@ contract DCNTCrescendo is
   /// @notice DCNTMetadataRenderer address
   address public metadataRenderer;
 
+  address public parentIP;
   /// ============ Constructor ============
 
   function initialize(
@@ -93,6 +94,7 @@ contract DCNTCrescendo is
     _symbol = _config.symbol;
     royaltyBPS = _config.royaltyBPS;
     splitMain = _splitMain;
+    parentIP = _metadataConfig.parentIP;
 
     if (
       _metadataRenderer != address(0) &&

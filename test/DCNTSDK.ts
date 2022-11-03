@@ -13,7 +13,8 @@ import {
   deployDCNTStaking,
   deployDCNTMetadataRenderer,
   deployContract,
-  theFuture
+  theFuture,
+  deployMockERC721
 } from "../core";
 
 describe("DCNTSDK", async () => {
@@ -22,7 +23,8 @@ describe("DCNTSDK", async () => {
       metadataRenderer: Contract,
       contractRegistry: Contract,
       sdk: Contract,
-      clone: Contract;
+      clone: Contract,
+      parentIP: Contract;
 
   before(async () => {
     [owner] = await ethers.getSigners();
@@ -30,6 +32,7 @@ describe("DCNTSDK", async () => {
     metadataRenderer = await deployDCNTMetadataRenderer();
     contractRegistry = await deployContract('DCNTRegistry');
     sdk = await deployDCNTSDK(implementations, metadataRenderer, contractRegistry);
+    parentIP = await deployMockERC721();
   });
 
   describe("constructor()", async () => {
@@ -78,7 +81,8 @@ describe("DCNTSDK", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        parentIP.address
       );
     });
 
@@ -112,7 +116,8 @@ describe("DCNTSDK", async () => {
         maxTokenPurchase,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        parentIP.address
       );
     });
 
@@ -153,7 +158,8 @@ describe("DCNTSDK", async () => {
         unlockDate,
         royaltyBPS,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        parentIP.address
       );
     });
 

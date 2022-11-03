@@ -88,7 +88,7 @@ contract DCNTSDK is Ownable {
         "initialize("
           "address,"
           "(string,string,uint256,uint256,uint256,uint256),"
-          "(string,bytes),"
+          "(string,bytes,address),"
           "address,"
           "address"
         ")",
@@ -115,7 +115,7 @@ contract DCNTSDK is Ownable {
         "initialize("
           "address,"
           "(string,string,uint256,uint256,uint256,uint256),"
-          "(string,bytes),"
+          "(string,bytes,address),"
           "address,"
           "address"
         ")",
@@ -142,7 +142,7 @@ contract DCNTSDK is Ownable {
         "initialize("
           "address,"
           "(string,string,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
-          "(string,bytes),"
+          "(string,bytes,address),"
           "address,"
           "address"
         ")",

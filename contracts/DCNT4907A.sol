@@ -44,7 +44,7 @@ contract DCNT4907A is DCNT721A, ERC4907A {
     public
     view
     virtual
-    override(DCNT721A, ERC721A)
+    override(DCNT721A, ERC721A, IERC721A)
     returns (string memory)
   {
     return DCNT721A.tokenURI(tokenId);

@@ -75,6 +75,7 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        saleStart,
         royaltyBPS,
         metadataURI,
         metadataRendererInit

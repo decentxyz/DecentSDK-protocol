@@ -115,7 +115,10 @@ export const deployDCNT721A = async (
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
-  parentIP: string = ethers.constants.AddressZero
+  parentIP: string = ethers.constants.AddressZero,
+  adjustableCap: boolean = false,
+  presaleStart: number = 0,
+  presaleEnd: number = 0,
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -137,11 +140,19 @@ export const deployDCNT721A = async (
       maxTokenPurchase,
       saleStart,
       royaltyBPS,
+      adjustableCap,
+      presaleStart,
+      presaleEnd,
     },
     {
       metadataURI,
       metadataRendererInit,
-      parentIP
+      parentIP,
+    },
+    {
+      tokenAddress: ethers.constants.AddressZero,
+      minBalance: 0,
+      saleType: 0,
     }
   );
 
@@ -161,8 +172,10 @@ export const deployDCNT4907A = async (
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
-  parentIP: string= ethers.constants.AddressZero
-
+  parentIP: string= ethers.constants.AddressZero,
+  adjustableCap: boolean = false,
+  presaleStart: number = 0,
+  presaleEnd: number = 0
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -184,11 +197,19 @@ export const deployDCNT4907A = async (
       maxTokenPurchase,
       saleStart,
       royaltyBPS,
+      adjustableCap,
+      presaleStart,
+      presaleEnd,
     },
     {
       metadataURI,
       metadataRendererInit,
       parentIP
+    },
+    {
+      tokenAddress: ethers.constants.AddressZero,
+      minBalance: 0,
+      saleType: 0,
     }
   );
 
@@ -302,7 +323,10 @@ export const DCNTVaultNFTCreate = async (
   vaultDistributionTokenAddress: string,
   unlockDate: number,
   supports4907: boolean,
-  parentIP:string = ethers.constants.AddressZero
+  parentIP: string = ethers.constants.AddressZero,
+  adjustableCap: boolean = false,
+  presaleStart: number = 0,
+  presaleEnd: number = 0
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -325,11 +349,19 @@ export const DCNTVaultNFTCreate = async (
       maxTokenPurchase,
       saleStart,
       royaltyBPS,
+      adjustableCap,
+      presaleStart,
+      presaleEnd,
     },
     {
       metadataURI,
       metadataRendererInit,
       parentIP
+    },
+    {
+      tokenAddress: ethers.constants.AddressZero,
+      minBalance: 0,
+      saleType: 0,
     },
     vaultDistributionTokenAddress,
     unlockDate,

@@ -108,17 +108,17 @@ export const deployDCNT721A = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
+  adjustableCap: boolean,
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  presaleStart: number,
+  presaleEnd: number,
   saleStart: number,
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
-  parentIP: string = ethers.constants.AddressZero,
-  adjustableCap: boolean = false,
-  presaleStart: number = 0,
-  presaleEnd: number = 0,
+  parentIP: string = ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -135,14 +135,14 @@ export const deployDCNT721A = async (
     {
       name,
       symbol,
+      adjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
-      saleStart,
-      royaltyBPS,
-      adjustableCap,
       presaleStart,
       presaleEnd,
+      saleStart,
+      royaltyBPS,
     },
     {
       metadataURI,
@@ -165,17 +165,17 @@ export const deployDCNT4907A = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
+  adjustableCap: boolean,
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  presaleStart: number,
+  presaleEnd: number,
   saleStart: number,
   royaltyBPS: number,
   metadataURI: string,
   metadata: MetadataInit | null,
-  parentIP: string= ethers.constants.AddressZero,
-  adjustableCap: boolean = false,
-  presaleStart: number = 0,
-  presaleEnd: number = 0
+  parentIP: string= ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -192,14 +192,14 @@ export const deployDCNT4907A = async (
     {
       name,
       symbol,
+      adjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
-      saleStart,
-      royaltyBPS,
-      adjustableCap,
       presaleStart,
       presaleEnd,
+      saleStart,
+      royaltyBPS,
     },
     {
       metadataURI,
@@ -313,9 +313,12 @@ export const DCNTVaultNFTCreate = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
+  adjustableCap: boolean,
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  presaleStart: number,
+  presaleEnd: number,
   saleStart: number,
   royaltyBPS: number,
   metadataURI: string,
@@ -323,10 +326,7 @@ export const DCNTVaultNFTCreate = async (
   vaultDistributionTokenAddress: string,
   unlockDate: number,
   supports4907: boolean,
-  parentIP: string = ethers.constants.AddressZero,
-  adjustableCap: boolean = false,
-  presaleStart: number = 0,
-  presaleEnd: number = 0
+  parentIP: string = ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -344,14 +344,14 @@ export const DCNTVaultNFTCreate = async (
     {
       name,
       symbol,
+      adjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
-      saleStart,
-      royaltyBPS,
-      adjustableCap,
       presaleStart,
       presaleEnd,
+      saleStart,
+      royaltyBPS,
     },
     {
       metadataURI,

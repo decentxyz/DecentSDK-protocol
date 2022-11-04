@@ -65,9 +65,12 @@ describe("DCNTSDK", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
+      const adjustableCap = false;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
+      const presaleStart = theFuture.time();
+      const presaleEnd = theFuture.time();
       const saleStart = theFuture.time();
       const royaltyBPS = 10_00;
       const metadataURI = 'http://localhost/metadata/';
@@ -77,9 +80,12 @@ describe("DCNTSDK", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
         saleStart,
         royaltyBPS,
         metadataURI,
@@ -102,9 +108,12 @@ describe("DCNTSDK", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
+      const adjustableCap = false;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
+      const presaleStart = theFuture.time();
+      const presaleEnd = theFuture.time();
       const saleStart = theFuture.time();
       const royaltyBPS = 10_00;
       const metadataURI = 'http://localhost/metadata/';
@@ -114,9 +123,12 @@ describe("DCNTSDK", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
         saleStart,
         royaltyBPS,
         metadataURI,

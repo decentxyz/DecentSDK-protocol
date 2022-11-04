@@ -7,9 +7,12 @@ import { deployDCNTSDK, deployDCNTVaultNFT, DCNTVaultNFTCreate, theFuture } from
 
 const name = 'Decent';
 const symbol = 'DCNT';
+const adjustableCap = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const presaleStart = theFuture.time();
+const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const royaltyBPS = 10_000;
 const metadataURI = 'http://localhost/metadata/';
@@ -46,9 +49,12 @@ describe("DCNTVaultNFT", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
         saleStart,
         royaltyBPS,
         metadataURI,
@@ -93,9 +99,12 @@ describe("DCNTVaultNFT", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
         saleStart,
         royaltyBPS,
         metadataURI,

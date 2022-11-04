@@ -266,29 +266,31 @@ contract SharedNFTLogic is IOnChainMetadata {
   function _formatProjectMetadata(ProjectMetadata memory _metadata)
     internal
     pure
-    returns (bytes memory)
+    returns (bytes memory output)
   {
-    return
-      abi.encodePacked(
-        '"project": {',
-        '"title": "',
-        _metadata.publishingData.title,
-        '", "description": "',
-        _metadata.publishingData.description,
-        '", "type": "',
-        _metadata.projectType,
-        '", "originalReleaseDate": "',
-        _metadata.publishingData.releaseDate,
-        '", "recordLabel": "',
-        _metadata.publishingData.recordLabel,
-        '", "publisher": "',
-        _metadata.publishingData.publisher,
-        '", "upc": "',
-        _metadata.upc,
-        '",',
-        _formatArtwork("artwork", _metadata.artwork),
-        "}"
-      );
+    output = abi.encodePacked(
+      '"project": {',
+      '"title": "',
+      _metadata.publishingData.title,
+      '", "description": "',
+      _metadata.publishingData.description,
+      '", "type": "',
+      _metadata.projectType,
+      '", "originalReleaseDate": "',
+      _metadata.publishingData.releaseDate
+    );
+
+    return bytes.concat(output, abi.encodePacked(
+      '", "recordLabel": "',
+      _metadata.publishingData.recordLabel,
+      '", "publisher": "',
+      _metadata.publishingData.publisher,
+      '", "upc": "',
+      _metadata.upc,
+      '",',
+      _formatArtwork("artwork", _metadata.artwork),
+      "}"
+    ));
   }
 
   function _formatAudio(Audio memory audio)
@@ -458,32 +460,39 @@ contract SharedNFTLogic is IOnChainMetadata {
     SongDetails memory _songDetails,
     ProjectMetadata memory _projectMetadata,
     PublishingData memory _publishingData
-  ) internal pure returns (bytes memory) {
+  )
+    internal
+    pure
+    returns (bytes memory output)
+  {
     AudioQuantitative memory _audioQuantitative = _songDetails
       .audioQuantitative;
     AudioQualitative memory _audioQualitative = _songDetails.audioQualitative;
-    return
-      abi.encodePacked(
-        '"',
-        _label,
-        '": {"number": ',
-        numberToString(_tokenOfEdition),
-        ', "bpm": ',
-        numberToString(_audioQuantitative.bpm),
-        ', "key": "',
-        _audioQuantitative.key,
-        '", "genre": "',
-        _audioQualitative.genre,
-        '", "project": "',
-        _projectMetadata.publishingData.title,
-        '", "artist": "',
-        _songDetails.artistName,
-        '", "recordLabel": "',
-        _publishingData.recordLabel,
-        '", "license": "',
-        _audioQualitative.license,
-        '"}'
-      );
+
+    output = abi.encodePacked(
+      '"',
+      _label,
+      '": {"number": ',
+      numberToString(_tokenOfEdition),
+      ', "bpm": ',
+      numberToString(_audioQuantitative.bpm),
+      ', "key": "',
+      _audioQuantitative.key,
+      '", "genre": "',
+      _audioQualitative.genre
+    );
+
+    return bytes.concat(output, abi.encodePacked(
+      '", "project": "',
+      _projectMetadata.publishingData.title,
+      '", "artist": "',
+      _songDetails.artistName,
+      '", "recordLabel": "',
+      _publishingData.recordLabel,
+      '", "license": "',
+      _audioQualitative.license,
+      '"}'
+    ));
   }
 
   function _getArrayString(string[] memory _array)

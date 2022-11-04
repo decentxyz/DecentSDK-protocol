@@ -45,10 +45,10 @@ contract DCNTCrescendo is
   string private _uri;
   string private _contractURI;
 
-  uint256 private step1;
-  uint256 private step2;
-  uint256 private hitch;
-  uint256 private takeRateBPS;
+  uint256 public step1;
+  uint256 public step2;
+  uint256 public hitch;
+  uint256 public takeRateBPS;
   uint256 public royaltyBPS;
 
   // id to supply
@@ -56,7 +56,7 @@ contract DCNTCrescendo is
   // id to current price
   mapping(uint256 => uint256) private _currentPrice;
 
-  uint256 private totalWithdrawn = 0;
+  uint256 public totalWithdrawn = 0;
 
   uint256 public saleStart;
   bool public saleIsPaused;

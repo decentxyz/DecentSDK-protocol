@@ -23,7 +23,7 @@ import "erc721a/contracts/IERC721A.sol";
 /// @notice DCNTMetadataRenderer for editions support
 contract DCNTMetadataRenderer is IMetadataRenderer, MusicMetadata, Credits {
   /// @notice Reference to Shared NFT logic library
-  ISharedNFTLogic private immutable sharedNFTLogic;
+  ISharedNFTLogic public immutable sharedNFTLogic;
 
   /// @notice Constructor for library
   /// @param _sharedNFTLogic reference to shared NFT logic library

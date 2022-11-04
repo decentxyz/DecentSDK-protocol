@@ -21,14 +21,16 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "./storage/DCNT721AStorage.sol";
 import "./utils/Splits.sol";
+import './interfaces/ITokenWithBalance.sol';
 
 /// @title template NFT contract
-contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
-  /// ============ Immutable storage ============
+contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
 
-  /// ============ Mutable storage ============
-
+  bool public adjustableCap;
+  bool public isSoulbound;
   uint256 public MAX_TOKENS;
   uint256 public tokenPrice;
   uint256 public maxTokenPurchase;
@@ -38,10 +40,13 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
   string public baseURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
+  uint256 public presaleStart;
+  uint256 public presaleEnd;
 
   address public splitMain;
   address public splitWallet;
   address public parentIP;
+  bytes32 private presaleMerkleRoot;
 
   /// ============ Events ============
 
@@ -50,12 +55,25 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
   /// @param tokenId_ of token minted
   event Minted(address sender, uint256 tokenId_);
 
+  /// ========== Modifier =============
+  modifier verifyTokenGate(bool isPresale) {
+    if (tokenGateConfig.tokenAddress != address(0)
+      && (tokenGateConfig.saleType == SaleType.ALL ||
+          isPresale && tokenGateConfig.saleType == SaleType.PRESALE) ||
+          !isPresale && tokenGateConfig.saleType == SaleType.PRIMARY) {
+            require(ITokenWithBalance(tokenGateConfig.tokenAddress).balanceOf(msg.sender) >= tokenGateConfig.minBalance, 'do not own required token');
+    }
+
+    _;
+  }
+
   /// ============ Constructor ============
 
   function initialize(
     address _owner,
     EditionConfig memory _editionConfig,
     MetadataConfig memory _metadataConfig,
+    TokenGateConfig memory _tokenGateConfig,
     address _metadataRenderer,
     address _splitMain
   ) public initializer {
@@ -68,8 +86,12 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     maxTokenPurchase = _editionConfig.maxTokenPurchase;
     saleStart = _editionConfig.saleStart;
     royaltyBPS = _editionConfig.royaltyBPS;
-    splitMain = _splitMain;
+    adjustableCap = _editionConfig.adjustableCap;
     parentIP = _metadataConfig.parentIP;
+    splitMain = _splitMain;
+    tokenGateConfig = _tokenGateConfig;
+    presaleStart = _editionConfig.presaleStart;
+    presaleEnd = _editionConfig.presaleEnd;
 
     if (
       _metadataRenderer != address(0) &&
@@ -84,8 +106,12 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     }
   }
 
-  function mint(uint256 numberOfTokens) external payable {
-    uint256 mintIndex = totalSupply();
+  function mint(uint256 numberOfTokens)
+    external
+    payable
+    verifyTokenGate(false)
+  {
+    uint256 mintIndex = _nextTokenId();
     require(block.timestamp >= saleStart, "Sales are not active yet.");
     require(!saleIsPaused, "Sale must be active to mint");
     require(
@@ -99,8 +125,66 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     }
 
     _safeMint(msg.sender, numberOfTokens);
-    for (uint256 i = 0; i < numberOfTokens; i++) {
-      emit Minted(msg.sender, mintIndex++);
+    unchecked {
+      for (uint256 i = 0; i < numberOfTokens; i++) {
+        emit Minted(msg.sender, mintIndex++);
+      }
+    }
+  }
+
+  // allows the owner to "airdrop" users an NFT
+  function mintAirdrop(address[] calldata recipients) external onlyOwner {
+    uint256 atId = _nextTokenId();
+    uint256 startAt = atId;
+    require(atId + recipients.length <= MAX_TOKENS,
+      "Purchase would exceed max supply"
+    );
+
+    unchecked {
+      for (
+        uint256 endAt = atId + recipients.length;
+        atId < endAt;
+        atId++
+      ) {
+        _safeMint(recipients[atId - startAt], 1);
+        emit Minted(recipients[atId - startAt], atId);
+      }
+    }
+  }
+
+  function mintPresale(
+    uint256 quantity,
+    uint256 maxQuantity,
+    uint256 pricePerToken,
+    bytes32[] calldata merkleProof
+  )
+    external
+    payable
+    verifyTokenGate(true)
+  {
+    require (block.timestamp >= presaleStart && block.timestamp <= presaleEnd, 'not presale');
+    uint256 mintIndex = _nextTokenId();
+    require(!saleIsPaused, "Sale must be active to mint");
+    require(
+      mintIndex + quantity <= MAX_TOKENS,
+      "Purchase would exceed max supply"
+    );
+    require (MerkleProof.verify(
+        merkleProof,
+        presaleMerkleRoot,
+        keccak256(
+          // address, uint256, uint256
+          abi.encode(msg.sender,maxQuantity,pricePerToken)
+        )
+      ), 'not approved');
+
+    require(msg.value >= (pricePerToken * quantity), "Insufficient funds");
+    require(balanceOf(msg.sender) + quantity <= maxQuantity, 'minted too many');
+    _safeMint(msg.sender, quantity);
+    unchecked {
+      for (uint256 i = 0; i < quantity; i++) {
+        emit Minted(msg.sender, mintIndex++);
+      }
     }
   }
 
@@ -110,6 +194,12 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
 
   function saleIsActive() external view returns(bool _saleIsActive) {
     _saleIsActive = (block.timestamp >= saleStart) && (!saleIsPaused);
+  }
+
+  function adjustCap(uint256 newCap) external onlyOwner {
+    require(adjustableCap, 'cannot adjust size of this collection');
+    require(_nextTokenId() <= newCap, 'cannot decrease cap');
+    MAX_TOKENS = newCap;
   }
 
   function withdraw() external onlyOwner {
@@ -149,7 +239,7 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
 
   // save some for creator
   function reserveDCNT(uint256 numReserved) external onlyOwner {
-    uint256 supply = totalSupply();
+    uint256 supply = _nextTokenId();
     require(
       supply + numReserved < MAX_TOKENS,
       "Purchase would exceed max supply"
@@ -199,5 +289,9 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
 
   function _setSplitWallet(address _splitWallet) internal virtual override {
     splitWallet = _splitWallet;
+  }
+
+  function updateSaleStart(uint256 newStart) external onlyOwner {
+    saleStart = newStart;
   }
 }

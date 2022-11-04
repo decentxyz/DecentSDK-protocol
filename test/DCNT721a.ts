@@ -20,6 +20,7 @@ const metadataRendererInit = {
   imageURI: "http://localhost/image.jpg",
   animationURI: "http://localhost/song.mp3",
 };
+const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 
 describe("DCNT721A", async () => {
@@ -59,6 +60,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
         parentIP.address
@@ -86,6 +88,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit
       );
@@ -121,6 +124,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         null
       );
@@ -145,6 +149,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit
       );
@@ -196,6 +201,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit
       );
@@ -231,6 +237,63 @@ describe("DCNT721A", async () => {
       expect(meta.description).to.equal(metadataRendererInit.description);
       expect(meta.image).to.equal(`${metadataRendererInit.imageURI}?id=0`);
       expect(meta.animation_url).to.equal(`${metadataRendererInit.animationURI}?id=0`);
+    });
+
+    it("should optionally return an off chain matadata url", async () => {
+      const freshNFT: Contract = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        null
+      );
+
+      freshNFT.mint(1, { value: tokenPrice });
+      const response = await freshNFT.tokenURI(0);
+      expect(response).to.equal(`${metadataURI}0`);
+    });
+  });
+
+  describe("contractURI()", async () => {
+    it("should return basic on chain contract-level matadata rendered as a base64 url", async () => {
+      const response = await nft.contractURI();
+      const decoded = base64decode(response);
+      const meta = JSON.parse(decoded);
+
+      expect(meta.name).to.equal(name);
+      expect(meta.description).to.equal(metadataRendererInit.description);
+      expect(meta.image).to.equal(metadataRendererInit.imageURI);
+    });
+
+    it("should optionally return an off chain matadata url", async () => {
+      const freshNFT: Contract = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        null
+      );
+
+      const response = await freshNFT.contractURI();
+      expect(response).to.equal(contractURI);
     });
   });
 
@@ -281,6 +344,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit
       );
@@ -314,6 +378,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit
       );
@@ -349,6 +414,7 @@ describe("DCNT721A", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit
       );

@@ -15,6 +15,7 @@ const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const royaltyBPS = 10_000;
+const contractURI = 'http://localhost/contract/';
 const metadataURI = 'http://localhost/metadata/';
 const metadataRendererInit = null;
 const vaultDistributionTokenAddress = ethers.constants.AddressZero;
@@ -57,6 +58,7 @@ describe("DCNTVaultNFT", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
         vaultDistributionTokenAddress,
@@ -107,6 +109,7 @@ describe("DCNTVaultNFT", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
         vaultDistributionTokenAddress,

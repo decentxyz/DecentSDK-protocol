@@ -15,6 +15,7 @@ const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const royaltyBPS = 10_00;
+const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
 
@@ -46,6 +47,7 @@ describe("DCNT4907A", async () => {
       presaleEnd,
       saleStart,
       royaltyBPS,
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP.address

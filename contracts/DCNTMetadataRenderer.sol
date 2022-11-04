@@ -92,12 +92,18 @@ contract DCNTMetadataRenderer is IMetadataRenderer, MusicMetadata, Credits {
         songMetadatas[target].song.artwork.artworkUri
       );
     }
+    bool isMusicNft = bytes(
+      songMetadatas[target].song.audio.songDetails.audioQuantitative.audioMimeType
+    ).length > 0;
+    string memory name = isMusicNft
+      ? songMetadatas[target].songPublishingData.title
+      : IERC721A(target).name();
     return
       string(
         sharedNFTLogic.encodeMetadataJSON(
           abi.encodePacked(
             '{"name": "',
-            songMetadatas[target].songPublishingData.title,
+            name,
             '", "description": "',
             songMetadatas[target].songPublishingData.description,
             imageSpace,

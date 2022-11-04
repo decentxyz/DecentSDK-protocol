@@ -116,6 +116,7 @@ export const deployDCNT721A = async (
   presaleEnd: number,
   saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
   parentIP: string = ethers.constants.AddressZero
@@ -145,6 +146,7 @@ export const deployDCNT721A = async (
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP,
@@ -173,6 +175,7 @@ export const deployDCNT4907A = async (
   presaleEnd: number,
   saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
   parentIP: string= ethers.constants.AddressZero
@@ -202,6 +205,7 @@ export const deployDCNT4907A = async (
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP
@@ -230,6 +234,7 @@ export const deployDCNTCrescendo = async (
   unlockDate: number,
   saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
   parentIP: string= ethers.constants.AddressZero
@@ -259,6 +264,7 @@ export const deployDCNTCrescendo = async (
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP
@@ -321,6 +327,7 @@ export const DCNTVaultNFTCreate = async (
   presaleEnd: number,
   saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
   vaultDistributionTokenAddress: string,
@@ -354,6 +361,7 @@ export const DCNTVaultNFTCreate = async (
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP

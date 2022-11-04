@@ -43,6 +43,7 @@ contract DCNTCrescendo is
 
   // Token uri
   string private _uri;
+  string private _contractURI;
 
   uint256 private step1;
   uint256 private step2;
@@ -107,6 +108,7 @@ contract DCNTCrescendo is
         _metadataConfig.metadataRendererInit
       );
     } else {
+      _contractURI = _metadataConfig.contractURI;
       _setURI(_metadataConfig.metadataURI);
     }
   }
@@ -291,6 +293,17 @@ contract DCNTCrescendo is
 
   function symbol() external view returns (string memory) {
     return _symbol;
+  }
+
+  function contractURI() public view returns (string memory) {
+    if (metadataRenderer != address(0)) {
+      return IMetadataRenderer(metadataRenderer).contractURI();
+    }
+    return _contractURI;
+  }
+
+  function updateContractURI(string memory contractURI_) external onlyOwner {
+    _contractURI = contractURI_;
   }
 
   function uri(uint256) public view override returns (string memory) {

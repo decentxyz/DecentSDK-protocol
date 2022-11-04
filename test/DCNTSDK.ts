@@ -73,6 +73,7 @@ describe("DCNTSDK", async () => {
       const presaleEnd = theFuture.time();
       const saleStart = theFuture.time();
       const royaltyBPS = 10_00;
+      const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
 
@@ -88,6 +89,7 @@ describe("DCNTSDK", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
         parentIP.address
@@ -116,6 +118,7 @@ describe("DCNTSDK", async () => {
       const presaleEnd = theFuture.time();
       const saleStart = theFuture.time();
       const royaltyBPS = 10_00;
+      const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
 
@@ -131,6 +134,7 @@ describe("DCNTSDK", async () => {
         presaleEnd,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
         parentIP.address
@@ -160,6 +164,7 @@ describe("DCNTSDK", async () => {
       const unlockDate = theFuture.time();
       const saleStart = theFuture.time();
       const royaltyBPS = 10_00;
+      const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
 
@@ -175,6 +180,7 @@ describe("DCNTSDK", async () => {
         unlockDate,
         saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
         parentIP.address

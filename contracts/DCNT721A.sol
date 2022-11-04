@@ -38,6 +38,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
   uint256 public saleStart;
   bool public saleIsPaused;
   string public baseURI;
+  string private _contractURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
   uint256 public presaleStart;
@@ -102,6 +103,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
         _metadataConfig.metadataRendererInit
       );
     } else {
+      _contractURI = _metadataConfig.contractURI;
       baseURI = _metadataConfig.metadataURI;
     }
   }
@@ -220,6 +222,21 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
 
   function setMetadataRenderer(address _metadataRenderer) external onlyOwner {
     metadataRenderer = _metadataRenderer;
+  }
+
+  function setContractURI(string memory uri) external onlyOwner {
+    _contractURI = uri;
+  }
+
+  function contractURI()
+    public
+    view
+    virtual
+    returns (string memory)
+  {
+    return (metadataRenderer != address(0))
+      ? IMetadataRenderer(metadataRenderer).contractURI()
+      : _contractURI;
   }
 
   function tokenURI(uint256 tokenId)

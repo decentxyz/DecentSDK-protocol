@@ -76,7 +76,7 @@ contract DCNTVaultNFT is Ownable {
         abi.encodeWithSignature(
           "deployDCNT4907A("
             "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
-            "(string,bytes,address),"
+            "(string,string,bytes,address),"
             "(address,uint88,uint8)"
           ")",
           _editionConfig,
@@ -92,7 +92,7 @@ contract DCNTVaultNFT is Ownable {
         abi.encodeWithSignature(
           "deployDCNT721A("
             "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
-            "(string,bytes,address),"
+            "(string,string,bytes,address),"
             "(address,uint88,uint8)"
           ")",
           _editionConfig,

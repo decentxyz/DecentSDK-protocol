@@ -30,7 +30,6 @@ import './interfaces/ITokenWithBalance.sol';
 contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
 
   bool public adjustableCap;
-  bool public isSoulbound;
   uint256 public MAX_TOKENS;
   uint256 public tokenPrice;
   uint256 public maxTokenPurchase;
@@ -41,13 +40,14 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
   string private _contractURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
+
   uint256 public presaleStart;
   uint256 public presaleEnd;
+  bytes32 private presaleMerkleRoot;
 
   address public splitMain;
   address public splitWallet;
   address public parentIP;
-  bytes32 private presaleMerkleRoot;
 
   /// ============ Events ============
 
@@ -176,7 +176,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
         presaleMerkleRoot,
         keccak256(
           // address, uint256, uint256
-          abi.encode(msg.sender,maxQuantity,pricePerToken)
+          abi.encodePacked(msg.sender,maxQuantity,pricePerToken)
         )
       ), 'not approved');
 
@@ -188,6 +188,10 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
         emit Minted(msg.sender, mintIndex++);
       }
     }
+  }
+
+  function setPresaleMerkleRoot(bytes32 _presaleMerkleRoot) external onlyOwner {
+    presaleMerkleRoot = _presaleMerkleRoot;
   }
 
   function flipSaleState() external onlyOwner {

@@ -18,6 +18,7 @@ const royaltyBPS = 10_000;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
+const tokenGateConfig = null;
 
 const scale = 1_000_000;
 const bigPercent = (num: BigNumber, perc: number) => num.div(100).mul(perc);
@@ -51,7 +52,8 @@ describe("Splits", async () => {
       royaltyBPS,
       contractURI,
       metadataURI,
-      metadataRendererInit
+      metadataRendererInit,
+      tokenGateConfig,
     );
 
     const payouts = sortByAddress([
@@ -97,7 +99,8 @@ describe("Splits", async () => {
         royaltyBPS,
         contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -132,7 +135,8 @@ describe("Splits", async () => {
         royaltyBPS,
         contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -173,7 +177,8 @@ describe("Splits", async () => {
         royaltyBPS,
         contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -200,7 +205,8 @@ describe("Splits", async () => {
         royaltyBPS,
         contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
     });
 
@@ -269,7 +275,8 @@ describe("Splits", async () => {
         royaltyBPS,
         contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -308,7 +315,8 @@ describe("Splits", async () => {
         royaltyBPS,
         contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
 
       await expect(

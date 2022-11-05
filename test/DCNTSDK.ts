@@ -76,6 +76,7 @@ describe("DCNTSDK", async () => {
       const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
+      const tokenGateConfig = null;
 
       clone = await deployDCNT721A(
         sdk,
@@ -92,6 +93,7 @@ describe("DCNTSDK", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         parentIP.address
       );
     });
@@ -121,6 +123,7 @@ describe("DCNTSDK", async () => {
       const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
+      const tokenGateConfig = null;
 
       clone = await deployDCNT4907A(
         sdk,
@@ -137,6 +140,7 @@ describe("DCNTSDK", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         parentIP.address
       );
     });

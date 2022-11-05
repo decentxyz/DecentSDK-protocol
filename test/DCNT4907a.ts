@@ -18,6 +18,7 @@ const royaltyBPS = 10_00;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
+const tokenGateConfig = null;
 
 describe("DCNT4907A", async () => {
   let owner: SignerWithAddress,
@@ -50,6 +51,7 @@ describe("DCNT4907A", async () => {
       contractURI,
       metadataURI,
       metadataRendererInit,
+      tokenGateConfig,
       parentIP.address
     );
   });

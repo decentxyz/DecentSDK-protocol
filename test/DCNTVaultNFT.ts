@@ -18,6 +18,7 @@ const royaltyBPS = 10_000;
 const contractURI = 'http://localhost/contract/';
 const metadataURI = 'http://localhost/metadata/';
 const metadataRendererInit = null;
+const tokenGateConfig = null;
 const vaultDistributionTokenAddress = ethers.constants.AddressZero;
 const unlockDate = theFuture.time();
 
@@ -61,6 +62,7 @@ describe("DCNTVaultNFT", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         vaultDistributionTokenAddress,
         unlockDate,
         supports4907
@@ -112,6 +114,7 @@ describe("DCNTVaultNFT", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         vaultDistributionTokenAddress,
         unlockDate,
         supports4907

@@ -19,6 +19,7 @@ const royaltyBPS = 10_00;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
+const tokenGateConfig = null;
 
 describe("DCNTRentalMarket", async () => {
   let owner: SignerWithAddress,
@@ -49,6 +50,7 @@ describe("DCNTRentalMarket", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         parentIP.address
       );
       await nft.connect(fan).mint(1, { value: tokenPrice });

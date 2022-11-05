@@ -44,6 +44,12 @@ export type MetadataInit = {
   animationURI: string;
 }
 
+export type TokenGateConfig = {
+  tokenAddress: string;
+  minBalance: number;
+  saleType: number;
+}
+
 export const deployDCNTSDK = async (
   implementations?: Implementations | null,
   metadataRenderer?: Contract | null,
@@ -119,6 +125,7 @@ export const deployDCNT721A = async (
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null,
   parentIP: string = ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
@@ -151,7 +158,7 @@ export const deployDCNT721A = async (
       metadataRendererInit,
       parentIP,
     },
-    {
+    tokenGateConfig || {
       tokenAddress: ethers.constants.AddressZero,
       minBalance: 0,
       saleType: 0,
@@ -178,6 +185,7 @@ export const deployDCNT4907A = async (
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null,
   parentIP: string= ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
@@ -210,7 +218,7 @@ export const deployDCNT4907A = async (
       metadataRendererInit,
       parentIP
     },
-    {
+    tokenGateConfig || {
       tokenAddress: ethers.constants.AddressZero,
       minBalance: 0,
       saleType: 0,
@@ -330,6 +338,7 @@ export const DCNTVaultNFTCreate = async (
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null,
   vaultDistributionTokenAddress: string,
   unlockDate: number,
   supports4907: boolean,
@@ -366,7 +375,7 @@ export const DCNTVaultNFTCreate = async (
       metadataRendererInit,
       parentIP
     },
-    {
+    tokenGateConfig || {
       tokenAddress: ethers.constants.AddressZero,
       minBalance: 0,
       saleType: 0,

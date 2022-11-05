@@ -600,7 +600,7 @@ describe("DCNTCrescendo", async () => {
   });
 
   describe("contractURI()", async () => {
-    it("should return basic on chain contract-level matadata rendered as a base64 url", async () => {
+    it("should return basic on chain contract-level metadata rendered as a base64 url", async () => {
       const response = await crescendo.contractURI();
       const decoded = base64decode(response);
       const meta = JSON.parse(decoded);
@@ -610,7 +610,7 @@ describe("DCNTCrescendo", async () => {
       expect(meta.image).to.equal(metadataRendererInit.imageURI);
     });
 
-    it("should optionally return an off chain matadata url", async () => {
+    it("should optionally return an off chain metadata url", async () => {
       const freshNFT: Contract = await deployDCNTCrescendo(
         sdk,
         name,

@@ -143,6 +143,7 @@ contract DCNTCrescendo is
     _saleIsActive = (block.timestamp >= saleStart) && (!saleIsPaused);
   }
 
+  /// @notice purchase nft
   function buy(uint256 id) external payable salesAreActive {
     uint256 price = calculateCurvedMintReturn(1, id);
     require(msg.value >= price, "Insufficient funds");
@@ -168,6 +169,7 @@ contract DCNTCrescendo is
     }
   }
 
+  /// @notice sell nft if liquidity is available
   function sell(uint256 id) external salesAreActive {
     require(id == 0, "currently only one edition");
     uint256 price = calculateCurvedBurnReturn(1, id);

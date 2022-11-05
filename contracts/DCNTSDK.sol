@@ -75,7 +75,7 @@ contract DCNTSDK is Ownable {
 
   /// ============ Functions ============
 
-  // deploy and initialize an erc721a clone
+  /// @notice deploy and initialize an erc721a clone
   function deployDCNT721A(
     EditionConfig memory _editionConfig,
     MetadataConfig memory _metadataConfig,
@@ -105,7 +105,7 @@ contract DCNTSDK is Ownable {
     emit DeployDCNT721A(clone);
   }
 
-  // deploy and initialize an erc4907a clone
+  /// @notice deploy and initialize an erc4907a clone
   function deployDCNT4907A(
     EditionConfig memory _editionConfig,
     MetadataConfig memory _metadataConfig,

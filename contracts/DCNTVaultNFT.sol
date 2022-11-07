@@ -20,6 +20,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IDCNTSDK.sol";
 import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
+import "./storage/TokenGateConfig.sol";
 
 contract DCNTVaultNFT is Ownable {
   /// ============ Immutable storage ============
@@ -64,6 +65,7 @@ contract DCNTVaultNFT is Ownable {
     address _DCNTSDK,
     EditionConfig memory _editionConfig,
     MetadataConfig memory _metadataConfig,
+    TokenGateConfig memory _tokenGateConfig,
     address _vaultDistributionTokenAddress,
     uint256 _unlockDate,
     bool _supports4907
@@ -72,9 +74,14 @@ contract DCNTVaultNFT is Ownable {
     if (_supports4907) {
       (bool success1, bytes memory data1) = _DCNTSDK.delegatecall(
         abi.encodeWithSignature(
-          "deployDCNT4907A((string,string,uint256,uint256,uint256,uint256),(string,bytes,address))",
+          "deployDCNT4907A("
+            "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+            "(string,string,bytes,address),"
+            "(address,uint88,uint8)"
+          ")",
           _editionConfig,
-          _metadataConfig
+          _metadataConfig,
+          _tokenGateConfig
         )
       );
 
@@ -83,9 +90,14 @@ contract DCNTVaultNFT is Ownable {
     } else {
       (bool success2, bytes memory data2) = _DCNTSDK.delegatecall(
         abi.encodeWithSignature(
-          "deployDCNT721A((string,string,uint256,uint256,uint256,uint256),(string,bytes,address))",
+          "deployDCNT721A("
+            "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+            "(string,string,bytes,address),"
+            "(address,uint88,uint8)"
+          ")",
           _editionConfig,
-          _metadataConfig
+          _metadataConfig,
+          _tokenGateConfig
         )
       );
 

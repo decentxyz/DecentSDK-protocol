@@ -3,20 +3,32 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT721A, deployMockERC721, sortByAddress, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNT721A, deployMockERC721, theFuture, sortByAddress, base64decode } from "../core";
+import { MerkleTree } from "merkletreejs";
+const keccak256 = require("keccak256");
 
 const name = 'Decent';
 const symbol = 'DCNT';
+const adjustableCap = true;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const presaleStart = theFuture.time();
+const presaleEnd = theFuture.time();
+let saleStart = theFuture.time();
 const royaltyBPS = 10_00;
 const metadataRendererInit = {
   description: "This is the Decent unit test NFT",
   imageURI: "http://localhost/image.jpg",
   animationURI: "http://localhost/song.mp3",
 };
+const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
+const tokenGateConfig = {
+  tokenAddress: ethers.constants.AddressZero,
+  minBalance: 0,
+  saleType: 0,
+}
 
 describe("DCNT721A", async () => {
   let owner: SignerWithAddress,
@@ -27,9 +39,13 @@ describe("DCNT721A", async () => {
       sdk: Contract,
       clone: Contract,
       nft: Contract,
+      presaleNFT: Contract,
       metadataRenderer: Contract,
       split: any[],
-      parentIP: Contract;
+      parentIP: Contract,
+      tree: MerkleTree,
+      leaves: string[],
+      snapshot: any[];
 
   let overrides = { value: ethers.utils.parseEther("0.01") };
   let overrides2 = { value: ethers.utils.parseEther("0.02") };
@@ -41,16 +57,24 @@ describe("DCNT721A", async () => {
       sdk = await deployDCNTSDK();
       parentIP = await deployMockERC721();
       metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', sdk.metadataRenderer());
+      await theFuture.reset();
+      saleStart = theFuture.time() + theFuture.oneDay
       clone = await deployDCNT721A(
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         parentIP.address
       );
     });
@@ -68,12 +92,18 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
       expect(await nftWithNoParent.parentIP()).to.equal(ethers.constants.AddressZero);
     });
@@ -81,9 +111,13 @@ describe("DCNT721A", async () => {
     it("should initialize state which would otherwise be set in constructor", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
+      expect(await clone.adjustableCap()).to.equal(adjustableCap);
       expect(await clone.MAX_TOKENS()).to.equal(maxTokens);
       expect(await clone.tokenPrice()).to.equal(tokenPrice);
       expect(await clone.maxTokenPurchase()).to.equal(maxTokenPurchase);
+      expect(await clone.presaleStart()).to.equal(presaleStart);
+      expect(await clone.presaleEnd()).to.equal(presaleEnd);
+      expect(await clone.saleStart()).to.equal(saleStart);
     });
 
     it("should initialize the edition with the metadata renderer", async () => {
@@ -98,17 +132,51 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        null
+        null,
+        tokenGateConfig
       );
 
-      await clone.flipSaleState();
-      await clone.mint(1, { value: tokenPrice });
-      expect(await clone.tokenURI(0)).to.equal(`${metadataURI}0`);
+      expect(await clone.baseURI()).to.equal(metadataURI);
+    });
+
+    it("should optionally set configuration for a token gate", async () => {
+      const gateNFT = await deployMockERC721();
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        null,
+        {
+          tokenAddress: gateNFT.address,
+          minBalance: 1337,
+          saleType: 2,
+        }
+      );
+
+      const config = await freshNFT.tokenGateConfig();
+      expect(config.tokenAddress).to.equal(gateNFT.address);
+      expect(config.minBalance).to.equal(1337);
+      expect(config.saleType).to.equal(2);
     });
   });
 
@@ -120,23 +188,30 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
     });
 
-    it("should prevent a user from minting", async () => {
+    it("should not allow mints until after the start date", async () => {
       await expect(nft.connect(addr1).mint(1)).to.be.revertedWith(
-        'Sale must be active to mint'
+        'Sales are not active yet.'
       );
+      await theFuture.travel(theFuture.oneDay);
+      await theFuture.arrive();
     });
 
     it("should not allow more than 2 mints at a time", async () => {
-      await nft.connect(addr1).flipSaleState();
       await expect(nft.connect(addr2).mint(3, overrides3)).to.be.revertedWith(
         "Exceeded max number per mint"
       );
@@ -166,17 +241,260 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
-        maxTokens,
+        0,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
 
-      await freshNFT.flipSaleState();
       await freshNFT.mint(maxTokens, { value: tokenPrice.mul(maxTokens) });
       expect(await freshNFT.balanceOf(addr1.address)).to.equal(maxTokens);
+    });
+
+    it("should optionally use a token gate to restrict mints for all sales", async () => {
+      const gateNFT = await deployMockERC721();
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        null,
+        {
+          tokenAddress: gateNFT.address,
+          minBalance: 1,
+          saleType: 0,
+        }
+      );
+
+      await expect(freshNFT.mint(1, { value: tokenPrice })).to.be.revertedWith(
+        'do not own required token'
+      );
+      await gateNFT.mintNft(1);
+      await freshNFT.mint(1, { value: tokenPrice });
+      expect(await freshNFT.balanceOf(addr1.address)).to.equal(1);
+    });
+  });
+
+  describe("mintAirdrop()", async () => {
+    it("should mint tokens to the specified recipients", async () => {
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      [addr1, addr2, addr3, addr4] = await ethers.getSigners();
+      expect(await freshNFT.balanceOf(addr1.address)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr2.address)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr3.address)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr4.address)).to.equal(0);
+
+      await freshNFT.mintAirdrop([addr1.address, addr2.address, addr3.address, addr4.address]);
+      expect(await freshNFT.balanceOf(addr1.address)).to.equal(1);
+      expect(await freshNFT.balanceOf(addr2.address)).to.equal(1);
+      expect(await freshNFT.balanceOf(addr3.address)).to.equal(1);
+      expect(await freshNFT.balanceOf(addr4.address)).to.equal(1);
+    });
+
+    it("should prevent an airdrop which would exceed max supply", async () => {
+      await expect(nft.mintAirdrop([addr1.address])).to.be.revertedWith(
+        'Purchase would exceed max supply'
+      );
+    });
+
+    it("should prevent non-owner from minting an airdrop", async () => {
+      await expect(nft.connect(addr2).mintAirdrop([])).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
+    });
+  });
+
+  describe("mintPresale()", async () => {
+    it("should mint tokens to recipients providing a valid merkle proof", async () => {
+      presaleNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        20,
+        tokenPrice,
+        maxTokenPurchase,
+        theFuture.time(),
+        theFuture.time() + theFuture.oneDay,
+        theFuture.time() + theFuture.oneDay + 1,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      expect(await presaleNFT.balanceOf(owner.address)).to.equal(0);
+
+      snapshot = [
+        [addr1.address, 1, tokenPrice],
+        [addr2.address, 2, tokenPrice],
+        [addr3.address, 3, tokenPrice],
+        [addr4.address, 4, tokenPrice],
+      ];
+
+      leaves = snapshot.map((leaf: any[]) => {
+        return ethers.utils.solidityKeccak256(
+          ["address", "uint256", "uint256"],
+          [leaf[0], leaf[1], leaf[2]]
+        );
+      });
+
+      tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+      await presaleNFT.setPresaleMerkleRoot(tree.getHexRoot());
+
+      for ( let i = 0; i < snapshot.length; i++ ) {
+        let quantity, maxQuantity;
+        quantity = maxQuantity = snapshot[i][1];
+        const merkleProof = tree.getHexProof(leaves[i]);
+        const allowlist = [addr1, addr2, addr3, addr4];
+        await presaleNFT.connect(allowlist[i]).mintPresale(
+          quantity,
+          maxQuantity,
+          tokenPrice,
+          merkleProof,
+          { value: tokenPrice.mul(quantity) }
+        );
+      }
+
+      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
+      expect(await presaleNFT.balanceOf(addr3.address)).to.equal(3);
+      expect(await presaleNFT.balanceOf(addr4.address)).to.equal(4);
+    });
+
+    it("should prevent minting without a valid merkle proof", async () => {
+      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
+
+      const snapshot = [
+        [addr1.address, 10, tokenPrice],
+        [addr2.address, 10, tokenPrice],
+      ];
+
+      const badLeaves = snapshot.map((leaf: any[]) => {
+        return ethers.utils.solidityKeccak256(
+          ["address", "uint256", "uint256"],
+          [leaf[0], leaf[1], leaf[2]]
+        );
+      });
+
+      await presaleNFT.setPresaleMerkleRoot(tree.getHexRoot());
+
+      for ( let i = 0; i < snapshot.length; i++ ) {
+        let quantity, maxQuantity;
+        quantity = maxQuantity = snapshot[i][1];
+        const merkleProof = tree.getHexProof(badLeaves[i]);
+        const allowlist = [addr1, addr2, addr3, addr4];
+        await expect(
+          presaleNFT.connect(allowlist[i]).mintPresale(
+            quantity,
+            maxQuantity,
+            tokenPrice,
+            merkleProof,
+            { value: tokenPrice.mul(quantity) }
+          )
+        ).to.be.revertedWith('not approved');
+      }
+
+      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
+    });
+
+    it("should prevent minting more tokens than allowed", async () => {
+      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
+
+      for ( let i = 0; i < snapshot.length; i++ ) {
+        let quantity, maxQuantity;
+        quantity = maxQuantity = snapshot[i][1];
+        const merkleProof = tree.getHexProof(leaves[i]);
+        const allowlist = [addr1, addr2, addr3, addr4];
+        await expect(
+          presaleNFT.connect(allowlist[i]).mintPresale(
+            1,
+            maxQuantity,
+            tokenPrice,
+            merkleProof,
+            { value: tokenPrice }
+          )
+        ).to.be.revertedWith('minted too many');
+      }
+
+      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
+    });
+  });
+
+  describe("adjustCap()", async() => {
+    it("should adjust the cap on nfts with an adjustable cap", async () => {
+      expect(await nft.MAX_TOKENS()).to.equal(maxTokens);
+      await nft.adjustCap(maxTokens*2);
+      expect(await nft.MAX_TOKENS()).to.equal(maxTokens*2);
+    });
+
+    it("should prevent adjusting the cap on nfts without an adjustable cap", async () => {
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        false,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      expect(await freshNFT.MAX_TOKENS()).to.equal(maxTokens);
+      await expect(freshNFT.adjustCap(maxTokens*2)).to.be.revertedWith(
+        'cannot adjust size of this collection'
+      );
+      expect(await freshNFT.MAX_TOKENS()).to.equal(maxTokens);
+    });
+
+    it("should prevent non-owner from adjusting cap", async () => {
+      await expect(nft.connect(addr2).flipSaleState()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      );
     });
   });
 
@@ -185,6 +503,14 @@ describe("DCNT721A", async () => {
       await expect(nft.connect(addr2).flipSaleState()).to.be.revertedWith(
         'Ownable: caller is not the owner'
       );
+    });
+
+    it("should prevent a user from minting", async () => {
+      await nft.flipSaleState();
+      await expect(nft.connect(addr1).mint(1)).to.be.revertedWith(
+        'Sale must be active to mint'
+      );
+      await nft.flipSaleState();
     });
   });
 
@@ -198,6 +524,65 @@ describe("DCNT721A", async () => {
       expect(meta.description).to.equal(metadataRendererInit.description);
       expect(meta.image).to.equal(`${metadataRendererInit.imageURI}?id=0`);
       expect(meta.animation_url).to.equal(`${metadataRendererInit.animationURI}?id=0`);
+    });
+
+    it("should optionally return an off chain matadata url", async () => {
+      const freshNFT: Contract = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        null,
+        tokenGateConfig
+      );
+
+      freshNFT.mint(1, { value: tokenPrice });
+      const response = await freshNFT.tokenURI(0);
+      expect(response).to.equal(`${metadataURI}0`);
+    });
+  });
+
+  describe("contractURI()", async () => {
+    it("should return basic on chain contract-level matadata rendered as a base64 url", async () => {
+      const response = await nft.contractURI();
+      const decoded = base64decode(response);
+      const meta = JSON.parse(decoded);
+
+      expect(meta.name).to.equal(name);
+      expect(meta.description).to.equal(metadataRendererInit.description);
+      expect(meta.image).to.equal(metadataRendererInit.imageURI);
+    });
+
+    it("should optionally return an off chain matadata url", async () => {
+      const freshNFT: Contract = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        null,
+        tokenGateConfig
+      );
+
+      const response = await freshNFT.contractURI();
+      expect(response).to.equal(contractURI);
     });
   });
 
@@ -240,14 +625,19 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
-      await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
     });
 
@@ -270,12 +660,18 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
 
       await expect(
@@ -301,15 +697,20 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
 
-      await freshNFT.flipSaleState();
       await freshNFT.mint(1, { value: tokenPrice });
 
       const ownerRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);

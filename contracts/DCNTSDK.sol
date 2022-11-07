@@ -20,13 +20,11 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./interfaces/IDCNTRegistry.sol";
 import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
+import "./storage/TokenGateConfig.sol";
 import "./storage/CrescendoConfig.sol";
 
 contract DCNTSDK is Ownable {
-  /// ============ Immutable storage ============
-
-  /// ============ Mutable storage ============
-
+  /// ============ Storage ===========
   /// @notice implementation addresses for base contracts
   address public DCNT721AImplementation;
   address public DCNT4907AImplementation;
@@ -77,24 +75,27 @@ contract DCNTSDK is Ownable {
 
   /// ============ Functions ============
 
-  // deploy and initialize an erc721a clone
+  /// @notice deploy and initialize an erc721a clone
   function deployDCNT721A(
     EditionConfig memory _editionConfig,
-    MetadataConfig memory _metadataConfig
+    MetadataConfig memory _metadataConfig,
+    TokenGateConfig memory _tokenGateConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,uint256,uint256,uint256,uint256),"
-          "(string,bytes,address),"
+          "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+          "(string,string,bytes,address),"
+          "(address,uint88,uint8),"
           "address,"
           "address"
         ")",
         msg.sender,
         _editionConfig,
         _metadataConfig,
+        _tokenGateConfig,
         metadataRenderer,
         SplitMain
       )
@@ -104,24 +105,27 @@ contract DCNTSDK is Ownable {
     emit DeployDCNT721A(clone);
   }
 
-  // deploy and initialize an erc4907a clone
+  /// @notice deploy and initialize an erc4907a clone
   function deployDCNT4907A(
     EditionConfig memory _editionConfig,
-    MetadataConfig memory _metadataConfig
+    MetadataConfig memory _metadataConfig,
+    TokenGateConfig memory _tokenGateConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNT4907AImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,uint256,uint256,uint256,uint256),"
-          "(string,bytes,address),"
+          "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+          "(string,string,bytes,address),"
+          "(address,uint88,uint8),"
           "address,"
           "address"
         ")",
         msg.sender,
         _editionConfig,
         _metadataConfig,
+        _tokenGateConfig,
         metadataRenderer,
         SplitMain
       )
@@ -141,8 +145,8 @@ contract DCNTSDK is Ownable {
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
-          "(string,bytes,address),"
+          "(string,string,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+          "(string,string,bytes,address),"
           "address,"
           "address"
         ")",

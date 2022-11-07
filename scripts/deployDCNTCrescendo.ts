@@ -13,6 +13,7 @@ const step2 = ethers.utils.parseEther("0.05");
 const hitch = 20;
 const takeRateBPS = 15_00;
 const unlockDate = theFuture.time();
+const saleStart = theFuture.time();
 const royaltyBPS = 10_00;
 const metadataRendererInit = {
   description: "This is the description for TOKEN.",
@@ -33,6 +34,7 @@ async function main() {
     hitch,
     takeRateBPS,
     unlockDate,
+    saleStart,
     royaltyBPS,
     metadataURI,
     metadataRendererInit

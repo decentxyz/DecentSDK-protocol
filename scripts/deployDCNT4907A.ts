@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployDCNT4907A } from "../core";
+import { deployDCNT4907A, theFuture } from "../core";
 
 // set up DCNTSDK
 const DCNTSDK_ENDPOINT = '';
@@ -10,6 +10,7 @@ const symbol = 'TOKEN';
 const maxTokens = 25;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const saleStart = theFuture.time();
 const royaltyBPS = 10_00;
 const metadataRendererInit = {
   description: "This is the description for TOKEN.",
@@ -27,6 +28,7 @@ async function main() {
     maxTokens,
     tokenPrice,
     maxTokenPurchase,
+    saleStart,
     royaltyBPS,
     metadataURI,
     metadataRendererInit

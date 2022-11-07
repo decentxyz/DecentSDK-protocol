@@ -65,23 +65,35 @@ describe("DCNTSDK", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
+      const adjustableCap = false;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
-      const royaltyBPS = 1000;
+      const presaleStart = theFuture.time();
+      const presaleEnd = theFuture.time();
+      const saleStart = theFuture.time();
+      const royaltyBPS = 10_00;
+      const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
+      const tokenGateConfig = null;
 
       clone = await deployDCNT721A(
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         parentIP.address
       );
     });
@@ -100,23 +112,35 @@ describe("DCNTSDK", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
+      const adjustableCap = false;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
+      const presaleStart = theFuture.time();
+      const presaleEnd = theFuture.time();
+      const saleStart = theFuture.time();
       const royaltyBPS = 10_00;
+      const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
+      const tokenGateConfig = null;
 
       clone = await deployDCNT4907A(
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
+        tokenGateConfig,
         parentIP.address
       );
     });
@@ -141,8 +165,10 @@ describe("DCNTSDK", async () => {
       const step2 = ethers.utils.parseEther("0.05");
       const hitch = 20;
       const takeRateBPS = 15_00;
-      const royaltyBPS = 10_00;
       const unlockDate = theFuture.time();
+      const saleStart = theFuture.time();
+      const royaltyBPS = 10_00;
+      const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
 
@@ -156,7 +182,9 @@ describe("DCNTSDK", async () => {
         hitch,
         takeRateBPS,
         unlockDate,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
         metadataRendererInit,
         parentIP.address

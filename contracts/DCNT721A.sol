@@ -21,22 +21,29 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "./storage/DCNT721AStorage.sol";
 import "./utils/Splits.sol";
+import './interfaces/ITokenWithBalance.sol';
 
 /// @title template NFT contract
-contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
-  /// ============ Immutable storage ============
+contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
 
-  /// ============ Mutable storage ============
-
+  bool public adjustableCap;
   uint256 public MAX_TOKENS;
   uint256 public tokenPrice;
   uint256 public maxTokenPurchase;
 
-  bool public saleIsActive = false;
+  uint256 public saleStart;
+  bool public saleIsPaused;
   string public baseURI;
+  string private _contractURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
+
+  uint256 public presaleStart;
+  uint256 public presaleEnd;
+  bytes32 private presaleMerkleRoot;
 
   address public splitMain;
   address public splitWallet;
@@ -49,12 +56,26 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
   /// @param tokenId_ of token minted
   event Minted(address sender, uint256 tokenId_);
 
+  /// ========== Modifier =============
+  /// @notice verifies caller has minimum balance to pass through token gate
+  modifier verifyTokenGate(bool isPresale) {
+    if (tokenGateConfig.tokenAddress != address(0)
+      && (tokenGateConfig.saleType == SaleType.ALL ||
+          isPresale && tokenGateConfig.saleType == SaleType.PRESALE) ||
+          !isPresale && tokenGateConfig.saleType == SaleType.PRIMARY) {
+            require(ITokenWithBalance(tokenGateConfig.tokenAddress).balanceOf(msg.sender) >= tokenGateConfig.minBalance, 'do not own required token');
+    }
+
+    _;
+  }
+
   /// ============ Constructor ============
 
   function initialize(
     address _owner,
     EditionConfig memory _editionConfig,
     MetadataConfig memory _metadataConfig,
+    TokenGateConfig memory _tokenGateConfig,
     address _metadataRenderer,
     address _splitMain
   ) public initializer {
@@ -65,9 +86,14 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     MAX_TOKENS = _editionConfig.maxTokens;
     tokenPrice = _editionConfig.tokenPrice;
     maxTokenPurchase = _editionConfig.maxTokenPurchase;
+    saleStart = _editionConfig.saleStart;
     royaltyBPS = _editionConfig.royaltyBPS;
-    splitMain = _splitMain;
+    adjustableCap = _editionConfig.adjustableCap;
     parentIP = _metadataConfig.parentIP;
+    splitMain = _splitMain;
+    tokenGateConfig = _tokenGateConfig;
+    presaleStart = _editionConfig.presaleStart;
+    presaleEnd = _editionConfig.presaleEnd;
 
     if (
       _metadataRenderer != address(0) &&
@@ -78,13 +104,20 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
         _metadataConfig.metadataRendererInit
       );
     } else {
+      _contractURI = _metadataConfig.contractURI;
       baseURI = _metadataConfig.metadataURI;
     }
   }
 
-  function mint(uint256 numberOfTokens) external payable {
-    uint256 mintIndex = totalSupply();
-    require(saleIsActive, "Sale must be active to mint");
+  /// @notice purchase nft
+  function mint(uint256 numberOfTokens)
+    external
+    payable
+    verifyTokenGate(false)
+  {
+    uint256 mintIndex = _nextTokenId();
+    require(block.timestamp >= saleStart, "Sales are not active yet.");
+    require(!saleIsPaused, "Sale must be active to mint");
     require(
       mintIndex + numberOfTokens <= MAX_TOKENS,
       "Purchase would exceed max supply"
@@ -96,15 +129,92 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     }
 
     _safeMint(msg.sender, numberOfTokens);
-    for (uint256 i = 0; i < numberOfTokens; i++) {
-      emit Minted(msg.sender, mintIndex++);
+    unchecked {
+      for (uint256 i = 0; i < numberOfTokens; i++) {
+        emit Minted(msg.sender, mintIndex++);
+      }
     }
   }
 
-  function flipSaleState() external onlyOwner {
-    saleIsActive = !saleIsActive;
+  /// @notice allows the owner to "airdrop" users an NFT
+  function mintAirdrop(address[] calldata recipients) external onlyOwner {
+    uint256 atId = _nextTokenId();
+    uint256 startAt = atId;
+    require(atId + recipients.length <= MAX_TOKENS,
+      "Purchase would exceed max supply"
+    );
+
+    unchecked {
+      for (
+        uint256 endAt = atId + recipients.length;
+        atId < endAt;
+        atId++
+      ) {
+        _safeMint(recipients[atId - startAt], 1);
+        emit Minted(recipients[atId - startAt], atId);
+      }
+    }
   }
 
+  /// @notice presale mint function
+  function mintPresale(
+    uint256 quantity,
+    uint256 maxQuantity,
+    uint256 pricePerToken,
+    bytes32[] calldata merkleProof
+  )
+    external
+    payable
+    verifyTokenGate(true)
+  {
+    require (block.timestamp >= presaleStart && block.timestamp <= presaleEnd, 'not presale');
+    uint256 mintIndex = _nextTokenId();
+    require(!saleIsPaused, "Sale must be active to mint");
+    require(
+      mintIndex + quantity <= MAX_TOKENS,
+      "Purchase would exceed max supply"
+    );
+    require (MerkleProof.verify(
+        merkleProof,
+        presaleMerkleRoot,
+        keccak256(
+          // address, uint256, uint256
+          abi.encodePacked(msg.sender,maxQuantity,pricePerToken)
+        )
+      ), 'not approved');
+
+    require(msg.value >= (pricePerToken * quantity), "Insufficient funds");
+    require(balanceOf(msg.sender) + quantity <= maxQuantity, 'minted too many');
+    _safeMint(msg.sender, quantity);
+    unchecked {
+      for (uint256 i = 0; i < quantity; i++) {
+        emit Minted(msg.sender, mintIndex++);
+      }
+    }
+  }
+
+  function setPresaleMerkleRoot(bytes32 _presaleMerkleRoot) external onlyOwner {
+    presaleMerkleRoot = _presaleMerkleRoot;
+  }
+
+  /// @notice pause or unpause sale 
+  function flipSaleState() external onlyOwner {
+    saleIsPaused = !saleIsPaused;
+  }
+
+  /// @notice is the current sale active
+  function saleIsActive() external view returns(bool _saleIsActive) {
+    _saleIsActive = (block.timestamp >= saleStart) && (!saleIsPaused);
+  }
+
+  ///change maximum number of tokens available to mint
+  function adjustCap(uint256 newCap) external onlyOwner {
+    require(adjustableCap, 'cannot adjust size of this collection');
+    require(_nextTokenId() <= newCap, 'cannot decrease cap');
+    MAX_TOKENS = newCap;
+  }
+
+  /// @notice withdraw funds from contract to seller funds recipient
   function withdraw() external onlyOwner {
     require(
       _getSplitWallet() == address(0),
@@ -125,6 +235,24 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     metadataRenderer = _metadataRenderer;
   }
 
+  /// @notice update the contract URI
+  function setContractURI(string memory uri) external onlyOwner {
+    _contractURI = uri;
+  }
+
+  /// @notice view the current contract URI
+  function contractURI()
+    public
+    view
+    virtual
+    returns (string memory)
+  {
+    return (metadataRenderer != address(0))
+      ? IMetadataRenderer(metadataRenderer).contractURI()
+      : _contractURI;
+  }
+
+  /// @notice view the token URI for a given tokenId
   function tokenURI(uint256 tokenId)
     public
     view
@@ -140,9 +268,9 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
     return super.tokenURI(tokenId);
   }
 
-  // save some for creator
+  /// @notice save some for creator
   function reserveDCNT(uint256 numReserved) external onlyOwner {
-    uint256 supply = totalSupply();
+    uint256 supply = _nextTokenId();
     require(
       supply + numReserved < MAX_TOKENS,
       "Purchase would exceed max supply"
@@ -192,5 +320,10 @@ contract DCNT721A is ERC721A, Initializable, Ownable, Splits {
 
   function _setSplitWallet(address _splitWallet) internal virtual override {
     splitWallet = _splitWallet;
+  }
+
+  /// @notice update the public sale start time
+  function updateSaleStart(uint256 newStart) external onlyOwner {
+    saleStart = newStart;
   }
 }

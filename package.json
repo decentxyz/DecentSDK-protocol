@@ -7,6 +7,8 @@
     "dotenv": "^16.0.1",
     "erc721a": "^4.2.2",
     "hardhat": "^2.10.1",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.3.0",
     "solmate": "^6.5.0"
   },
   "devDependencies": {

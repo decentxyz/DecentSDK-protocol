@@ -21,6 +21,9 @@ export const theFuture = (() => {
         await ethers.provider.send('evm_mine', []);
       }
     },
+    reset: async () => {
+      future = await time.latest();
+    },
     oneDay: 60 * 60 * 24,
     oneMonth: 60 * 60 * 24 * 30,
     oneYear: 60 * 60 * 24 * 365,
@@ -39,6 +42,12 @@ export type MetadataInit = {
   description: string;
   imageURI: string;
   animationURI: string;
+}
+
+export type TokenGateConfig = {
+  tokenAddress: string;
+  minBalance: number;
+  saleType: number;
 }
 
 export const deployDCNTSDK = async (
@@ -105,12 +114,18 @@ export const deployDCNT721A = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
+  adjustableCap: boolean,
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  presaleStart: number,
+  presaleEnd: number,
+  saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null,
   parentIP: string = ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
@@ -128,15 +143,25 @@ export const deployDCNT721A = async (
     {
       name,
       symbol,
+      adjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      presaleStart,
+      presaleEnd,
+      saleStart,
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
-      parentIP
+      parentIP,
+    },
+    tokenGateConfig || {
+      tokenAddress: ethers.constants.AddressZero,
+      minBalance: 0,
+      saleType: 0,
     }
   );
 
@@ -149,14 +174,19 @@ export const deployDCNT4907A = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
+  adjustableCap: boolean,
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  presaleStart: number,
+  presaleEnd: number,
+  saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null,
   parentIP: string= ethers.constants.AddressZero
-
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -173,15 +203,25 @@ export const deployDCNT4907A = async (
     {
       name,
       symbol,
+      adjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      presaleStart,
+      presaleEnd,
+      saleStart,
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP
+    },
+    tokenGateConfig || {
+      tokenAddress: ethers.constants.AddressZero,
+      minBalance: 0,
+      saleType: 0,
     }
   );
 
@@ -200,7 +240,9 @@ export const deployDCNTCrescendo = async (
   hitch: number,
   takeRateBPS: number,
   unlockDate: number,
+  saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
   parentIP: string= ethers.constants.AddressZero
@@ -226,9 +268,11 @@ export const deployDCNTCrescendo = async (
       hitch,
       takeRateBPS,
       unlockDate,
+      saleStart,
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP
@@ -283,16 +327,22 @@ export const DCNTVaultNFTCreate = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
+  adjustableCap: boolean,
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokenPurchase: number,
+  presaleStart: number,
+  presaleEnd: number,
+  saleStart: number,
   royaltyBPS: number,
+  contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null,
   vaultDistributionTokenAddress: string,
   unlockDate: number,
   supports4907: boolean,
-  parentIP:string = ethers.constants.AddressZero
+  parentIP: string = ethers.constants.AddressZero
 ) => {
   const metadataRendererInit = metadata != null
     ? ethers.utils.AbiCoder.prototype.encode(
@@ -310,15 +360,25 @@ export const DCNTVaultNFTCreate = async (
     {
       name,
       symbol,
+      adjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      presaleStart,
+      presaleEnd,
+      saleStart,
       royaltyBPS,
     },
     {
+      contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP
+    },
+    tokenGateConfig || {
+      tokenAddress: ethers.constants.AddressZero,
+      minBalance: 0,
+      saleType: 0,
     },
     vaultDistributionTokenAddress,
     unlockDate,

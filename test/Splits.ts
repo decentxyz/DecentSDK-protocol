@@ -3,16 +3,22 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT4907A, deployMockERC20, sortByAddress } from "../core";
+import { deployDCNTSDK, deployDCNT4907A, theFuture, deployMockERC20, sortByAddress } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
+const adjustableCap = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('1');
 const maxTokenPurchase = 2;
+const presaleStart = theFuture.time();
+const presaleEnd = theFuture.time();
+const saleStart = theFuture.time();
 const royaltyBPS = 10_000;
+const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
+const tokenGateConfig = null;
 
 const scale = 1_000_000;
 const bigPercent = (num: BigNumber, perc: number) => num.div(100).mul(perc);
@@ -36,12 +42,18 @@ describe("Splits", async () => {
       sdk,
       name,
       symbol,
+      adjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      presaleStart,
+      presaleEnd,
+      saleStart,
       royaltyBPS,
+      contractURI,
       metadataURI,
-      metadataRendererInit
+      metadataRendererInit,
+      tokenGateConfig,
     );
 
     const payouts = sortByAddress([
@@ -77,12 +89,18 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -93,7 +111,6 @@ describe("Splits", async () => {
 
   describe("distributeETH()", async () => {
     it("should transfer ETH to the split and distribute to receipients", async () => {
-      await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);
 
@@ -108,12 +125,18 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -144,12 +167,18 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -166,19 +195,24 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
     });
 
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
       nft.createSplit(...split);
 
-      await nft.flipSaleState();
       await nft.mint(1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);
 
@@ -231,12 +265,18 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig,
       );
 
       await expect(
@@ -265,12 +305,18 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
+        adjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleStart,
+        presaleEnd,
+        saleStart,
         royaltyBPS,
+        contractURI,
         metadataURI,
-        metadataRendererInit
+        metadataRendererInit,
+        tokenGateConfig
       );
 
       await expect(

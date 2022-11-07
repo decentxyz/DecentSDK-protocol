@@ -43,11 +43,12 @@ contract DCNTCrescendo is
 
   // Token uri
   string private _uri;
+  string private _contractURI;
 
-  uint256 private step1;
-  uint256 private step2;
-  uint256 private hitch;
-  uint256 private takeRateBPS;
+  uint256 public step1;
+  uint256 public step2;
+  uint256 public hitch;
+  uint256 public takeRateBPS;
   uint256 public royaltyBPS;
 
   // id to supply
@@ -55,9 +56,10 @@ contract DCNTCrescendo is
   // id to current price
   mapping(uint256 => uint256) private _currentPrice;
 
-  uint256 private totalWithdrawn = 0;
+  uint256 public totalWithdrawn = 0;
 
-  bool public saleIsActive = false;
+  uint256 public saleStart;
+  bool public saleIsPaused;
 
   uint256 public unlockDate;
 
@@ -92,6 +94,7 @@ contract DCNTCrescendo is
     unlockDate = _config.unlockDate;
     _name = _config.name;
     _symbol = _config.symbol;
+    saleStart = _config.saleStart;
     royaltyBPS = _config.royaltyBPS;
     splitMain = _splitMain;
     parentIP = _metadataConfig.parentIP;
@@ -105,6 +108,7 @@ contract DCNTCrescendo is
         _metadataConfig.metadataRendererInit
       );
     } else {
+      _contractURI = _metadataConfig.contractURI;
       _setURI(_metadataConfig.metadataURI);
     }
   }
@@ -129,8 +133,18 @@ contract DCNTCrescendo is
     return ((bps - takeRateBPS) * _currentPrice[id]) / bps;
   }
 
-  function buy(uint256 id) external payable {
-    require(saleIsActive, "Sale must be active to buy");
+  modifier salesAreActive {
+    require(block.timestamp >= saleStart, "Sales are not active yet.");
+    require(! saleIsPaused, "Sale must be active to buy or sell");
+    _;
+  }
+
+  function saleIsActive() external view returns(bool _saleIsActive) {
+    _saleIsActive = (block.timestamp >= saleStart) && (!saleIsPaused);
+  }
+
+  /// @notice purchase nft
+  function buy(uint256 id) external payable salesAreActive {
     uint256 price = calculateCurvedMintReturn(1, id);
     require(msg.value >= price, "Insufficient funds");
     require(id == 0, "currently only one edition");
@@ -155,8 +169,8 @@ contract DCNTCrescendo is
     }
   }
 
-  function sell(uint256 id) external {
-    require(saleIsActive, "Sale must be active to sell");
+  /// @notice sell nft if liquidity is available
+  function sell(uint256 id) external salesAreActive {
     require(id == 0, "currently only one edition");
     uint256 price = calculateCurvedBurnReturn(1, id);
     require(balanceOf[msg.sender][id] > 0, "must own nft to sell");
@@ -183,7 +197,7 @@ contract DCNTCrescendo is
   }
 
   function flipSaleState() external onlyOwner {
-    saleIsActive = !saleIsActive;
+    saleIsPaused = !saleIsPaused;
   }
 
   function withdrawFund() external onlyOwner onlyUnlocked {
@@ -281,6 +295,17 @@ contract DCNTCrescendo is
 
   function symbol() external view returns (string memory) {
     return _symbol;
+  }
+
+  function contractURI() public view returns (string memory) {
+    if (metadataRenderer != address(0)) {
+      return IMetadataRenderer(metadataRenderer).contractURI();
+    }
+    return _contractURI;
+  }
+
+  function updateContractURI(string memory contractURI_) external onlyOwner {
+    _contractURI = contractURI_;
   }
 
   function uri(uint256) public view override returns (string memory) {

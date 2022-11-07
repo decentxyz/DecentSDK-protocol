@@ -13,9 +13,11 @@ const adjustableCap = true;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const presaleMerkleRoot = null;
 const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
+const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
 const metadataRendererInit = {
   description: "This is the Decent unit test NFT",
@@ -67,9 +69,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -96,9 +100,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -136,9 +142,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -159,9 +167,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -192,9 +202,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -245,10 +257,12 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         0,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
         royaltyBPS,
+        saleEnd,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -269,9 +283,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -302,9 +318,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -340,25 +358,7 @@ describe("DCNT721A", async () => {
 
   describe("mintPresale()", async () => {
     it("should mint tokens to recipients providing a valid merkle proof", async () => {
-      presaleNFT = await deployDCNT721A(
-        sdk,
-        name,
-        symbol,
-        adjustableCap,
-        20,
-        tokenPrice,
-        maxTokenPurchase,
-        theFuture.time(),
-        theFuture.time() + theFuture.oneDay,
-        theFuture.time() + theFuture.oneDay + 1,
-        royaltyBPS,
-        contractURI,
-        metadataURI,
-        metadataRendererInit,
-        tokenGateConfig
-      );
 
-      expect(await presaleNFT.balanceOf(owner.address)).to.equal(0);
 
       snapshot = [
         [addr1.address, 1, tokenPrice],
@@ -375,6 +375,30 @@ describe("DCNT721A", async () => {
       });
 
       tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+
+      presaleNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        adjustableCap,
+        20,
+        tokenPrice,
+        maxTokenPurchase,
+        tree.getHexRoot(),
+        theFuture.time(),
+        theFuture.time() + theFuture.oneDay,
+        theFuture.time() + theFuture.oneMonth,
+        theFuture.time() + theFuture.oneYear,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      expect(await presaleNFT.balanceOf(owner.address)).to.equal(0);
+
+
       await presaleNFT.setPresaleMerkleRoot(tree.getHexRoot());
 
       for ( let i = 0; i < snapshot.length; i++ ) {
@@ -411,8 +435,6 @@ describe("DCNT721A", async () => {
           [leaf[0], leaf[1], leaf[2]]
         );
       });
-
-      await presaleNFT.setPresaleMerkleRoot(tree.getHexRoot());
 
       for ( let i = 0; i < snapshot.length; i++ ) {
         let quantity, maxQuantity;
@@ -474,9 +496,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -535,9 +559,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -571,9 +597,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -629,9 +657,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -664,9 +694,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -701,9 +733,11 @@ describe("DCNT721A", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,

@@ -75,7 +75,7 @@ contract DCNTVaultNFT is Ownable {
       (bool success1, bytes memory data1) = _DCNTSDK.delegatecall(
         abi.encodeWithSignature(
           "deployDCNT4907A("
-            "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+            "(string,string,bool,uint256,uint256,uint256,bytes32,uint256,uint256,uint256,uint256,uint256),"
             "(string,string,bytes,address),"
             "(address,uint88,uint8)"
           ")",
@@ -91,7 +91,7 @@ contract DCNTVaultNFT is Ownable {
       (bool success2, bytes memory data2) = _DCNTSDK.delegatecall(
         abi.encodeWithSignature(
           "deployDCNT721A("
-            "(string,string,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
+            "(string,string,bool,uint256,uint256,uint256,bytes32,uint256,uint256,uint256,uint256,uint256),"
             "(string,string,bytes,address),"
             "(address,uint88,uint8)"
           ")",

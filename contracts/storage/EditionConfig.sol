@@ -8,8 +8,10 @@ struct EditionConfig {
   uint256 maxTokens;
   uint256 tokenPrice;
   uint256 maxTokenPurchase;
+  bytes32 presaleMerkleRoot;
   uint256 presaleStart;
   uint256 presaleEnd;
   uint256 saleStart;
+  uint256 saleEnd;
   uint256 royaltyBPS;
 }

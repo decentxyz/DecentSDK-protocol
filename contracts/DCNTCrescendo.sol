@@ -135,6 +135,7 @@ contract DCNTCrescendo is
 
   modifier salesAreActive {
     require(block.timestamp >= saleStart, "Sales are not active yet.");
+    require(block.timestamp < unlockDate, "Sales are no longer active.");
     require(! saleIsPaused, "Sale must be active to buy or sell");
     _;
   }

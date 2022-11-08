@@ -200,7 +200,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     presaleMerkleRoot = _presaleMerkleRoot;
   }
 
-  /// @notice pause or unpause sale 
+  /// @notice pause or unpause sale
   function flipSaleState() external onlyOwner {
     saleIsPaused = !saleIsPaused;
   }
@@ -223,7 +223,9 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"
     );
-    payable(msg.sender).transfer(address(this).balance);
+
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(success, "Could not withdraw");
   }
 
   function setBaseURI(string memory uri) external onlyOwner {

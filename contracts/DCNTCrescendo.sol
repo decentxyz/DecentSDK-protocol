@@ -206,7 +206,8 @@ contract DCNTCrescendo is
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"
     );
-    payable(msg.sender).transfer(address(this).balance);
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(success, "Could not withdraw fund");
   }
 
   /// @notice only when crescendo is unlocked

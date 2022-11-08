@@ -130,7 +130,8 @@ contract DCNTVault is Ownable, Initializable {
   }
 
   function drainEth() public onlyOwner {
-    payable(msg.sender).transfer(address(this).balance);
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(success, "Could not drain ETH");
   }
 
   function _asSingletonArray(uint256 element)

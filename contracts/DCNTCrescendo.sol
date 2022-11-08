@@ -135,6 +135,7 @@ contract DCNTCrescendo is
 
   modifier salesAreActive {
     require(block.timestamp >= saleStart, "Sales are not active yet.");
+    require(block.timestamp < unlockDate, "Sales are no longer active.");
     require(! saleIsPaused, "Sale must be active to buy or sell");
     _;
   }
@@ -205,7 +206,8 @@ contract DCNTCrescendo is
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"
     );
-    payable(msg.sender).transfer(address(this).balance);
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(success, "Could not withdraw fund");
   }
 
   /// @notice only when crescendo is unlocked

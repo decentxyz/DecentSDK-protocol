@@ -11,9 +11,11 @@ const adjustableCap = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('1');
 const maxTokenPurchase = 2;
+const presaleMerkleRoot = null;
 const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
+const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_000;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
@@ -46,9 +48,11 @@ describe("Splits", async () => {
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
+      presaleMerkleRoot,
       presaleStart,
       presaleEnd,
       saleStart,
+      saleEnd,
       royaltyBPS,
       contractURI,
       metadataURI,
@@ -93,9 +97,11 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -129,9 +135,11 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -171,9 +179,11 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -199,9 +209,11 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -269,9 +281,11 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,
@@ -309,9 +323,11 @@ describe("Splits", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,

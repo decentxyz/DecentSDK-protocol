@@ -35,6 +35,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
   uint256 public maxTokenPurchase;
 
   uint256 public saleStart;
+  uint256 public saleEnd;
   bool public saleIsPaused;
   string public baseURI;
   string private _contractURI;
@@ -87,11 +88,13 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     tokenPrice = _editionConfig.tokenPrice;
     maxTokenPurchase = _editionConfig.maxTokenPurchase;
     saleStart = _editionConfig.saleStart;
+    saleEnd = _editionConfig.saleEnd;
     royaltyBPS = _editionConfig.royaltyBPS;
     adjustableCap = _editionConfig.adjustableCap;
     parentIP = _metadataConfig.parentIP;
     splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
+    presaleMerkleRoot = _editionConfig.presaleMerkleRoot;
     presaleStart = _editionConfig.presaleStart;
     presaleEnd = _editionConfig.presaleEnd;
 
@@ -197,7 +200,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     presaleMerkleRoot = _presaleMerkleRoot;
   }
 
-  /// @notice pause or unpause sale 
+  /// @notice pause or unpause sale
   function flipSaleState() external onlyOwner {
     saleIsPaused = !saleIsPaused;
   }
@@ -220,7 +223,9 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"
     );
-    payable(msg.sender).transfer(address(this).balance);
+
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(success, "Could not withdraw");
   }
 
   function setBaseURI(string memory uri) external onlyOwner {

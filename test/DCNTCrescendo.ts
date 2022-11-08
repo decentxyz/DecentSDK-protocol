@@ -12,7 +12,7 @@ const step1 = ethers.utils.parseEther("0.005");
 const step2 = ethers.utils.parseEther("0.05");
 const hitch = 20;
 const takeRateBPS = 15_00;
-const unlockDate = theFuture.time();
+let unlockDate = theFuture.time() + theFuture.oneYear;
 let saleStart = theFuture.time();
 const royaltyBPS = 10_00;
 const bps = 100_00;
@@ -327,6 +327,7 @@ describe("DCNTCrescendo", async () => {
     });
 
     it("should withdraw all funds to the contract owner", async () => {
+      await theFuture.travel(theFuture.oneYear);
       const before = await ethers.provider.getBalance(owner.address);
 
       const tx = await crescendo.withdrawFund();
@@ -375,6 +376,7 @@ describe("DCNTCrescendo", async () => {
 
   describe("distributeAndWithdraw()", async () => {
     before(async () => {
+      unlockDate = theFuture.time() + theFuture.oneYear;
       crescendo = await deployDCNTCrescendo(
         sdk,
         name,
@@ -456,6 +458,7 @@ describe("DCNTCrescendo", async () => {
     });
 
     it("should transfer all funds to the split, distribute to receipients, and withdraw", async () => {
+      await theFuture.travel(theFuture.oneYear);
       const before2 = await ethers.provider.getBalance(addr2.address);
       const before3 = await ethers.provider.getBalance(addr3.address);
 
@@ -571,6 +574,7 @@ describe("DCNTCrescendo", async () => {
     });
 
     it('should set owner as the receiver, unless there is a split', async function () {
+      unlockDate = theFuture.time() + theFuture.oneYear;
       const freshNFT: Contract = await deployDCNTCrescendo(
         sdk,
         name,

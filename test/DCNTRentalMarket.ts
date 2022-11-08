@@ -12,9 +12,11 @@ const adjustableCap = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
+const presaleMerkleRoot = null;
 const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
+const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
@@ -43,9 +45,11 @@ describe("DCNTRentalMarket", async () => {
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
+        presaleMerkleRoot,
         presaleStart,
         presaleEnd,
         saleStart,
+        saleEnd,
         royaltyBPS,
         contractURI,
         metadataURI,

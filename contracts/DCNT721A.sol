@@ -29,7 +29,7 @@ import './interfaces/ITokenWithBalance.sol';
 /// @title template NFT contract
 contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
 
-  bool public adjustableCap;
+  bool public hasAdjustableCap;
   uint256 public MAX_TOKENS;
   uint256 public tokenPrice;
   uint256 public maxTokenPurchase;
@@ -90,7 +90,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     saleStart = _editionConfig.saleStart;
     saleEnd = _editionConfig.saleEnd;
     royaltyBPS = _editionConfig.royaltyBPS;
-    adjustableCap = _editionConfig.adjustableCap;
+    hasAdjustableCap = _editionConfig.hasAdjustableCap;
     parentIP = _metadataConfig.parentIP;
     splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
@@ -212,7 +212,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
 
   ///change maximum number of tokens available to mint
   function adjustCap(uint256 newCap) external onlyOwner {
-    require(adjustableCap, 'cannot adjust size of this collection');
+    require(hasAdjustableCap, 'cannot adjust size of this collection');
     require(_nextTokenId() <= newCap, 'cannot decrease cap');
     MAX_TOKENS = newCap;
   }

@@ -8,7 +8,7 @@ import { deployDCNTSDK, deployDCNT4907A, deployMockERC721, deployContract, theFu
 const rentalPrice = ethers.utils.parseEther('0.01');
 const name = 'Decent';
 const symbol = 'DCNT';
-const adjustableCap = false;
+const hasAdjustableCap = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -41,7 +41,7 @@ describe("DCNTRentalMarket", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,

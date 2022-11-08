@@ -9,7 +9,7 @@ const keccak256 = require("keccak256");
 
 const name = 'Decent';
 const symbol = 'DCNT';
-const adjustableCap = true;
+const hasAdjustableCap = true;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -65,7 +65,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -96,7 +96,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -117,7 +117,7 @@ describe("DCNT721A", async () => {
     it("should initialize state which would otherwise be set in constructor", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
-      expect(await clone.adjustableCap()).to.equal(adjustableCap);
+      expect(await clone.hasAdjustableCap()).to.equal(hasAdjustableCap);
       expect(await clone.MAX_TOKENS()).to.equal(maxTokens);
       expect(await clone.tokenPrice()).to.equal(tokenPrice);
       expect(await clone.maxTokenPurchase()).to.equal(maxTokenPurchase);
@@ -138,7 +138,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -163,7 +163,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -198,7 +198,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -253,7 +253,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         0,
@@ -279,7 +279,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -314,7 +314,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -380,7 +380,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         20,
         tokenPrice,
         maxTokenPurchase,
@@ -555,7 +555,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -593,7 +593,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -653,7 +653,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -690,7 +690,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -729,7 +729,7 @@ describe("DCNT721A", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,

@@ -7,7 +7,7 @@ import { deployDCNTSDK, deployDCNT4907A, theFuture, deployMockERC20, sortByAddre
 
 const name = 'Decent';
 const symbol = 'DCNT';
-const adjustableCap = false;
+const hasAdjustableCap = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('1');
 const maxTokenPurchase = 2;
@@ -44,7 +44,7 @@ describe("Splits", async () => {
       sdk,
       name,
       symbol,
-      adjustableCap,
+      hasAdjustableCap,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
@@ -93,7 +93,7 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -131,7 +131,7 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -175,7 +175,7 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -205,7 +205,7 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -277,7 +277,7 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -319,7 +319,7 @@ describe("Splits", async () => {
         sdk,
         name,
         symbol,
-        adjustableCap,
+        hasAdjustableCap,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,

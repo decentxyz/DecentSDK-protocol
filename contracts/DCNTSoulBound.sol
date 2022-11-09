@@ -26,7 +26,7 @@ import "./utils/Splits.sol";
 import './interfaces/ITokenWithBalance.sol';
 
 /// @title template NFT contract
-contract DCNT721A is ERC721A, DCNT721AStorage, Ownable, Splits {
+contract DCNTSoulBound is ERC721A, DCNT721AStorage, Ownable, Splits {
 
   bool public hasAdjustableCap;
   uint256 public MAX_TOKENS;
@@ -198,8 +198,6 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Ownable, Splits {
   function setPresaleMerkleRoot(bytes32 _presaleMerkleRoot) external onlyOwner {
     presaleMerkleRoot = _presaleMerkleRoot;
   }
-
-  
 
   /// @notice pause or unpause sale
   function flipSaleState() external onlyOwner {

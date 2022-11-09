@@ -2,7 +2,7 @@ const { network } = require("hardhat");
 import { ethers } from "hardhat";
 
 // set up DCNTSDK
-const DCNTSDK_ENDPOINT = '';
+const DCNTSDK_ENDPOINT = '0x7b867E509ab94A488B668bE693A19250300A5e8A';
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);

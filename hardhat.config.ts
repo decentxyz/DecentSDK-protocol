@@ -83,6 +83,14 @@ const config: HardhatUserConfig = {
           browserURL: "https://goerli-rollup-explorer.arbitrum.io"
         }
       },
+      {
+        network: "telos_testnet",
+        chainId: 41,
+        urls: {
+          apiURL: "https://goerli-rollup-explorer.arbitrum.io/api",
+          browserURL: "https://testnet.telos.net/evm"
+        }
+      },
     ],
   },
   gasReporter: {

@@ -1,0 +1,16 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MetadataRenderAdminCheck",
+  "sourceName": "contracts/utils/MetadataRenderAdminCheck.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "Access_OnlyAdmin",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220f6de7df8d020cf2ac3dcc2a063860e6aa1fa386475610585d916f807e161b2eb64736f6c63430008090033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220f6de7df8d020cf2ac3dcc2a063860e6aa1fa386475610585d916f807e161b2eb64736f6c63430008090033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -1,0 +1,1958 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "SharedNFTLogic",
+  "sourceName": "contracts/utils/SharedNFTLogic.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "newArtist",
+          "type": "string"
+        }
+      ],
+      "name": "ArtistUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkUri",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkMimeType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkNft",
+          "type": "string"
+        }
+      ],
+      "name": "ArtworkUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "license",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "externalUrl",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "isrc",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "genre",
+          "type": "string"
+        }
+      ],
+      "name": "AudioQualitativeUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "key",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "bpm",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "duration",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "audioMimeType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "trackNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "AudioQuantitativeUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "collaboratorType",
+              "type": "string"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IOnChainMetadata.Credit[]",
+          "name": "credits",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "CreditsUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "newDescription",
+          "type": "string"
+        }
+      ],
+      "name": "DescriptionUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "imageURI",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "animationURI",
+          "type": "string"
+        }
+      ],
+      "name": "EditionInitialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "losslessAudio",
+          "type": "string"
+        }
+      ],
+      "name": "LosslessAudioUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "lyrics",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "lyricsNft",
+          "type": "string"
+        }
+      ],
+      "name": "LyricsUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "imageURI",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "animationURI",
+          "type": "string"
+        }
+      ],
+      "name": "MediaURIsUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkUri",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkMimeType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkNft",
+          "type": "string"
+        }
+      ],
+      "name": "ProjectArtworkUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "recordLabel",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "publisher",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "locationCreated",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "releaseDate",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "projectType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "upc",
+          "type": "string"
+        }
+      ],
+      "name": "ProjectPublishingDataUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "recordLabel",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "publisher",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "locationCreated",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "releaseDate",
+          "type": "string"
+        }
+      ],
+      "name": "PublishingDataUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "losslessAudio",
+                      "type": "string"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "artistName",
+                          "type": "string"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "key",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "bpm",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "duration",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "audioMimeType",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "trackNumber",
+                              "type": "uint256"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQuantitative",
+                          "name": "audioQuantitative",
+                          "type": "tuple"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "license",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "externalUrl",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "isrc",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "genre",
+                              "type": "string"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQualitative",
+                          "name": "audioQualitative",
+                          "type": "tuple"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.SongDetails",
+                      "name": "songDetails",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "lyrics",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "lyricsNft",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.Lyrics",
+                      "name": "lyrics",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Audio",
+                  "name": "audio",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "artwork",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "visualizer",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.SongContent",
+              "name": "song",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "songPublishingData",
+              "type": "tuple"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IOnChainMetadata.SongMetadata",
+          "name": "songMetadata",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "publishingData",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "artworkUri",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkMimeType",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkNft",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.Artwork",
+              "name": "artwork",
+              "type": "tuple"
+            },
+            {
+              "internalType": "string",
+              "name": "projectType",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "upc",
+              "type": "string"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IOnChainMetadata.ProjectMetadata",
+          "name": "projectMetadata",
+          "type": "tuple"
+        },
+        {
+          "indexed": false,
+          "internalType": "string[]",
+          "name": "tags",
+          "type": "string[]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "collaboratorType",
+              "type": "string"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct IOnChainMetadata.Credit[]",
+          "name": "credits",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "SongUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string[]",
+          "name": "tags",
+          "type": "string[]"
+        }
+      ],
+      "name": "TagsUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkUri",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkMimeType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "artworkNft",
+          "type": "string"
+        }
+      ],
+      "name": "VisualizerUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "unencoded",
+          "type": "bytes"
+        }
+      ],
+      "name": "base64Encode",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "imageUrl",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "animationUrl",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenOfEdition",
+          "type": "uint256"
+        }
+      ],
+      "name": "createBaseMetadataEdition",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenOfEdition",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "losslessAudio",
+                      "type": "string"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "artistName",
+                          "type": "string"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "key",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "bpm",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "duration",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "audioMimeType",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "trackNumber",
+                              "type": "uint256"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQuantitative",
+                          "name": "audioQuantitative",
+                          "type": "tuple"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "license",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "externalUrl",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "isrc",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "genre",
+                              "type": "string"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQualitative",
+                          "name": "audioQualitative",
+                          "type": "tuple"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.SongDetails",
+                      "name": "songDetails",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "lyrics",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "lyricsNft",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.Lyrics",
+                      "name": "lyrics",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Audio",
+                  "name": "audio",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "artwork",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "visualizer",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.SongContent",
+              "name": "song",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "songPublishingData",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.SongMetadata",
+          "name": "songMetadata",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "publishingData",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "artworkUri",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkMimeType",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkNft",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.Artwork",
+              "name": "artwork",
+              "type": "tuple"
+            },
+            {
+              "internalType": "string",
+              "name": "projectType",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "upc",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.ProjectMetadata",
+          "name": "projectMetadata",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "collaboratorType",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.Credit[]",
+          "name": "credits",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "tags",
+          "type": "string[]"
+        }
+      ],
+      "name": "createMetadataEdition",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenOfEdition",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "losslessAudio",
+                      "type": "string"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "artistName",
+                          "type": "string"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "key",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "bpm",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "duration",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "audioMimeType",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "trackNumber",
+                              "type": "uint256"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQuantitative",
+                          "name": "audioQuantitative",
+                          "type": "tuple"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "license",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "externalUrl",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "isrc",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "genre",
+                              "type": "string"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQualitative",
+                          "name": "audioQualitative",
+                          "type": "tuple"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.SongDetails",
+                      "name": "songDetails",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "lyrics",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "lyricsNft",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.Lyrics",
+                      "name": "lyrics",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Audio",
+                  "name": "audio",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "artwork",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "visualizer",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.SongContent",
+              "name": "song",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "songPublishingData",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.SongMetadata",
+          "name": "songMetadata",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "publishingData",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "artworkUri",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkMimeType",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkNft",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.Artwork",
+              "name": "artwork",
+              "type": "tuple"
+            },
+            {
+              "internalType": "string",
+              "name": "projectType",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "upc",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.ProjectMetadata",
+          "name": "projectMetadata",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "collaboratorType",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.Credit[]",
+          "name": "credits",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "tags",
+          "type": "string[]"
+        }
+      ],
+      "name": "createMetadataJSON",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenOfEdition",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "losslessAudio",
+                      "type": "string"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "artistName",
+                          "type": "string"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "key",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "bpm",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "duration",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "audioMimeType",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "trackNumber",
+                              "type": "uint256"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQuantitative",
+                          "name": "audioQuantitative",
+                          "type": "tuple"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "string",
+                              "name": "license",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "externalUrl",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "isrc",
+                              "type": "string"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "genre",
+                              "type": "string"
+                            }
+                          ],
+                          "internalType": "struct IOnChainMetadata.AudioQualitative",
+                          "name": "audioQualitative",
+                          "type": "tuple"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.SongDetails",
+                      "name": "songDetails",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "string",
+                          "name": "lyrics",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "lyricsNft",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct IOnChainMetadata.Lyrics",
+                      "name": "lyrics",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Audio",
+                  "name": "audio",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "artwork",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "artworkUri",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkMimeType",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "artworkNft",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct IOnChainMetadata.Artwork",
+                  "name": "visualizer",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.SongContent",
+              "name": "song",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "songPublishingData",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.SongMetadata",
+          "name": "songMetadata",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "title",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "description",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "recordLabel",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "publisher",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "locationCreated",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "releaseDate",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.PublishingData",
+              "name": "publishingData",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "artworkUri",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkMimeType",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "artworkNft",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct IOnChainMetadata.Artwork",
+              "name": "artwork",
+              "type": "tuple"
+            },
+            {
+              "internalType": "string",
+              "name": "projectType",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "upc",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.ProjectMetadata",
+          "name": "projectMetadata",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "collaboratorType",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct IOnChainMetadata.Credit[]",
+          "name": "credits",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "string[]",
+          "name": "tags",
+          "type": "string[]"
+        }
+      ],
+      "name": "createMusicMetadataJSON",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "json",
+          "type": "bytes"
+        }
+      ],
+      "name": "encodeMetadataJSON",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "numberToString",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "imageUrl",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "animationUrl",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenOfEdition",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenMediaData",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5061277e806100206000396000f3fe608060405234801561001057600080fd5b50600436106100885760003560e01c8063b725951f1161005b578063b725951f146100ef578063d01fde8c14610102578063d5fb1b1914610115578063eb111ab61461012857600080fd5b80630464320b1461008d578063086e7c7a146100b6578063170dc660146100c957806318f5c87a146100dc575b600080fd5b6100a061009b3660046113fc565b61013b565b6040516100ad9190611531565b60405180910390f35b6100a06100c4366004611544565b610166565b6100a06100d73660046115f8565b6101b7565b6100a06100ea3660046113fc565b6101c8565b6100a06100fd3660046113fc565b61021e565b6100a0610110366004611611565b61027e565b6100a0610123366004611611565b6102af565b6100a0610136366004611659565b6102ba565b6060600061014d8888888888886101c8565b90506101588161027e565b9150505b9695505050505050565b606085610172836101b7565b8661017e8787876102ba565b610187866101b7565b8a60405160200161019d969594939291906116e1565b604051602081830303815290604052905095945050505050565b60606101c282610373565b92915050565b835151602090810151015160609081015151158015906101fe576020860151516101f690888888888861021e565b91505061015c565b60208087015181015187519182015151915151610158928b92918b610166565b6060600061022b86610478565b905087610237886101b7565b8261024188610524565b61024e8b8b8b8a8c6105d4565b6040516020016102629594939291906117fc565b6040516020818303038152906040529150509695505050505050565b6060610289826102af565b60405160200161029991906118ce565b6040516020818303038152906040529050919050565b60606101c282610679565b825182516060911580159115159082906102d15750805b1561031557856102e0856101b7565b866102ea876101b7565b6040516020016102fd9493929190611913565b6040516020818303038152906040529250505061036c565b81156103365785610325856101b7565b6040516020016102fd9291906119ce565b80156103575784610346856101b7565b6040516020016102fd929190611a34565b60405180602001604052806000815250925050505b9392505050565b6060816103975750506040805180820190915260018152600360fc1b602082015290565b8160005b81156103c157806103ab81611ab8565b91506103ba9050600a83611ae9565b915061039b565b6000816001600160401b038111156103db576103db610c0d565b6040519080825280601f01601f191660200182016040528015610405576020820181803683370190505b5090505b84156104705761041a600183611afd565b9150610427600a86611b14565b610432906030611b28565b60f81b81838151811061044757610447611b40565b60200101906001600160f81b031916908160001a905350610469600a86611ae9565b9450610409565b949350505050565b805151606090610487906107cc565b61049483602001516107f4565b6104c560405180604001604052806007815260200166617274776f726b60c81b81525085600001516020015161082f565b6104f96040518060400160405280600a8152602001693b34b9bab0b634bd32b960b11b81525086600001516040015161082f565b855151604001516105099061086b565b86516020908101515160405161029997969594939201611b56565b8051805160208083015160408086015160a090950151905160609561054d959490929101611c29565b60405160208183030381529060405290508082600001516040015183600001516060015184606001516105a360405180604001604052806007815260200166617274776f726b60c81b815250876020015161082f565b6040516020016105b69493929190611d10565b60408051601f19818403018152908290526102999291602001611ddb565b60606106156040518060400160405280600a8152602001696174747269627574657360b01b8152508787600001516000015160200151878960200151610888565b6106546040518060400160405280600a81526020016970726f7065727469657360b01b8152508888600001516000015160200151888a60200151610888565b61065d85610931565b61066685610a10565b60405160200161019d9493929190611e0a565b606081516000141561069957505060408051602081019091526000815290565b600060405180606001604052806040815260200161270960409139905060006003845160026106c89190611b28565b6106d29190611ae9565b6106dd906004611ea0565b6001600160401b038111156106f4576106f4610c0d565b6040519080825280601f01601f19166020018201604052801561071e576020820181803683370190505b509050600182016020820185865187015b8082101561078a576003820191508151603f8160121c168501518453600184019350603f81600c1c168501518453600184019350603f8160061c168501518453600184019350603f811685015184535060018301925061072f565b50506003865106600181146107a657600281146107b9576107c1565b603d6001830353603d60028303536107c1565b603d60018303535b509195945050505050565b805160208201516060919081906107e290610b57565b60405160200161029993929190611ebf565b6060816000015182602001518360400151846060015185608001518660a0015187600001516040516020016102999796959493929190611f51565b60608282600001518360200151846040015160405160200161085494939291906120b9565b604051602081830303815290604052905092915050565b606081600001518260200151604051602001610299929190612185565b6020830151604084015160609190876108a0886101b7565b6108ad84602001516101b7565b845160608501516040516108c8959493929190602001612204565b60408051601f19818403018152828252875151895192880151855192975087946108f7949293906020016122e1565b60408051601f19818403018152908290526109159291602001611ddb565b6040516020818303038152906040529250505095945050505050565b6040805180820190915260018152605b60f81b602082015260609060005b83518110156109e7578161097b85838151811061096e5761096e611b40565b6020026020010151610b8a565b60405160200161098c929190611ddb565b6040516020818303038152906040529150600184516109ab9190611afd565b8110156109d557816040516020016109c391906123bb565b60405160208183030381529060405291505b806109df81611ab8565b91505061094f565b50806040516020016109f991906123e0565b60408051601f198184030181529190529392505050565b6040805180820190915260018152605b60f81b602082015260609060005b83518110156109e75781604051602001610a489190612405565b604051602081830303815290604052915081610a80858381518110610a6f57610a6f611b40565b602002602001015160000151610b8a565b604051602001610a91929190611ddb565b604051602081830303815290604052915081604051602001610ab39190612431565b604051602081830303815290604052915081610aeb858381518110610ada57610ada611b40565b602002602001015160200151610b8a565b604051602001610afc929190612469565b604051602081830303815290604052915060018451610b1b9190611afd565b811015610b455781604051602001610b3391906123bb565b60405160208183030381529060405291505b80610b4f81611ab8565b915050610a2e565b60608160000151610b6b8360200151610b9d565b610b788460400151610be4565b604051602001610299939291906124a4565b606081604051602001610299919061251c565b60608160000151610bb183602001516101b7565b610bbe84604001516101b7565b8460600151610bd086608001516101b7565b60405160200161029995949392919061254a565b606081600001518260200151836040015184606001516040516020016102999493929190612638565b634e487b7160e01b600052604160045260246000fd5b604051608081016001600160401b0381118282101715610c4557610c45610c0d565b60405290565b604080519081016001600160401b0381118282101715610c4557610c45610c0d565b604051606081016001600160401b0381118282101715610c4557610c45610c0d565b60405160c081016001600160401b0381118282101715610c4557610c45610c0d565b60405160a081016001600160401b0381118282101715610c4557610c45610c0d565b604051601f8201601f191681016001600160401b0381118282101715610cfb57610cfb610c0d565b604052919050565b60006001600160401b03831115610d1c57610d1c610c0d565b610d2f601f8401601f1916602001610cd3565b9050828152838383011115610d4357600080fd5b828260208301376000602084830101529392505050565b600082601f830112610d6b57600080fd5b61036c83833560208501610d03565b600060808284031215610d8c57600080fd5b610d94610c23565b905081356001600160401b0380821115610dad57600080fd5b610db985838601610d5a565b83526020840135915080821115610dcf57600080fd5b610ddb85838601610d5a565b60208401526040840135915080821115610df457600080fd5b610e0085838601610d5a565b60408401526060840135915080821115610e1957600080fd5b50610e2684828501610d5a565b60608301525092915050565b600060408284031215610e4457600080fd5b610e4c610c4b565b905081356001600160401b0380821115610e6557600080fd5b610e7185838601610d5a565b83526020840135915080821115610e8757600080fd5b50610e9484828501610d5a565b60208301525092915050565b600060608284031215610eb257600080fd5b610eba610c6d565b905081356001600160401b0380821115610ed357600080fd5b610edf85838601610d5a565b83526020840135915080821115610ef557600080fd5b610f0185838601610d5a565b60208401526040840135915080821115610f1a57600080fd5b50610f2784828501610d5a565b60408301525092915050565b600060c08284031215610f4557600080fd5b610f4d610c8f565b905081356001600160401b0380821115610f6657600080fd5b610f7285838601610d5a565b83526020840135915080821115610f8857600080fd5b610f9485838601610d5a565b60208401526040840135915080821115610fad57600080fd5b610fb985838601610d5a565b60408401526060840135915080821115610fd257600080fd5b610fde85838601610d5a565b60608401526080840135915080821115610ff757600080fd5b61100385838601610d5a565b608084015260a084013591508082111561101c57600080fd5b5061102984828501610d5a565b60a08301525092915050565b6000604080838503121561104857600080fd5b611050610c4b565b915082356001600160401b038082111561106957600080fd5b908401906060828703121561107d57600080fd5b611085610c6d565b82358281111561109457600080fd5b8301606081890312156110a657600080fd5b6110ae610c6d565b8135848111156110bd57600080fd5b6110c98a828501610d5a565b825250602080830135858111156110df57600080fd5b83016060818c0312156110f157600080fd5b6110f9610c6d565b81358781111561110857600080fd5b6111148d828501610d5a565b825250828201358781111561112857600080fd5b820160a0818e03121561113a57600080fd5b611142610cb1565b81358981111561115157600080fd5b61115d8f828501610d5a565b82525084820135858201528a8201358b82015260608201358981111561118257600080fd5b61118e8f828501610d5a565b606083015250608082013560808201528085840152505088820135878111156111b657600080fd5b6111c28d828501610d7a565b828b015250838301525082870135858111156111dd57600080fd5b6111e98b828601610e32565b88840152508184528086013592508483111561120457600080fd5b6112108a848801610ea0565b818501528686013592508483111561122757600080fd5b6112338a848801610ea0565b878501528388528089013596508487111561124d57600080fd5b6112598a888b01610f33565b818901525050505050505092915050565b60006080828403121561127c57600080fd5b611284610c23565b905081356001600160401b038082111561129d57600080fd5b6112a985838601610f33565b835260208401359150808211156112bf57600080fd5b610ddb85838601610ea0565b60006001600160401b038211156112e4576112e4610c0d565b5060051b60200190565b600082601f8301126112ff57600080fd5b8135602061131461130f836112cb565b610cd3565b82815260059290921b8401810191818101908684111561133357600080fd5b8286015b848110156113725780356001600160401b038111156113565760008081fd5b6113648986838b0101610e32565b845250918301918301611337565b509695505050505050565b600082601f83011261138e57600080fd5b8135602061139e61130f836112cb565b82815260059290921b840181019181810190868411156113bd57600080fd5b8286015b848110156113725780356001600160401b038111156113e05760008081fd5b6113ee8986838b0101610d5a565b8452509183019183016113c1565b60008060008060008060c0878903121561141557600080fd5b86356001600160401b038082111561142c57600080fd5b6114388a838b01610d5a565b975060208901359650604089013591508082111561145557600080fd5b6114618a838b01611035565b9550606089013591508082111561147757600080fd5b6114838a838b0161126a565b9450608089013591508082111561149957600080fd5b6114a58a838b016112ee565b935060a08901359150808211156114bb57600080fd5b506114c889828a0161137d565b9150509295509295509295565b60005b838110156114f05781810151838201526020016114d8565b838111156114ff576000848401525b50505050565b6000815180845261151d8160208601602086016114d5565b601f01601f19169290920160200192915050565b60208152600061036c6020830184611505565b600080600080600060a0868803121561155c57600080fd5b85356001600160401b038082111561157357600080fd5b61157f89838a01610d5a565b9650602088013591508082111561159557600080fd5b6115a189838a01610d5a565b955060408801359150808211156115b757600080fd5b6115c389838a01610d5a565b945060608801359150808211156115d957600080fd5b506115e688828901610d5a565b95989497509295608001359392505050565b60006020828403121561160a57600080fd5b5035919050565b60006020828403121561162357600080fd5b81356001600160401b0381111561163957600080fd5b8201601f8101841361164a57600080fd5b61047084823560208401610d03565b60008060006060848603121561166e57600080fd5b83356001600160401b038082111561168557600080fd5b61169187838801610d5a565b945060208601359150808211156116a757600080fd5b506116b486828701610d5a565b925050604084013590509250925092565b600081516116d78185602086016114d5565b9290920192915050565b693d913730b6b2911d101160b11b8152865160009061170781600a850160208c016114d5565b600160fd1b600a91840191820152875161172881600b840160208c016114d5565b631116101160e11b600b929091019182018190526e3232b9b1b934b83a34b7b7111d101160891b600f830152875161176781601e850160208c016114d5565b601e9201918201528551611782816022840160208a016114d5565b7f70726f70657274696573223a207b226e756d626572223a200000000000000000602292909101918201526117ef6117e06117da6117c3603a8501896116c5565b6a1610113730b6b2911d101160a91b8152600b0190565b866116c5565b62227d7d60e81b815260030190565b9998505050505050505050565b7f7b2276657273696f6e223a2022302e31222c20226e616d65223a20220000000081526000865161183481601c850160208b016114d5565b600160fd1b601c91840191820152865161185581601d840160208b016114d5565b61088b60f21b601d9290910191820152855161187881601f840160208a016114d5565b80820191505061016160f51b80601f830152855161189d816021850160208a016114d5565b602192019182015283516118b88160238401602088016114d5565b6117ef602382840101607d60f81b815260010190565b7f646174613a6170706c69636174696f6e2f6a736f6e3b6261736536342c00000081526000825161190681601d8501602087016114d5565b91909101601d0192915050565b6834b6b0b3b2911d101160b91b81528451600090611938816009850160208a016114d5565b8083019050633f69643d60e01b806009830152865161195e81600d850160208b016114d5565b741116101130b734b6b0ba34b7b72fbab936111d101160591b600d93909101928301528551611994816022850160208a016114d5565b602292019182015283516119af8160268401602088016114d5565b631116101160e11b60269290910191820152602a019695505050505050565b6834b6b0b3b2911d101160b91b815282516000906119f38160098501602088016114d5565b633f69643d60e01b6009918401918201528351611a1781600d8401602088016114d5565b631116101160e11b600d9290910191820152601101949350505050565b7030b734b6b0ba34b7b72fbab936111d101160791b81528251600090611a618160118501602088016114d5565b633f69643d60e01b6011918401918201528351611a858160158401602088016114d5565b631116101160e11b60159290910191820152601901949350505050565b634e487b7160e01b600052601160045260246000fd5b6000600019821415611acc57611acc611aa2565b5060010190565b634e487b7160e01b600052601260045260246000fd5b600082611af857611af8611ad3565b500490565b600082821015611b0f57611b0f611aa2565b500390565b600082611b2357611b23611ad3565b500690565b60008219821115611b3b57611b3b611aa2565b500190565b634e487b7160e01b600052603260045260246000fd5b600087516020611b698285838d016114d5565b8184019150600b60fa1b8083528951611b888160018601858e016114d5565b600193019283018190528851611ba48160028601858d016114d5565b600293019283018190528751611bc08160038601858c016114d5565b60039301928301528551611bda8160048501848a016114d5565b69161134b6b0b3b2911d1160b11b600493909101928301528451611c0481600e85018489016114d5565b611c1a600e82850101601160f91b815260010190565b9b9a5050505050505050505050565b6b2270726f6a656374223a207b60a01b815269113a34ba3632911d101160b11b600c8201528451600090611c64816016850160208a016114d5565b72111610113232b9b1b934b83a34b7b7111d101160691b6016918401918201528551611c97816029840160208a016114d5565b6b111610113a3cb832911d101160a11b602992909101918201528451611cc48160358401602089016114d5565b7f222c20226f726967696e616c52656c6561736544617465223a20220000000000603592909101918201528351611d028160508401602088016114d5565b016050019695505050505050565b72111610113932b1b7b9322630b132b6111d101160691b81528451600090611d3f816013850160208a016114d5565b7011161011383ab13634b9b432b9111d101160791b6013918401918201528551611d70816024840160208a016114d5565b6a111610113ab831911d101160a91b602492909101918201528451611d9c81602f8401602089016114d5565b61088b60f21b602f92909101918201528351611dbf8160318401602088016114d5565b607d60f81b603192909101918201526032019695505050505050565b60008351611ded8184602088016114d5565b835190830190611e018183602088016114d5565b01949350505050565b60008551611e1c818460208a016114d5565b61016160f51b9083019081528551611e3b816002840160208a016114d5565b6716113a30b3b9911d60c11b600292909101918201528451611e6481600a8401602089016114d5565b6c016101131b932b234ba39911d1609d1b600a92909101918201528351611e928160178401602088016114d5565b016017019695505050505050565b6000816000190483118215151615611eba57611eba611aa2565b500290565b71113637b9b9b632b9b9a0bab234b7911d101160711b81528351600090611eed8160128501602089016114d5565b7311161130b734b6b0ba34b7b72fbab936111d101160611b6012918401918201528451611f218160268401602089016114d5565b61088b60f21b602692909101918201528351611f448160288401602088016114d5565b0160280195945050505050565b69113a34ba3632911d101160b11b81528751600090611f7781600a850160208d016114d5565b72111610113232b9b1b934b83a34b7b7111d101160691b600a918401918201528851611faa81601d840160208d016114d5565b72111610113932b1b7b9322630b132b6111d101160691b601d92909101918201528751611fde816030840160208c016114d5565b7011161011383ab13634b9b432b9111d101160791b603092909101918201528651612010816041840160208b016114d5565b7f222c20226c6f636174696f6e43726561746564223a2022000000000000000000604192909101918201526120ab61209e6117da612086612080612057605887018c6116c5565b7f222c20226f726967696e616c52656c6561736544617465223a202200000000008152601b0190565b896116c5565b6b111610113730b6b2911d101160a11b8152600c0190565b601160f91b815260010190565b9a9950505050505050505050565b601160f91b815284516000906120d6816001850160208a016114d5565b63223a207b60e01b60019184019182015267113ab934911d101160c11b6005820152855161210b81600d840160208a016114d5565b6f1116101136b4b6b2aa3cb832911d101160811b600d9290910191820152845161213c81601d8401602089016114d5565b6a1116101137333a111d101160a91b601d929091019182015283516121688160288401602088016114d5565b61227d60f01b60289290910191820152602a019695505050505050565b6a226c7972696373223a207b60a81b815268113a32bc3a111d101160b91b600b82015282516000906121be8160148501602088016114d5565b6a1116101137333a111d101160a91b60149184019182015283516121e981601f8401602088016114d5565b61227d60f01b601f9290910191820152602101949350505050565b601160f91b81528551600090612221816001850160208b016114d5565b6d0111d103d91373ab6b132b9111d160951b600191840191820152865161224f81600f840160208b016114d5565b680161011313836911d160bd1b600f92909101918201528551612279816018840160208a016114d5565b6916101135b2bc911d101160b11b6018929091019182015284516122a48160228401602089016114d5565b6c1116101133b2b73932911d101160991b6022929091019182015283516122d281602f8401602088016114d5565b01602f01979650505050505050565b6e11161011383937b532b1ba111d101160891b8152845160009061230c81600f850160208a016114d5565b6d1116101130b93a34b9ba111d101160911b600f91840191820152855161233a81601d840160208a016114d5565b72111610113932b1b7b9322630b132b6111d101160691b601d9290910191820152845161236e8160308401602089016114d5565b6e111610113634b1b2b739b2911d101160891b60309290910191820152835161239e81603f8401602088016114d5565b61227d60f01b603f92909101918201526041019695505050505050565b600082516123cd8184602087016114d5565b600b60fa1b920191825250600101919050565b600082516123f28184602087016114d5565b605d60f81b920191825250600101919050565b600082516124178184602087016114d5565b673d913730b6b2911d60c11b920191825250600801919050565b600082516124438184602087016114d5565b73161131b7b63630b137b930ba37b92a3cb832911d60611b920191825250601401919050565b6000835161247b8184602088016114d5565b83519083019061248f8183602088016114d5565b607d60f81b9101908152600101949350505050565b6a1130b93a34b9ba111d101160a91b815283516000906124cb81600b8501602089016114d5565b61088b60f21b600b9184019182015284516124ed81600d8401602089016114d5565b600b60fa1b600d9290910191820152835161250f81600e8401602088016114d5565b01600e0195945050505050565b6000601160f91b80835283516125398160018601602088016114d5565b600193019283015250600201919050565b671135b2bc911d101160c11b81528551600090602061256f8260088601838c016114d5565b69011161011313836911d160b51b60089285019283015287516125988160128501848c016114d5565b6d0161011323ab930ba34b7b7111d160951b6012939091019283015286516125c581838501848b016114d5565b6e16101136b4b6b2aa3cb832911d101160891b92018181019290925285516125f381602f85018985016114d5565b710111610113a3930b1b5a73ab6b132b9111d160751b602f9390910192830152845161262581604185018489016114d5565b9190910160410198975050505050505050565b6b113634b1b2b739b2911d101160a11b81528451600090602061266182600c8601838b016114d5565b731116101132bc3a32b93730b62fbab936111d101160611b600c92850192830152865161269381838501848b016114d5565b6b1116101134b9b931911d101160a11b92018181019290925285516126be81602c85018985016114d5565b6c1116101133b2b73932911d101160991b602c939091019283015284516126eb81603985018489016114d5565b601160f91b6039939091019283015250603a01969550505050505056fe4142434445464748494a4b4c4d4e4f505152535455565758595a6162636465666768696a6b6c6d6e6f707172737475767778797a303132333435363738392b2fa2646970667358221220c023fbe28dd4e392a8ae8514dc005b731bb2e08b975b299e4a8bb86292319a9564736f6c63430008090033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100885760003560e01c8063b725951f1161005b578063b725951f146100ef578063d01fde8c14610102578063d5fb1b1914610115578063eb111ab61461012857600080fd5b80630464320b1461008d578063086e7c7a146100b6578063170dc660146100c957806318f5c87a146100dc575b600080fd5b6100a061009b3660046113fc565b61013b565b6040516100ad9190611531565b60405180910390f35b6100a06100c4366004611544565b610166565b6100a06100d73660046115f8565b6101b7565b6100a06100ea3660046113fc565b6101c8565b6100a06100fd3660046113fc565b61021e565b6100a0610110366004611611565b61027e565b6100a0610123366004611611565b6102af565b6100a0610136366004611659565b6102ba565b6060600061014d8888888888886101c8565b90506101588161027e565b9150505b9695505050505050565b606085610172836101b7565b8661017e8787876102ba565b610187866101b7565b8a60405160200161019d969594939291906116e1565b604051602081830303815290604052905095945050505050565b60606101c282610373565b92915050565b835151602090810151015160609081015151158015906101fe576020860151516101f690888888888861021e565b91505061015c565b60208087015181015187519182015151915151610158928b92918b610166565b6060600061022b86610478565b905087610237886101b7565b8261024188610524565b61024e8b8b8b8a8c6105d4565b6040516020016102629594939291906117fc565b6040516020818303038152906040529150509695505050505050565b6060610289826102af565b60405160200161029991906118ce565b6040516020818303038152906040529050919050565b60606101c282610679565b825182516060911580159115159082906102d15750805b1561031557856102e0856101b7565b866102ea876101b7565b6040516020016102fd9493929190611913565b6040516020818303038152906040529250505061036c565b81156103365785610325856101b7565b6040516020016102fd9291906119ce565b80156103575784610346856101b7565b6040516020016102fd929190611a34565b60405180602001604052806000815250925050505b9392505050565b6060816103975750506040805180820190915260018152600360fc1b602082015290565b8160005b81156103c157806103ab81611ab8565b91506103ba9050600a83611ae9565b915061039b565b6000816001600160401b038111156103db576103db610c0d565b6040519080825280601f01601f191660200182016040528015610405576020820181803683370190505b5090505b84156104705761041a600183611afd565b9150610427600a86611b14565b610432906030611b28565b60f81b81838151811061044757610447611b40565b60200101906001600160f81b031916908160001a905350610469600a86611ae9565b9450610409565b949350505050565b805151606090610487906107cc565b61049483602001516107f4565b6104c560405180604001604052806007815260200166617274776f726b60c81b81525085600001516020015161082f565b6104f96040518060400160405280600a8152602001693b34b9bab0b634bd32b960b11b81525086600001516040015161082f565b855151604001516105099061086b565b86516020908101515160405161029997969594939201611b56565b8051805160208083015160408086015160a090950151905160609561054d959490929101611c29565b60405160208183030381529060405290508082600001516040015183600001516060015184606001516105a360405180604001604052806007815260200166617274776f726b60c81b815250876020015161082f565b6040516020016105b69493929190611d10565b60408051601f19818403018152908290526102999291602001611ddb565b60606106156040518060400160405280600a8152602001696174747269627574657360b01b8152508787600001516000015160200151878960200151610888565b6106546040518060400160405280600a81526020016970726f7065727469657360b01b8152508888600001516000015160200151888a60200151610888565b61065d85610931565b61066685610a10565b60405160200161019d9493929190611e0a565b606081516000141561069957505060408051602081019091526000815290565b600060405180606001604052806040815260200161270960409139905060006003845160026106c89190611b28565b6106d29190611ae9565b6106dd906004611ea0565b6001600160401b038111156106f4576106f4610c0d565b6040519080825280601f01601f19166020018201604052801561071e576020820181803683370190505b509050600182016020820185865187015b8082101561078a576003820191508151603f8160121c168501518453600184019350603f81600c1c168501518453600184019350603f8160061c168501518453600184019350603f811685015184535060018301925061072f565b50506003865106600181146107a657600281146107b9576107c1565b603d6001830353603d60028303536107c1565b603d60018303535b509195945050505050565b805160208201516060919081906107e290610b57565b60405160200161029993929190611ebf565b6060816000015182602001518360400151846060015185608001518660a0015187600001516040516020016102999796959493929190611f51565b60608282600001518360200151846040015160405160200161085494939291906120b9565b604051602081830303815290604052905092915050565b606081600001518260200151604051602001610299929190612185565b6020830151604084015160609190876108a0886101b7565b6108ad84602001516101b7565b845160608501516040516108c8959493929190602001612204565b60408051601f19818403018152828252875151895192880151855192975087946108f7949293906020016122e1565b60408051601f19818403018152908290526109159291602001611ddb565b6040516020818303038152906040529250505095945050505050565b6040805180820190915260018152605b60f81b602082015260609060005b83518110156109e7578161097b85838151811061096e5761096e611b40565b6020026020010151610b8a565b60405160200161098c929190611ddb565b6040516020818303038152906040529150600184516109ab9190611afd565b8110156109d557816040516020016109c391906123bb565b60405160208183030381529060405291505b806109df81611ab8565b91505061094f565b50806040516020016109f991906123e0565b60408051601f198184030181529190529392505050565b6040805180820190915260018152605b60f81b602082015260609060005b83518110156109e75781604051602001610a489190612405565b604051602081830303815290604052915081610a80858381518110610a6f57610a6f611b40565b602002602001015160000151610b8a565b604051602001610a91929190611ddb565b604051602081830303815290604052915081604051602001610ab39190612431565b604051602081830303815290604052915081610aeb858381518110610ada57610ada611b40565b602002602001015160200151610b8a565b604051602001610afc929190612469565b604051602081830303815290604052915060018451610b1b9190611afd565b811015610b455781604051602001610b3391906123bb565b60405160208183030381529060405291505b80610b4f81611ab8565b915050610a2e565b60608160000151610b6b8360200151610b9d565b610b788460400151610be4565b604051602001610299939291906124a4565b606081604051602001610299919061251c565b60608160000151610bb183602001516101b7565b610bbe84604001516101b7565b8460600151610bd086608001516101b7565b60405160200161029995949392919061254a565b606081600001518260200151836040015184606001516040516020016102999493929190612638565b634e487b7160e01b600052604160045260246000fd5b604051608081016001600160401b0381118282101715610c4557610c45610c0d565b60405290565b604080519081016001600160401b0381118282101715610c4557610c45610c0d565b604051606081016001600160401b0381118282101715610c4557610c45610c0d565b60405160c081016001600160401b0381118282101715610c4557610c45610c0d565b60405160a081016001600160401b0381118282101715610c4557610c45610c0d565b604051601f8201601f191681016001600160401b0381118282101715610cfb57610cfb610c0d565b604052919050565b60006001600160401b03831115610d1c57610d1c610c0d565b610d2f601f8401601f1916602001610cd3565b9050828152838383011115610d4357600080fd5b828260208301376000602084830101529392505050565b600082601f830112610d6b57600080fd5b61036c83833560208501610d03565b600060808284031215610d8c57600080fd5b610d94610c23565b905081356001600160401b0380821115610dad57600080fd5b610db985838601610d5a565b83526020840135915080821115610dcf57600080fd5b610ddb85838601610d5a565b60208401526040840135915080821115610df457600080fd5b610e0085838601610d5a565b60408401526060840135915080821115610e1957600080fd5b50610e2684828501610d5a565b60608301525092915050565b600060408284031215610e4457600080fd5b610e4c610c4b565b905081356001600160401b0380821115610e6557600080fd5b610e7185838601610d5a565b83526020840135915080821115610e8757600080fd5b50610e9484828501610d5a565b60208301525092915050565b600060608284031215610eb257600080fd5b610eba610c6d565b905081356001600160401b0380821115610ed357600080fd5b610edf85838601610d5a565b83526020840135915080821115610ef557600080fd5b610f0185838601610d5a565b60208401526040840135915080821115610f1a57600080fd5b50610f2784828501610d5a565b60408301525092915050565b600060c08284031215610f4557600080fd5b610f4d610c8f565b905081356001600160401b0380821115610f6657600080fd5b610f7285838601610d5a565b83526020840135915080821115610f8857600080fd5b610f9485838601610d5a565b60208401526040840135915080821115610fad57600080fd5b610fb985838601610d5a565b60408401526060840135915080821115610fd257600080fd5b610fde85838601610d5a565b60608401526080840135915080821115610ff757600080fd5b61100385838601610d5a565b608084015260a084013591508082111561101c57600080fd5b5061102984828501610d5a565b60a08301525092915050565b6000604080838503121561104857600080fd5b611050610c4b565b915082356001600160401b038082111561106957600080fd5b908401906060828703121561107d57600080fd5b611085610c6d565b82358281111561109457600080fd5b8301606081890312156110a657600080fd5b6110ae610c6d565b8135848111156110bd57600080fd5b6110c98a828501610d5a565b825250602080830135858111156110df57600080fd5b83016060818c0312156110f157600080fd5b6110f9610c6d565b81358781111561110857600080fd5b6111148d828501610d5a565b825250828201358781111561112857600080fd5b820160a0818e03121561113a57600080fd5b611142610cb1565b81358981111561115157600080fd5b61115d8f828501610d5a565b82525084820135858201528a8201358b82015260608201358981111561118257600080fd5b61118e8f828501610d5a565b606083015250608082013560808201528085840152505088820135878111156111b657600080fd5b6111c28d828501610d7a565b828b015250838301525082870135858111156111dd57600080fd5b6111e98b828601610e32565b88840152508184528086013592508483111561120457600080fd5b6112108a848801610ea0565b818501528686013592508483111561122757600080fd5b6112338a848801610ea0565b878501528388528089013596508487111561124d57600080fd5b6112598a888b01610f33565b818901525050505050505092915050565b60006080828403121561127c57600080fd5b611284610c23565b905081356001600160401b038082111561129d57600080fd5b6112a985838601610f33565b835260208401359150808211156112bf57600080fd5b610ddb85838601610ea0565b60006001600160401b038211156112e4576112e4610c0d565b5060051b60200190565b600082601f8301126112ff57600080fd5b8135602061131461130f836112cb565b610cd3565b82815260059290921b8401810191818101908684111561133357600080fd5b8286015b848110156113725780356001600160401b038111156113565760008081fd5b6113648986838b0101610e32565b845250918301918301611337565b509695505050505050565b600082601f83011261138e57600080fd5b8135602061139e61130f836112cb565b82815260059290921b840181019181810190868411156113bd57600080fd5b8286015b848110156113725780356001600160401b038111156113e05760008081fd5b6113ee8986838b0101610d5a565b8452509183019183016113c1565b60008060008060008060c0878903121561141557600080fd5b86356001600160401b038082111561142c57600080fd5b6114388a838b01610d5a565b975060208901359650604089013591508082111561145557600080fd5b6114618a838b01611035565b9550606089013591508082111561147757600080fd5b6114838a838b0161126a565b9450608089013591508082111561149957600080fd5b6114a58a838b016112ee565b935060a08901359150808211156114bb57600080fd5b506114c889828a0161137d565b9150509295509295509295565b60005b838110156114f05781810151838201526020016114d8565b838111156114ff576000848401525b50505050565b6000815180845261151d8160208601602086016114d5565b601f01601f19169290920160200192915050565b60208152600061036c6020830184611505565b600080600080600060a0868803121561155c57600080fd5b85356001600160401b038082111561157357600080fd5b61157f89838a01610d5a565b9650602088013591508082111561159557600080fd5b6115a189838a01610d5a565b955060408801359150808211156115b757600080fd5b6115c389838a01610d5a565b945060608801359150808211156115d957600080fd5b506115e688828901610d5a565b95989497509295608001359392505050565b60006020828403121561160a57600080fd5b5035919050565b60006020828403121561162357600080fd5b81356001600160401b0381111561163957600080fd5b8201601f8101841361164a57600080fd5b61047084823560208401610d03565b60008060006060848603121561166e57600080fd5b83356001600160401b038082111561168557600080fd5b61169187838801610d5a565b945060208601359150808211156116a757600080fd5b506116b486828701610d5a565b925050604084013590509250925092565b600081516116d78185602086016114d5565b9290920192915050565b693d913730b6b2911d101160b11b8152865160009061170781600a850160208c016114d5565b600160fd1b600a91840191820152875161172881600b840160208c016114d5565b631116101160e11b600b929091019182018190526e3232b9b1b934b83a34b7b7111d101160891b600f830152875161176781601e850160208c016114d5565b601e9201918201528551611782816022840160208a016114d5565b7f70726f70657274696573223a207b226e756d626572223a200000000000000000602292909101918201526117ef6117e06117da6117c3603a8501896116c5565b6a1610113730b6b2911d101160a91b8152600b0190565b866116c5565b62227d7d60e81b815260030190565b9998505050505050505050565b7f7b2276657273696f6e223a2022302e31222c20226e616d65223a20220000000081526000865161183481601c850160208b016114d5565b600160fd1b601c91840191820152865161185581601d840160208b016114d5565b61088b60f21b601d9290910191820152855161187881601f840160208a016114d5565b80820191505061016160f51b80601f830152855161189d816021850160208a016114d5565b602192019182015283516118b88160238401602088016114d5565b6117ef602382840101607d60f81b815260010190565b7f646174613a6170706c69636174696f6e2f6a736f6e3b6261736536342c00000081526000825161190681601d8501602087016114d5565b91909101601d0192915050565b6834b6b0b3b2911d101160b91b81528451600090611938816009850160208a016114d5565b8083019050633f69643d60e01b806009830152865161195e81600d850160208b016114d5565b741116101130b734b6b0ba34b7b72fbab936111d101160591b600d93909101928301528551611994816022850160208a016114d5565b602292019182015283516119af8160268401602088016114d5565b631116101160e11b60269290910191820152602a019695505050505050565b6834b6b0b3b2911d101160b91b815282516000906119f38160098501602088016114d5565b633f69643d60e01b6009918401918201528351611a1781600d8401602088016114d5565b631116101160e11b600d9290910191820152601101949350505050565b7030b734b6b0ba34b7b72fbab936111d101160791b81528251600090611a618160118501602088016114d5565b633f69643d60e01b6011918401918201528351611a858160158401602088016114d5565b631116101160e11b60159290910191820152601901949350505050565b634e487b7160e01b600052601160045260246000fd5b6000600019821415611acc57611acc611aa2565b5060010190565b634e487b7160e01b600052601260045260246000fd5b600082611af857611af8611ad3565b500490565b600082821015611b0f57611b0f611aa2565b500390565b600082611b2357611b23611ad3565b500690565b60008219821115611b3b57611b3b611aa2565b500190565b634e487b7160e01b600052603260045260246000fd5b600087516020611b698285838d016114d5565b8184019150600b60fa1b8083528951611b888160018601858e016114d5565b600193019283018190528851611ba48160028601858d016114d5565b600293019283018190528751611bc08160038601858c016114d5565b60039301928301528551611bda8160048501848a016114d5565b69161134b6b0b3b2911d1160b11b600493909101928301528451611c0481600e85018489016114d5565b611c1a600e82850101601160f91b815260010190565b9b9a5050505050505050505050565b6b2270726f6a656374223a207b60a01b815269113a34ba3632911d101160b11b600c8201528451600090611c64816016850160208a016114d5565b72111610113232b9b1b934b83a34b7b7111d101160691b6016918401918201528551611c97816029840160208a016114d5565b6b111610113a3cb832911d101160a11b602992909101918201528451611cc48160358401602089016114d5565b7f222c20226f726967696e616c52656c6561736544617465223a20220000000000603592909101918201528351611d028160508401602088016114d5565b016050019695505050505050565b72111610113932b1b7b9322630b132b6111d101160691b81528451600090611d3f816013850160208a016114d5565b7011161011383ab13634b9b432b9111d101160791b6013918401918201528551611d70816024840160208a016114d5565b6a111610113ab831911d101160a91b602492909101918201528451611d9c81602f8401602089016114d5565b61088b60f21b602f92909101918201528351611dbf8160318401602088016114d5565b607d60f81b603192909101918201526032019695505050505050565b60008351611ded8184602088016114d5565b835190830190611e018183602088016114d5565b01949350505050565b60008551611e1c818460208a016114d5565b61016160f51b9083019081528551611e3b816002840160208a016114d5565b6716113a30b3b9911d60c11b600292909101918201528451611e6481600a8401602089016114d5565b6c016101131b932b234ba39911d1609d1b600a92909101918201528351611e928160178401602088016114d5565b016017019695505050505050565b6000816000190483118215151615611eba57611eba611aa2565b500290565b71113637b9b9b632b9b9a0bab234b7911d101160711b81528351600090611eed8160128501602089016114d5565b7311161130b734b6b0ba34b7b72fbab936111d101160611b6012918401918201528451611f218160268401602089016114d5565b61088b60f21b602692909101918201528351611f448160288401602088016114d5565b0160280195945050505050565b69113a34ba3632911d101160b11b81528751600090611f7781600a850160208d016114d5565b72111610113232b9b1b934b83a34b7b7111d101160691b600a918401918201528851611faa81601d840160208d016114d5565b72111610113932b1b7b9322630b132b6111d101160691b601d92909101918201528751611fde816030840160208c016114d5565b7011161011383ab13634b9b432b9111d101160791b603092909101918201528651612010816041840160208b016114d5565b7f222c20226c6f636174696f6e43726561746564223a2022000000000000000000604192909101918201526120ab61209e6117da612086612080612057605887018c6116c5565b7f222c20226f726967696e616c52656c6561736544617465223a202200000000008152601b0190565b896116c5565b6b111610113730b6b2911d101160a11b8152600c0190565b601160f91b815260010190565b9a9950505050505050505050565b601160f91b815284516000906120d6816001850160208a016114d5565b63223a207b60e01b60019184019182015267113ab934911d101160c11b6005820152855161210b81600d840160208a016114d5565b6f1116101136b4b6b2aa3cb832911d101160811b600d9290910191820152845161213c81601d8401602089016114d5565b6a1116101137333a111d101160a91b601d929091019182015283516121688160288401602088016114d5565b61227d60f01b60289290910191820152602a019695505050505050565b6a226c7972696373223a207b60a81b815268113a32bc3a111d101160b91b600b82015282516000906121be8160148501602088016114d5565b6a1116101137333a111d101160a91b60149184019182015283516121e981601f8401602088016114d5565b61227d60f01b601f9290910191820152602101949350505050565b601160f91b81528551600090612221816001850160208b016114d5565b6d0111d103d91373ab6b132b9111d160951b600191840191820152865161224f81600f840160208b016114d5565b680161011313836911d160bd1b600f92909101918201528551612279816018840160208a016114d5565b6916101135b2bc911d101160b11b6018929091019182015284516122a48160228401602089016114d5565b6c1116101133b2b73932911d101160991b6022929091019182015283516122d281602f8401602088016114d5565b01602f01979650505050505050565b6e11161011383937b532b1ba111d101160891b8152845160009061230c81600f850160208a016114d5565b6d1116101130b93a34b9ba111d101160911b600f91840191820152855161233a81601d840160208a016114d5565b72111610113932b1b7b9322630b132b6111d101160691b601d9290910191820152845161236e8160308401602089016114d5565b6e111610113634b1b2b739b2911d101160891b60309290910191820152835161239e81603f8401602088016114d5565b61227d60f01b603f92909101918201526041019695505050505050565b600082516123cd8184602087016114d5565b600b60fa1b920191825250600101919050565b600082516123f28184602087016114d5565b605d60f81b920191825250600101919050565b600082516124178184602087016114d5565b673d913730b6b2911d60c11b920191825250600801919050565b600082516124438184602087016114d5565b73161131b7b63630b137b930ba37b92a3cb832911d60611b920191825250601401919050565b6000835161247b8184602088016114d5565b83519083019061248f8183602088016114d5565b607d60f81b9101908152600101949350505050565b6a1130b93a34b9ba111d101160a91b815283516000906124cb81600b8501602089016114d5565b61088b60f21b600b9184019182015284516124ed81600d8401602089016114d5565b600b60fa1b600d9290910191820152835161250f81600e8401602088016114d5565b01600e0195945050505050565b6000601160f91b80835283516125398160018601602088016114d5565b600193019283015250600201919050565b671135b2bc911d101160c11b81528551600090602061256f8260088601838c016114d5565b69011161011313836911d160b51b60089285019283015287516125988160128501848c016114d5565b6d0161011323ab930ba34b7b7111d160951b6012939091019283015286516125c581838501848b016114d5565b6e16101136b4b6b2aa3cb832911d101160891b92018181019290925285516125f381602f85018985016114d5565b710111610113a3930b1b5a73ab6b132b9111d160751b602f9390910192830152845161262581604185018489016114d5565b9190910160410198975050505050505050565b6b113634b1b2b739b2911d101160a11b81528451600090602061266182600c8601838b016114d5565b731116101132bc3a32b93730b62fbab936111d101160611b600c92850192830152865161269381838501848b016114d5565b6b1116101134b9b931911d101160a11b92018181019290925285516126be81602c85018985016114d5565b6c1116101133b2b73932911d101160991b602c939091019283015284516126eb81603985018489016114d5565b601160f91b6039939091019283015250603a01969550505050505056fe4142434445464748494a4b4c4d4e4f505152535455565758595a6162636465666768696a6b6c6d6e6f707172737475767778797a303132333435363738392b2fa2646970667358221220c023fbe28dd4e392a8ae8514dc005b731bb2e08b975b299e4a8bb86292319a9564736f6c63430008090033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

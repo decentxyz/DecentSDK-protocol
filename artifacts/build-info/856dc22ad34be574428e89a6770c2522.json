@@ -1,0 +1,238 @@
+{
+  "id": "856dc22ad34be574428e89a6770c2522",
+  "_format": "hh-sol-build-info-1",
+  "solcVersion": "0.8.9",
+  "solcLongVersion": "0.8.9+commit.e5eed63a",
+  "input": {
+    "language": "Solidity",
+    "sources": {
+      "contracts/splits/interfaces/ReverseRecords.sol": {
+        "content": "// SPDX-License-Identifier: GPL-3.0-or-later\r\npragma solidity ^0.8.4;\r\n\r\ninterface ReverseRecords {\r\n  function getNames(address[] calldata addresses)\r\n    external\r\n    view\r\n    returns (string[] memory r);\r\n}\r\n"
+      }
+    },
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ],
+          "": [
+            "ast"
+          ]
+        }
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "contracts/splits/interfaces/ReverseRecords.sol": {
+        "ReverseRecords": {
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address[]",
+                  "name": "addresses",
+                  "type": "address[]"
+                }
+              ],
+              "name": "getNames",
+              "outputs": [
+                {
+                  "internalType": "string[]",
+                  "name": "r",
+                  "type": "string[]"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ],
+          "evm": {
+            "bytecode": {
+              "functionDebugData": {},
+              "generatedSources": [],
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "deployedBytecode": {
+              "functionDebugData": {},
+              "generatedSources": [],
+              "immutableReferences": {},
+              "linkReferences": {},
+              "object": "",
+              "opcodes": "",
+              "sourceMap": ""
+            },
+            "methodIdentifiers": {
+              "getNames(address[])": "cbf8b66c"
+            }
+          },
+          "metadata": "{\"compiler\":{\"version\":\"0.8.9+commit.e5eed63a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"addresses\",\"type\":\"address[]\"}],\"name\":\"getNames\",\"outputs\":[{\"internalType\":\"string[]\",\"name\":\"r\",\"type\":\"string[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/splits/interfaces/ReverseRecords.sol\":\"ReverseRecords\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/splits/interfaces/ReverseRecords.sol\":{\"keccak256\":\"0xf1a78619f0d5c00469a1884e3f7a7034588a4f141bbc333b7ac054aefbbc9558\",\"license\":\"GPL-3.0-or-later\",\"urls\":[\"bzz-raw://c82ff613e848aa6ea9bc7688c96bd780938f40cdb75d74341f8f78e6eb62a422\",\"dweb:/ipfs/QmS3wZ68Yo2AysXKNGDJwFYQgydDnHY6zAzJ9gfTgWqFrc\"]}},\"version\":1}"
+        }
+      }
+    },
+    "sources": {
+      "contracts/splits/interfaces/ReverseRecords.sol": {
+        "ast": {
+          "absolutePath": "contracts/splits/interfaces/ReverseRecords.sol",
+          "exportedSymbols": {
+            "ReverseRecords": [
+              11
+            ]
+          },
+          "id": 12,
+          "license": "GPL-3.0-or-later",
+          "nodeType": "SourceUnit",
+          "nodes": [
+            {
+              "id": 1,
+              "literals": [
+                "solidity",
+                "^",
+                "0.8",
+                ".4"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "46:23:0"
+            },
+            {
+              "abstract": false,
+              "baseContracts": [],
+              "canonicalName": "ReverseRecords",
+              "contractDependencies": [],
+              "contractKind": "interface",
+              "fullyImplemented": false,
+              "id": 11,
+              "linearizedBaseContracts": [
+                11
+              ],
+              "name": "ReverseRecords",
+              "nameLocation": "83:14:0",
+              "nodeType": "ContractDefinition",
+              "nodes": [
+                {
+                  "functionSelector": "cbf8b66c",
+                  "id": 10,
+                  "implemented": false,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "getNames",
+                  "nameLocation": "112:8:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 5,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 4,
+                        "mutability": "mutable",
+                        "name": "addresses",
+                        "nameLocation": "140:9:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 10,
+                        "src": "121:28:0",
+                        "stateVariable": false,
+                        "storageLocation": "calldata",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                          "typeString": "address[]"
+                        },
+                        "typeName": {
+                          "baseType": {
+                            "id": 2,
+                            "name": "address",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "121:7:0",
+                            "stateMutability": "nonpayable",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address",
+                              "typeString": "address"
+                            }
+                          },
+                          "id": 3,
+                          "nodeType": "ArrayTypeName",
+                          "src": "121:9:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                            "typeString": "address[]"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "120:30:0"
+                  },
+                  "returnParameters": {
+                    "id": 9,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 8,
+                        "mutability": "mutable",
+                        "name": "r",
+                        "nameLocation": "205:1:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 10,
+                        "src": "189:17:0",
+                        "stateVariable": false,
+                        "storageLocation": "memory",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_string_memory_ptr_$dyn_memory_ptr",
+                          "typeString": "string[]"
+                        },
+                        "typeName": {
+                          "baseType": {
+                            "id": 6,
+                            "name": "string",
+                            "nodeType": "ElementaryTypeName",
+                            "src": "189:6:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_string_storage_ptr",
+                              "typeString": "string"
+                            }
+                          },
+                          "id": 7,
+                          "nodeType": "ArrayTypeName",
+                          "src": "189:8:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_string_storage_$dyn_storage_ptr",
+                            "typeString": "string[]"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "188:19:0"
+                  },
+                  "scope": 11,
+                  "src": "103:105:0",
+                  "stateMutability": "view",
+                  "virtual": false,
+                  "visibility": "external"
+                }
+              ],
+              "scope": 12,
+              "src": "73:138:0",
+              "usedErrors": []
+            }
+          ],
+          "src": "46:167:0"
+        },
+        "id": 0
+      }
+    }
+  }
+}

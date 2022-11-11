@@ -46,6 +46,14 @@ const config: HardhatUserConfig = {
       url: process.env.ARBITRUM_TESTNET_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },
+    telos: {
+      url: process.env.ARBITRUM_MAINNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
+    telos_testnet: {
+      url: process.env.TELOS_TESTNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
   },
   etherscan: {
     apiKey: {
@@ -55,6 +63,8 @@ const config: HardhatUserConfig = {
       polygonMumbai: process.env.POLYGONSCAN_KEY as string,
       optimism_testnet: process.env.OPTIMISMSCAN_KEY as string,
       arbitrum_testnet: process.env.BLOCKSCOUT_KEY as string,
+      telos: process.env.TELOSSCAN_KEY as string,
+      telos_testnet: process.env.TELOSSCAN_KEY as string,   
     },
     customChains: [
       {
@@ -71,6 +81,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://goerli-rollup-explorer.arbitrum.io/api",
           browserURL: "https://goerli-rollup-explorer.arbitrum.io"
+        }
+      },
+      {
+        network: "telos_testnet",
+        chainId: 41,
+        urls: {
+          apiURL: "https://goerli-rollup-explorer.arbitrum.io/api",
+          browserURL: "https://testnet.telos.net/evm"
         }
       },
     ],

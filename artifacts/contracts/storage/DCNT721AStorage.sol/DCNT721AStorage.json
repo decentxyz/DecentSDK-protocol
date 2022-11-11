@@ -1,0 +1,34 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "DCNT721AStorage",
+  "sourceName": "contracts/storage/DCNT721AStorage.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "tokenGateConfig",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint88",
+          "name": "minBalance",
+          "type": "uint88"
+        },
+        {
+          "internalType": "enum SaleType",
+          "name": "saleType",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060fa8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80631dbdedbd14602d575b600080fd5b6000546060906001600160a01b03811690600160a01b81046affffffffffffffffffffff1690600160f81b900460ff1683565b604051606d939291906076565b60405180910390f35b6001600160a01b03841681526affffffffffffffffffffff83166020820152606081016003831060b657634e487b7160e01b600052602160045260246000fd5b82604083015294935050505056fea264697066735822122096f5a8394c568f7d95ad70f81a2cad6b17f5d341f6a9a1a86ca6245a2a8eb15164736f6c63430008090033",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c80631dbdedbd14602d575b600080fd5b6000546060906001600160a01b03811690600160a01b81046affffffffffffffffffffff1690600160f81b900460ff1683565b604051606d939291906076565b60405180910390f35b6001600160a01b03841681526affffffffffffffffffffff83166020820152606081016003831060b657634e487b7160e01b600052602160045260246000fd5b82604083015294935050505056fea264697066735822122096f5a8394c568f7d95ad70f81a2cad6b17f5d341f6a9a1a86ca6245a2a8eb15164736f6c63430008090033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

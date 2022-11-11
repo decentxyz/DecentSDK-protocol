@@ -330,8 +330,9 @@ contract DCNT721A is ERC721A, DefaultOperatorFilterer721, DCNT721AStorage, Initi
   }
 
   /// @notice update the public sale start time
-  function updateSaleStart(uint256 newStart) external onlyOwner {
+  function updateSaleStartEnd(uint256 newStart, uint256 newEnd) external onlyOwner {
     saleStart = newStart;
+    saleEnd = newEnd;
   }
 
   function transferFrom(address from, address to, uint256 tokenId) public override onlyAllowedOperator(from) {

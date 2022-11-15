@@ -1,50 +1,88 @@
-const { network } = require("hardhat");
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
+const fs = require('fs');
+const { execSync } = require('child_process');
 
-// set up DCNTSDK
-const DCNTSDK_ENDPOINT = '';
+const run = (command: string) => {
+  try {
+    execSync(command, { stdio: 'inherit' });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+const getSDKAddresses = () => {
+  const files = new Map();
+  files.set('mainnet', '1-mainnet');
+  files.set('polygon', '137-polygon');
+  files.set('optimism', '10-optimism');
+  files.set('arbitrum', '42161-arbitrum');
+  files.set('goerli', '5-goerli');
+  files.set('polygon_testnet', '80001-polygonMumbai');
+  files.set('optimism_testnet', '420-optimismGoerli');
+  files.set('arbitrum_testnet', '421613-arbitrumGoerli');
+  const file = files.get(network.name);
+  var path = process.env.PWD + '/addresses/';
+  var addresses = JSON.parse(fs.readFileSync(`${path}${file}.json`, 'utf8'));
+  return addresses;
+}
 
 async function main() {
-  const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
-  const DCNT721A = await DCNTSDK.DCNT721AImplementation();
-  const DCNT4907A = await DCNTSDK.DCNT4907AImplementation();
-  const DCNTCrescendo = await DCNTSDK.DCNTCrescendoImplementation();
-  const DCNTVault = await DCNTSDK.DCNTVaultImplementation();
-  const DCNTStaking = await DCNTSDK.DCNTStakingImplementation();
-  const DCNTMetadataRenderer = await DCNTSDK.metadataRenderer();
-  const DCNTRegistry = await DCNTSDK.contractRegistry();
-  const SplitMain = await DCNTSDK.SplitMain();
+  const addresses = getSDKAddresses();
+  const DCNTSDK = await ethers.getContractAt('DCNTSDK', addresses.DCNTSDK);
+  const DCNT721A = await ethers.getContractAt('DCNT721A', addresses.DCNT721A);
+  const DCNT4907A = await ethers.getContractAt('DCNT4907A', addresses.DCNT4907A);
+  const DCNTCrescendo = await ethers.getContractAt('DCNTCrescendo', addresses.DCNTCrescendo);
+  const DCNTVault = await ethers.getContractAt('DCNTVault', addresses.DCNTVault);
+  const DCNTStaking = await ethers.getContractAt('DCNTStaking', addresses.DCNTStaking);
+  const DCNTMetadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', addresses.DCNTMetadataRenderer);
+  const SharedNFTLogic = await ethers.getContractAt('DCNTMetadataRenderer', await DCNTMetadataRenderer.sharedNFTLogic());
+  const DCNTRegistry = await ethers.getContractAt('DCNTRegistry', addresses.DCNTRegistry);
+  const DCNTVaultNFT = await ethers.getContractAt('DCNTVaultNFT', addresses.DCNTVaultNFT);
+  const DCNTRentalMarket = await ethers.getContractAt('DCNTRentalMarket', addresses.DCNTRentalMarket);
+  const SplitMain = await ethers.getContractAt('SplitMain', addresses.SplitMain);
 
-  console.log('\nVerify DCNTSDK:');
-  console.log(`npx hardhat verify --network ${network.name}`,
-    DCNTSDK_ENDPOINT,
-    DCNT721A,
-    DCNT4907A,
-    DCNTCrescendo,
-    DCNTVault,
-    DCNTStaking,
-    DCNTMetadataRenderer,
-    DCNTRegistry,
-    SplitMain
+  console.log('\nVerifying DCNTSDK...\n');
+  run(`npx hardhat verify --network ${network.name} `
+    +`${DCNTSDK.address} `
+    +`${DCNT721A.address} `
+    +`${DCNT4907A.address} `
+    +`${DCNTCrescendo.address} `
+    +`${DCNTVault.address} `
+    +`${DCNTStaking.address} `
+    +`${DCNTMetadataRenderer.address} `
+    +`${DCNTRegistry.address} `
+    +`${SplitMain.address}`
   );
 
-  console.log('\nVerify DCNT721A:');
-  console.log(`npx hardhat verify --network ${network.name} ${DCNT721A}`);
+  console.log('\nVerifying DCNT721A...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNT721A.address}`);
 
-  console.log('\nVerify DCNT4907A:');
-  console.log(`npx hardhat verify --network ${network.name} ${DCNT4907A}`);
+  console.log('\nVerifying DCNT4907A...');
+  await run(`npx hardhat verify --network ${network.name} ${DCNT4907A.address}`);
 
-  console.log('\nVerify DCNTCrescendo:');
-  console.log(`npx hardhat verify --network ${network.name} ${DCNTCrescendo}`);
+  console.log('\nVerify DCNTCrescendo...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTCrescendo.address}`);
 
-  console.log('\nVerify DCNTVault:');
-  console.log(`npx hardhat verify --network ${network.name} ${DCNTVault}`);
+  console.log('\nVerifying DCNTVault...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTVault.address}`);
 
-  console.log('\nVerify DCNTStaking:');
-  console.log(`npx hardhat verify --network ${network.name} ${DCNTStaking}`);
+  console.log('\nVerifying DCNTStaking...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTStaking.address}`);
 
-  console.log('\nVerify DCNTRegistry:');
-  console.log(`npx hardhat verify --network ${network.name} ${DCNTRegistry}\n`);
+  console.log('\nVerifying DCNTRegistry...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTRegistry.address}`);
+
+  console.log('\nVerifying SharedNFTLogic...\n');
+  await run(`npx hardhat verify --network ${network.name} ${SharedNFTLogic.address}`);
+
+  console.log('\nVerifying DCNTMetadataRenderer...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTMetadataRenderer.address} ${SharedNFTLogic.address}`);
+
+  console.log('\nVerifying DCNTVaultNFT...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTVaultNFT.address} ${DCNTSDK.address}`);
+
+  console.log('\nVerifying DCNTRentalMarket...\n');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTRentalMarket.address}\n`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

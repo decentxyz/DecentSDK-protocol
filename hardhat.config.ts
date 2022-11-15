@@ -53,8 +53,10 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_KEY as string,
       polygon: process.env.POLYGONSCAN_KEY as string,
       polygonMumbai: process.env.POLYGONSCAN_KEY as string,
+      optimisticEthereum: process.env.OPTIMISMSCAN_KEY as string,
       optimism_testnet: process.env.OPTIMISMSCAN_KEY as string,
-      arbitrum_testnet: process.env.BLOCKSCOUT_KEY as string,
+      arbitrumOne: process.env.ARBISCAN_KEY as string,
+      arbitrum_testnet: process.env.ARBISCAN_KEY as string,
     },
     customChains: [
       {
@@ -69,8 +71,8 @@ const config: HardhatUserConfig = {
         network: "arbitrum_testnet",
         chainId: 421613,
         urls: {
-          apiURL: "https://goerli-rollup-explorer.arbitrum.io/api",
-          browserURL: "https://goerli-rollup-explorer.arbitrum.io"
+          apiURL: "https://api-goerli.arbiscan.io/api",
+          browserURL: "https://goerli.arbiscan.io/"
         }
       },
     ],

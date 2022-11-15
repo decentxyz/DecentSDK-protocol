@@ -98,9 +98,9 @@ export const deployImplementations = async () => {
   };
 }
 
-export const deployContract = async (contract: string) => {
+export const deployContract = async (contract: string, args: any[] = []) => {
   const factory = await ethers.getContractFactory(contract);
-  const tx = await factory.deploy();
+  const tx = await factory.deploy(...args);
   return await tx.deployed();
 }
 

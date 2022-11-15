@@ -15,12 +15,13 @@ const takeRateBPS = 15_00;
 const unlockDate = theFuture.time();
 const saleStart = theFuture.time();
 const royaltyBPS = 10_00;
+const contractURI = 'http://localhost/contract/';
+const metadataURI = "http://localhost/{id}.json";
 const metadataRendererInit = {
   description: "This is the description for TOKEN.",
   imageURI: "http://localhost/image.jpg",
   animationURI: "http://localhost/song.mp3",
 };
-const metadataURI = "http://localhost/{id}.json";
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
@@ -36,6 +37,7 @@ async function main() {
     unlockDate,
     saleStart,
     royaltyBPS,
+    contractURI,
     metadataURI,
     metadataRendererInit
   );

@@ -119,7 +119,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     verifyTokenGate(false)
   {
     uint256 mintIndex = _nextTokenId();
-    require(block.timestamp >= saleStart, "Sales are not active yet.");
+    require(block.timestamp >= saleStart && block.timestamp <= saleEnd, "Sales are not active.");
     require(!saleIsPaused, "Sale must be active to mint");
     require(
       mintIndex + numberOfTokens <= MAX_TOKENS,
@@ -207,7 +207,7 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
 
   /// @notice is the current sale active
   function saleIsActive() external view returns(bool _saleIsActive) {
-    _saleIsActive = (block.timestamp >= saleStart) && (!saleIsPaused);
+    _saleIsActive = (block.timestamp >= saleStart && block.timestamp <= saleEnd) && (!saleIsPaused);
   }
 
   ///change maximum number of tokens available to mint
@@ -328,7 +328,8 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
   }
 
   /// @notice update the public sale start time
-  function updateSaleStart(uint256 newStart) external onlyOwner {
+  function updateSaleStartEnd(uint256 newStart, uint256 newEnd) external onlyOwner {
     saleStart = newStart;
+    saleEnd = newEnd;
   }
 }

@@ -217,7 +217,7 @@ describe("DCNT721A", async () => {
 
     it("should not allow mints until after the start date", async () => {
       await expect(nft.connect(addr1).mint(1)).to.be.revertedWith(
-        'Sales are not active yet.'
+        'Sales are not active.'
       );
       await theFuture.travel(theFuture.oneDay);
       await theFuture.arrive();
@@ -261,8 +261,8 @@ describe("DCNT721A", async () => {
         presaleStart,
         presaleEnd,
         saleStart,
-        royaltyBPS,
         saleEnd,
+        royaltyBPS,
         contractURI,
         metadataURI,
         metadataRendererInit,

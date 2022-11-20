@@ -19,6 +19,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./interfaces/IDCNTRegistry.sol";
 import "./storage/EditionConfig.sol";
+import "./storage/ZKEditionConfig.sol";
 import "./storage/MetadataConfig.sol";
 import "./storage/TokenGateConfig.sol";
 import "./storage/CrescendoConfig.sol";
@@ -31,6 +32,7 @@ contract DCNTSDK is Ownable {
   address public DCNTCrescendoImplementation;
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
+  address public ZKEditionImplementation;
 
   /// @notice address of the metadata renderer
   address public metadataRenderer;
@@ -49,6 +51,7 @@ contract DCNTSDK is Ownable {
   event DeployDCNTCrescendo(address DCNTCrescendo);
   event DeployDCNTVault(address DCNTVault);
   event DeployDCNTStaking(address DCNTStaking);
+  event DeployZKEdition(address ZKEdition);
 
   /// ============ Constructor ============
 
@@ -61,7 +64,8 @@ contract DCNTSDK is Ownable {
     address _DCNTStakingImplementation,
     address _metadataRenderer,
     address _contractRegistry,
-    address _SplitMain
+    address _SplitMain,
+    address _ZKEditionImplementation
   ) {
     DCNT721AImplementation = _DCNT721AImplementation;
     DCNT4907AImplementation = _DCNT4907AImplementation;
@@ -71,6 +75,7 @@ contract DCNTSDK is Ownable {
     metadataRenderer = _metadataRenderer;
     contractRegistry = _contractRegistry;
     SplitMain = _SplitMain;
+    ZKEditionImplementation = _ZKEditionImplementation;
   }
 
   /// ============ Functions ============
@@ -103,6 +108,36 @@ contract DCNTSDK is Ownable {
     require(success);
     IDCNTRegistry(contractRegistry).register(msg.sender, clone, "DCNT721A");
     emit DeployDCNT721A(clone);
+  }
+
+  /// @notice deploy and initialize a ZKEdition clone
+  function deployZKEdition(
+    ZKEditionConfig memory _editionConfig,
+    MetadataConfig memory _metadataConfig,
+    address zkVerifier
+  ) external returns (address clone) {
+    clone = Clones.clone(ZKEditionImplementation); //zkedition implementation
+    (bool success, ) = clone.call(
+      abi.encodeWithSignature(
+        "initialize("
+          "address,"
+          "(bool,uint256,string,uint256,string),"
+          "(string,string,bytes,address),"
+          "address,"
+          "address,"
+          "address"
+        ")",
+        msg.sender,
+        _editionConfig,
+        _metadataConfig,
+        metadataRenderer,
+        SplitMain,
+        zkVerifier
+      )
+    );
+    require(success);
+    IDCNTRegistry(contractRegistry).register(msg.sender, clone, "ZKEdition");
+    emit DeployZKEdition(clone);
   }
 
   /// @notice deploy and initialize an erc4907a clone

@@ -36,6 +36,7 @@ export type Implementations = {
   DCNTCrescendo: Contract;
   DCNTVault: Contract;
   DCNTStaking: Contract;
+  ZKEdition: Contract;
 };
 
 export type MetadataInit = {
@@ -69,7 +70,8 @@ export const deployDCNTSDK = async (
     implementations.DCNTStaking.address,
     metadataRenderer.address,
     contractRegistry.address,
-    splitMain.address
+    splitMain.address,
+    implementations.ZKEdition.address
   );
   return await decentSDK.deployed();
 }
@@ -89,12 +91,14 @@ export const deployImplementations = async () => {
   const DCNTCrescendo = await deployContract('DCNTCrescendo');
   const DCNTVault = await deployContract('DCNTVault');
   const DCNTStaking = await deployContract('DCNTStaking');
+  const ZKEdition = await deployContract('ZKEdition')
   return {
     DCNT721A,
     DCNT4907A,
     DCNTCrescendo,
     DCNTVault,
-    DCNTStaking
+    DCNTStaking,
+    ZKEdition
   };
 }
 
@@ -406,6 +410,52 @@ export const DCNTVaultNFTCreate = async (
   const vault = await ethers.getContractAt("DCNTVault", vaultAddr);
 
   return [nft, vault];
+}
+
+export const deployZKEdition = async (
+  decentSDK: Contract,
+  name: string,
+  symbol: string,
+  hasAdjustableCap: boolean,
+  maxTokens: number,
+  royaltyBPS: number,
+  contractURI: string,
+  metadataURI: string,
+  metadata: MetadataInit | null,
+  zkVerifier: string,
+  parentIP: string = ethers.constants.AddressZero
+) => {
+  const metadataRendererInit = metadata != null
+    ? ethers.utils.AbiCoder.prototype.encode(
+        ['string', 'string', 'string'],
+        [
+          metadata.description,
+          metadata.imageURI,
+          metadata.animationURI
+        ]
+      )
+    : [];
+
+  const deployTx = await decentSDK.deployZKEdition(
+    {
+      hasAdjustableCap,
+      maxTokens,
+      name,
+      royaltyBPS,
+      symbol,
+    },
+    {
+      contractURI,
+      metadataURI,
+      metadataRendererInit,
+      parentIP,
+    },
+    zkVerifier
+  );
+
+  const receipt = await deployTx.wait();
+  const address = receipt.events.find((x: any) => x.event === 'DeployZKEdition').args.ZKEdition;
+  return ethers.getContractAt("ZKEdition", address);
 }
 
 export const deployMockERC20 = async (amountToMint: BigNumber | number) => {

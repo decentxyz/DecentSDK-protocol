@@ -1,6 +1,6 @@
 # DecentSDK
 
-### Getting Started :rainbow:
+### Getting Started:
 
 - `npm i` to install packages
 - copy `.env.example` to `.env` and add your variables

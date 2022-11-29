@@ -19,7 +19,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./interfaces/IDCNTRegistry.sol";
 import "./storage/EditionConfig.sol";
-import "./storage/ZKEditionConfig.sol";
 import "./storage/MetadataConfig.sol";
 import "./storage/TokenGateConfig.sol";
 import "./storage/CrescendoConfig.sol";
@@ -112,8 +111,9 @@ contract DCNTSDK is Ownable {
 
   /// @notice deploy and initialize a ZKEdition clone
   function deployZKEdition(
-    ZKEditionConfig memory _editionConfig,
+    EditionConfig memory _editionConfig,
     MetadataConfig memory _metadataConfig,
+    TokenGateConfig memory _tokenGateConfig,
     address zkVerifier
   ) external returns (address clone) {
     clone = Clones.clone(ZKEditionImplementation); //zkedition implementation
@@ -121,8 +121,9 @@ contract DCNTSDK is Ownable {
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(bool,uint256,string,uint256,string),"
+          "(string,string,bool,uint256,uint256,uint256,bytes32,uint256,uint256,uint256,uint256,uint256),"
           "(string,string,bytes,address),"
+          "(address,uint88,uint8),"
           "address,"
           "address,"
           "address"
@@ -130,6 +131,7 @@ contract DCNTSDK is Ownable {
         msg.sender,
         _editionConfig,
         _metadataConfig,
+        _tokenGateConfig,
         metadataRenderer,
         SplitMain,
         zkVerifier

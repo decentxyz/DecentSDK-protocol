@@ -38,13 +38,13 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
   uint256 public saleEnd;
   bool public saleIsPaused;
   string public baseURI;
-  string private _contractURI;
+  string internal _contractURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
 
   uint256 public presaleStart;
   uint256 public presaleEnd;
-  bytes32 private presaleMerkleRoot;
+  bytes32 internal presaleMerkleRoot;
 
   address public splitMain;
   address public splitWallet;

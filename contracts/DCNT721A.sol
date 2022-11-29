@@ -332,4 +332,10 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
     saleStart = newStart;
     saleEnd = newEnd;
   }
+
+  /// @notice update the public sale start time
+  function updatePresaleStartEnd(uint256 newStart, uint256 newEnd) external onlyOwner {
+    presaleStart = newStart;
+    presaleEnd = newEnd;
+  }
 }

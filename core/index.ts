@@ -418,10 +418,18 @@ export const deployZKEdition = async (
   symbol: string,
   hasAdjustableCap: boolean,
   maxTokens: number,
+  tokenPrice: BigNumber,
+  maxTokenPurchase: number,
+  presaleMerkleRoot: string | null,
+  presaleStart: number,
+  presaleEnd: number,
+  saleStart: number,
+  saleEnd: number | BigNumber,
   royaltyBPS: number,
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null,
   zkVerifier: string,
   parentIP: string = ethers.constants.AddressZero
 ) => {
@@ -438,17 +446,29 @@ export const deployZKEdition = async (
 
   const deployTx = await decentSDK.deployZKEdition(
     {
+      name,
+      symbol,
       hasAdjustableCap,
       maxTokens,
-      name,
+      tokenPrice,
+      maxTokenPurchase,
+      presaleMerkleRoot: presaleMerkleRoot || ethers.constants.HashZero,
+      presaleStart,
+      presaleEnd,
+      saleStart,
+      saleEnd,
       royaltyBPS,
-      symbol,
     },
     {
       contractURI,
       metadataURI,
       metadataRendererInit,
       parentIP,
+    },
+    tokenGateConfig || {
+      tokenAddress: ethers.constants.AddressZero,
+      minBalance: 0,
+      saleType: 0,
     },
     zkVerifier
   );

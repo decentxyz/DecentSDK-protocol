@@ -40,6 +40,7 @@ async function main() {
   const DCNTVaultNFT = await ethers.getContractAt('DCNTVaultNFT', addresses.DCNTVaultNFT);
   const DCNTRentalMarket = await ethers.getContractAt('DCNTRentalMarket', addresses.DCNTRentalMarket);
   const SplitMain = await ethers.getContractAt('SplitMain', addresses.SplitMain);
+  const ZKEdition = await ethers.getContractAt('ZKEdition', addresses.ZKEdition);
 
   console.log('\nVerifying DCNTSDK...\n');
   run(`npx hardhat verify --network ${network.name} `
@@ -51,7 +52,8 @@ async function main() {
     +`${DCNTStaking.address} `
     +`${DCNTMetadataRenderer.address} `
     +`${DCNTRegistry.address} `
-    +`${SplitMain.address}`
+    +`${SplitMain.address} `
+    +`${ZKEdition.address}`
   );
 
   console.log('\nVerifying DCNT721A...\n');
@@ -83,6 +85,9 @@ async function main() {
 
   console.log('\nVerifying DCNTRentalMarket...\n');
   await run(`npx hardhat verify --network ${network.name} ${DCNTRentalMarket.address}\n`);
+
+  console.log('\nVerifying ZKEdition...\n');
+  await run(`npx hardhat verify --network ${network.name} ${ZKEdition.address}\n`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

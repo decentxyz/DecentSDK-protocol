@@ -4,15 +4,16 @@ const fs = require('fs');
 
 const UPGRADES = {
   DCNTSDK: true,
-  DCNT721A: false,
-  DCNT4907A: false,
+  DCNT721A: true,
+  DCNT4907A: true,
   DCNTCrescendo: false,
   DCNTVault: false,
   DCNTStaking: false,
   DCNTMetadataRenderer: false,
   DCNTRegistry: false,
-  DCNTVaultNFT: false,
+  DCNTVaultNFT: true,
   DCNTRentalMarket: false,
+  ZKEdition: true,
 }
 
 const getSDKAddresses = () => {
@@ -65,6 +66,8 @@ async function main() {
 
   const DCNTRegistry = await getUpgradedContractAt('DCNTRegistry', addresses.DCNTRegistry);
 
+  const ZKEdition = await getUpgradedContractAt('ZKEdition', addresses?.ZKEdition);
+
   const DCNTSDK = await getUpgradedContractAt('DCNTSDK', addresses.DCNTSDK, [
     DCNT721A.address,
     DCNT4907A.address,
@@ -73,7 +76,8 @@ async function main() {
     DCNTStaking.address,
     DCNTMetadataRenderer.address,
     DCNTRegistry.address,
-    addresses.SplitMain
+    addresses.SplitMain,
+    ZKEdition.address,
   ]);
 
   const DCNTVaultNFT = await getUpgradedContractAt('DCNTVaultNFT', addresses.DCNTVaultNFT, [DCNTSDK.address]);
@@ -92,6 +96,7 @@ async function main() {
     DCNTVaultNFT: DCNTVaultNFT.address,
     DCNTRentalMarket: DCNTRentalMarket.address,
     SplitMain: addresses.SplitMain,
+    ZKEdition: ZKEdition.address,
   }
 
   console.log(JSON.stringify(contracts, null, 2),'\n');

@@ -31,6 +31,7 @@ async function main() {
     DCNTVaultNFT: vaultNFT.address,
     DCNTRentalMarket: rentalMarket.address,
     SplitMain: await sdk.SplitMain(),
+    ZKEdition: await sdk.ZKEditionImplementation(),
   }
 
   console.log(JSON.stringify(contracts, null, 2));

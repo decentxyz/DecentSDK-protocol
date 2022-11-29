@@ -12,6 +12,7 @@ import {
   deployDCNTVault,
   deployDCNTStaking,
   deployDCNTMetadataRenderer,
+  deployZKEdition,
   deployContract,
   theFuture,
   deployMockERC721
@@ -258,6 +259,58 @@ describe("DCNTSDK", async () => {
     it("should register the deployed DCNTStaking with the contract registry", async () => {
       const deployments = await contractRegistry.query(owner.address);
       expect(deployments[4]).to.equal(clone.address);
+    });
+  });
+
+  describe("deployZKEdition()", async () => {
+    before(async () => {
+      const name = 'Decent';
+      const symbol = 'DCNT';
+      const hasAdjustableCap = false;
+      const maxTokens = 4;
+      const tokenPrice = ethers.utils.parseEther('0.01');
+      const maxTokenPurchase = 2;
+      const presaleMerkleRoot = '';
+      const presaleStart = theFuture.time();
+      const presaleEnd = theFuture.time();
+      const saleStart = theFuture.time();
+      const saleEnd = theFuture.time() + theFuture.oneDay;
+      const royaltyBPS = 10_00;
+      const contractURI = 'http://localhost/contract/';
+      const metadataURI = 'http://localhost/metadata/';
+      const metadataRendererInit = null;
+      const tokenGateConfig = null;
+
+      clone = await deployZKEdition(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig,
+        ethers.constants.AddressZero,
+        parentIP.address
+      );
+    });
+
+    it("should deploy and initialize a ZKEdition contract", async () => {
+      expect(clone.address).to.be.properAddress;
+    });
+
+    it("should register the deployed ZKEdition with the contract registry", async () => {
+      const deployments = await contractRegistry.query(owner.address);
+      expect(deployments[5]).to.equal(clone.address);
     });
   });
 });

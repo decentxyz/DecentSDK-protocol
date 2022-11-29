@@ -31,6 +31,7 @@ contract DCNTVaultNFT is Ownable {
   address public DCNTCrescendoImplementation;
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
+  address public ZKEditionImplementation;
 
   /// @notice address of the metadata renderer
   address public metadataRenderer;

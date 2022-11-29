@@ -713,6 +713,10 @@ describe("DCNT721A", async () => {
   });
 
   describe("supportsInterface()", async () => {
+    it('should support the interface for ERC721', async function () {
+      expect(await nft.supportsInterface('0x80ac58cd')).to.eq(true);
+    });
+
     it('should support the interface for ERC2981', async function () {
       expect(await nft.supportsInterface('0x2a55205a')).to.eq(true);
     });

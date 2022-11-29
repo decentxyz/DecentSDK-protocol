@@ -122,6 +122,10 @@ describe("DCNT4907A", async () => {
   });
 
   describe("supportsInterface()", async () => {
+    it('should support the interface for ERC721', async function () {
+      expect(await clone.supportsInterface('0x80ac58cd')).to.eq(true);
+    });
+
     it('should support the interface for ERC4907', async function () {
       expect(await clone.supportsInterface('0xad092b5c')).to.eq(true);
     });

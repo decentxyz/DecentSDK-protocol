@@ -107,6 +107,7 @@ contract DCNTSDK is Ownable {
     require(success);
     IDCNTRegistry(contractRegistry).register(msg.sender, clone, "DCNT721A");
     emit DeployDCNT721A(clone);
+    return clone;
   }
 
   /// @notice deploy and initialize a ZKEdition clone

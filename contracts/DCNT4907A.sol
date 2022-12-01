@@ -44,9 +44,35 @@ contract DCNT4907A is DCNT721A, ERC4907A {
     public
     view
     virtual
-    override(DCNT721A, ERC721A)
+    override(DCNT721A, ERC721A, IERC721A)
     returns (string memory)
   {
     return DCNT721A.tokenURI(tokenId);
+  }
+
+  /// @dev we must specify inheritance path for _beforeTokenTransfers
+  function _beforeTokenTransfers(
+    address from,
+    address to,
+    uint256 startTokenId,
+    uint256 quantity
+  ) internal virtual override(DCNT721A, ERC721A) {
+    DCNT721A._beforeTokenTransfers(from, to, startTokenId, quantity);
+  }
+
+  /// @dev we must specify inheritance path for setApprovalForAll
+  function setApprovalForAll(
+    address operator,
+    bool approved
+  ) public override(DCNT721A, ERC721A, IERC721A) {
+    DCNT721A.setApprovalForAll(operator, approved);
+  }
+
+  /// @dev we must specify inheritance path for approve
+  function approve(
+    address operator,
+    uint256 tokenId
+  ) public override(DCNT721A, ERC721A, IERC721A) {
+    DCNT721A.approve(operator, tokenId);
   }
 }

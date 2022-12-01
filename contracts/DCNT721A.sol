@@ -25,9 +25,10 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./storage/DCNT721AStorage.sol";
 import "./utils/Splits.sol";
 import './interfaces/ITokenWithBalance.sol';
+import "./utils/OperatorFilterer.sol";
 
 /// @title template NFT contract
-contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
+contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, Ownable, Splits {
 
   bool public hasAdjustableCap;
   uint256 public MAX_TOKENS;
@@ -337,5 +338,44 @@ contract DCNT721A is ERC721A, DCNT721AStorage, Initializable, Ownable, Splits {
   function updatePresaleStartEnd(uint256 newStart, uint256 newEnd) external onlyOwner {
     presaleStart = newStart;
     presaleEnd = newEnd;
+  }
+
+  /// @notice update the registration with the operator filter registry
+  /// @param enable whether or not to enable the operator filter
+  /// @param operatorFilter the address for the operator filter subscription
+  function updateOperatorFilter(bool enable, address operatorFilter) external onlyOwner {
+    address self = address(this);
+    if (!operatorFilterRegistry.isRegistered(self) && enable) {
+      operatorFilterRegistry.registerAndSubscribe(self, operatorFilter);
+    } else if (enable) {
+      operatorFilterRegistry.subscribe(self, operatorFilter);
+    } else {
+      operatorFilterRegistry.unsubscribe(self, false);
+      operatorFilterRegistry.unregister(self);
+    }
+  }
+
+  /// @dev Use ERC721A token hook and OperatorFilterer modifier to restrict transfers
+  function _beforeTokenTransfers(
+    address from,
+    address to,
+    uint256 startTokenId,
+    uint256 quantity
+  ) internal virtual override onlyAllowedOperator(from) { }
+
+  /// @dev Use OperatorFilterer modifier to restrict approvals
+  function setApprovalForAll(
+    address operator,
+    bool approved
+  ) public virtual override onlyAllowedOperatorApproval(operator) {
+    super.setApprovalForAll(operator, approved);
+  }
+
+  /// @dev Use OperatorFilterer modifier to restrict approvals
+  function approve(
+    address operator,
+    uint256 tokenId
+  ) public virtual override onlyAllowedOperatorApproval(operator) {
+    super.approve(operator, tokenId);
   }
 }

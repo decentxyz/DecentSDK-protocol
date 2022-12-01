@@ -538,6 +538,44 @@ describe("DCNT721A", async () => {
     });
   });
 
+  describe("transferFrom()", async () => {
+    it('should allow transfers by the owner or approved operator', async function () {
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      await freshNFT.mint(1, { value: tokenPrice });
+      expect(await freshNFT.ownerOf(0)).to.equal(addr1.address);
+
+      await freshNFT.connect(addr1).transferFrom(addr1.address, addr2.address, 0);
+      expect(await freshNFT.ownerOf(0)).to.equal(addr2.address);
+
+      await freshNFT.connect(addr2).approve(addr3.address, 0);
+      await freshNFT.connect(addr3).transferFrom(addr2.address, addr4.address, 0);
+      expect(await freshNFT.ownerOf(0)).to.equal(addr4.address);
+
+      await expect(
+        freshNFT.connect(addr2).transferFrom(addr4.address, addr2.address, 0)
+      ).to.be.revertedWithCustomError(freshNFT, 'TransferCallerNotOwnerNorApproved');
+    });
+  });
+
   describe("tokenURI()", async () => {
     it("should return basic on chain matadata rendered as a base64 url", async () => {
       const response = await nft.tokenURI(0);

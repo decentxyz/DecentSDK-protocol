@@ -56,6 +56,31 @@ describe("DCNTStaking", async () => {
     });
   });
 
+  describe("stake()", async () => {
+    it("should revert if not approved for token or not an approved operator", async () => {
+      const stakedNFT = await deployMockERC721();
+      await stakedNFT.mintNft(10);
+
+      const staking = await deployDCNTStaking(
+        sdk,
+        stakedNFT.address,
+        token.address,
+        vaultDuration,
+        totalSupply
+      );
+
+      await expect(staking.stake([0])).to.be.revertedWith('not approved for transfer');
+      await stakedNFT.approve(staking.address, 0);
+      await staking.stake([0]);
+      expect(await staking.balanceOf(owner.address)).to.equal(1);
+
+      await expect(staking.stake([1,2,3,4,5])).to.be.revertedWith('not approved for transfer');
+      await stakedNFT.setApprovalForAll(staking.address, true);
+      await staking.stake([1,2,3,4,5]);
+      expect(await staking.balanceOf(owner.address)).to.equal(6);
+    });
+  });
+
   describe("vault functionality", async () => {
     it("should have a vault balance of zero", async () => {
       expect(await nft.balanceOf(owner.address)).to.equal(0);

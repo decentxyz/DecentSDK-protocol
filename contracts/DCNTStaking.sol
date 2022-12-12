@@ -77,7 +77,8 @@ contract DCNTStaking is
         "not your token"
       );
       require(
-        IERC721(nftAddress).getApproved(tokenId) == address(this),
+        IERC721(nftAddress).getApproved(tokenId) == address(this)
+        || IERC721(nftAddress).isApprovedForAll(msg.sender, address(this)),
         "not approved for transfer"
       );
 

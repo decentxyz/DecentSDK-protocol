@@ -9,7 +9,7 @@ const rentalPrice = ethers.utils.parseEther('0.01');
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = false;
-const maxTokens = 4;
+const maxTokens = 100;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
 const presaleMerkleRoot = null;
@@ -87,11 +87,24 @@ describe("DCNTRentalMarket", async () => {
       ).to.be.revertedWith('NFT does not support ERC4907');
     });
 
-    it("should revert if the rental market has not been approved by token owner", async () => {
+    it("should revert if the rental market is not approved for token or not an approved operator", async () => {
       await nft.connect(fan).mint(1, { value: tokenPrice });
+
       await expect(
         rentalMarket.connect(fan).setRentable(nft.address, 1, true, rentalPrice, 1, 30)
       ).to.be.revertedWith('Token is not approved for rentals');
+
+      await nft.connect(fan).approve(rentalMarket.address, 1);
+      await rentalMarket.connect(fan).setRentable(nft.address, 1, true, rentalPrice, 1, 30);
+      await nft.connect(fan).approve(ethers.constants.AddressZero, 1);
+
+      await expect(
+        rentalMarket.connect(fan).setRentable(nft.address, 1, true, rentalPrice, 1, 30)
+      ).to.be.revertedWith('Token is not approved for rentals');
+
+      await nft.connect(fan).setApprovalForAll(rentalMarket.address, true);
+      await rentalMarket.connect(fan).setRentable(nft.address, 1, true, rentalPrice, 1, 30);
+      await nft.connect(fan).setApprovalForAll(rentalMarket.address, false);
     });
 
     it("should revert if called by an account other than token owner", async () => {
@@ -161,44 +174,54 @@ describe("DCNTRentalMarket", async () => {
       await expect(
         rentalMarket.connect(renter).rent(nft.address, 3, 1, { value: rentalPrice })
       ).to.be.revertedWith('Token is not approved for rentals');
+
+      await nft.connect(fan).setApprovalForAll(rentalMarket.address, true);
+      await rentalMarket.connect(renter).rent(nft.address, 3, 1, { value: rentalPrice })
+      await nft.connect(fan).setApprovalForAll(rentalMarket.address, false);
+
+      await nft.connect(fan).mint(1, { value: tokenPrice });
+      await expect(
+        rentalMarket.connect(renter).rent(nft.address, 4, 1, { value: rentalPrice })
+      ).to.be.revertedWith('Token is not approved for rentals');
     });
 
     it("should revert if the rental fee has not been set", async () => {
-      await nft.connect(fan).approve(rentalMarket.address, 3);
-      await rentalMarket.connect(fan).setRentable(nft.address, 3, true, 0, 1, 30);
+
+      await nft.connect(fan).approve(rentalMarket.address, 4);
+      await rentalMarket.connect(fan).setRentable(nft.address, 4, true, 0, 1, 30);
 
       await expect(
-        rentalMarket.connect(renter).rent(nft.address, 3, 1, { value: rentalPrice })
+        rentalMarket.connect(renter).rent(nft.address, 4, 1, { value: rentalPrice })
       ).to.be.revertedWith('Rental fee has not been set');
     });
 
     it("should revert if the amount transferred does not cover the rental fee", async () => {
-      await rentalMarket.connect(fan).setRentable(nft.address, 3, true, rentalPrice, 1, 30);
+      await rentalMarket.connect(fan).setRentable(nft.address, 4, true, rentalPrice, 1, 30);
 
       await expect(
-        rentalMarket.connect(renter).rent(nft.address, 3, 1, { value: rentalPrice.sub(1) })
+        rentalMarket.connect(renter).rent(nft.address, 4, 1, { value: rentalPrice.sub(1) })
       ).to.be.revertedWith('Not enough funds sent for rental');
     });
 
     it("should revert if the token owner has disabled rentals", async () => {
-      await nft.connect(fan).approve(rentalMarket.address, 3);
-      await rentalMarket.connect(fan).setRentable(nft.address, 3, false, rentalPrice, 1, 30);
+      await nft.connect(fan).approve(rentalMarket.address, 4);
+      await rentalMarket.connect(fan).setRentable(nft.address, 4, false, rentalPrice, 1, 30);
 
       await expect(
-        rentalMarket.connect(renter).rent(nft.address, 3, 1, { value: rentalPrice })
+        rentalMarket.connect(renter).rent(nft.address, 4, 1, { value: rentalPrice })
       ).to.be.revertedWith('Rentals are not active for this token');
     });
 
 
     it("should revert if the rental duration is outside of owner specified boundaries", async () => {
-      await rentalMarket.connect(fan).setRentable(nft.address, 3, true, rentalPrice, 2, 7);
+      await rentalMarket.connect(fan).setRentable(nft.address, 4, true, rentalPrice, 2, 7);
 
       await expect(
-        rentalMarket.connect(renter).rent(nft.address, 3, 1, { value: rentalPrice })
+        rentalMarket.connect(renter).rent(nft.address, 4, 1, { value: rentalPrice })
       ).to.be.revertedWith('Invalid rental duration');
 
       await expect(
-        rentalMarket.connect(renter).rent(nft.address, 3, 8, { value: rentalPrice })
+        rentalMarket.connect(renter).rent(nft.address, 4, 8, { value: rentalPrice })
       ).to.be.revertedWith('Invalid rental duration');
     });
   });

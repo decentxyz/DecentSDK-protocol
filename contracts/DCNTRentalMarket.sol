@@ -54,8 +54,9 @@ contract DCNTRentalMarket {
     uint16 _minDays,
     uint16 _maxDays
   ) external {
+    address tokenOwner = IERC4907A(_nft).ownerOf(_tokenId);
     require(IERC4907A(_nft).supportsInterface(0xad092b5c), 'NFT does not support ERC4907');
-    require(IERC4907A(_nft).getApproved(_tokenId) == address(this), 'Token is not approved for rentals');
+    require(_checkApproved(_nft, _tokenId, tokenOwner), 'Token is not approved for rentals');
     require(IERC4907A(_nft).ownerOf(_tokenId) == msg.sender, 'Must be token owner to set rentable');
     Rentable storage rentable = rentables[_nft][_tokenId];
     rentable.isListed = _isListed;
@@ -81,8 +82,9 @@ contract DCNTRentalMarket {
     address _nft,
     uint256 _tokenId
   ) external {
-    require(IERC4907A(_nft).getApproved(_tokenId) == address(this), 'Token is not approved for rentals');
-    require(IERC4907A(_nft).ownerOf(_tokenId) == msg.sender, 'Must be token owner to set listed');
+    address tokenOwner = IERC4907A(_nft).ownerOf(_tokenId);
+    require(_checkApproved(_nft, _tokenId, tokenOwner), 'Token is not approved for rentals');
+    require(tokenOwner == msg.sender, 'Must be token owner to set listed');
     Rentable storage rentable = rentables[_nft][_tokenId];
     rentable.isListed = ! rentable.isListed;
 
@@ -100,8 +102,11 @@ contract DCNTRentalMarket {
   ) external payable {
     Rentable memory rentable = rentables[_nft][_tokenId];
 
-    // check for token approval
-    require(IERC4907A(_nft).getApproved(_tokenId) == address(this), 'Token is not approved for rentals');
+    // get the current token owner
+    address tokenOwner = IERC4907A(_nft).ownerOf(_tokenId);
+
+    // check for token approval or operator approval
+    require(_checkApproved(_nft, _tokenId, tokenOwner), 'Token is not approved for rentals');
 
     // check for active listing
     require(rentable.isListed, 'Rentals are not active for this token');
@@ -135,7 +140,6 @@ contract DCNTRentalMarket {
     }
 
     // pay rental fee to token owner
-    address tokenOwner = IERC4907A(_nft).ownerOf(_tokenId);
     (bool rentalFeePaid, ) = payable(tokenOwner).call{ value: payment }("");
     require(rentalFeePaid, "Failed to send rental fee to token owner");
 
@@ -149,5 +153,14 @@ contract DCNTRentalMarket {
       msg.sender,
       expires
     );
+  }
+
+  function _checkApproved(
+    address _nft,
+    uint256 _tokenId,
+    address _tokenOwner
+  ) private view returns (bool) {
+    return IERC4907A(_nft).getApproved(_tokenId) == address(this)
+      || IERC4907A(_nft).isApprovedForAll(_tokenOwner, address(this));
   }
 }

@@ -156,15 +156,30 @@ describe("DCNTRentalMarket", async () => {
     });
   });
 
-  describe("toggleListed()", async () => {
-    it("should toggle the listed state of the rentable ", async () => {
-      await rentalMarket.connect(fan).toggleListed(nft.address, 0);
+  describe("setListed()", async () => {
+    it("should toggle the listed state of the rentable", async () => {
+      await rentalMarket.connect(fan).setListed(nft.address, 0, false);
       let rentable = await rentalMarket.getRentable(nft.address, 0);
       expect(rentable.isListed).to.equal(false);
 
-      await rentalMarket.connect(fan).toggleListed(nft.address, 0);
+      await rentalMarket.connect(fan).setListed(nft.address, 0, true);
       rentable = await rentalMarket.getRentable(nft.address, 0);
       expect(rentable.isListed).to.equal(true);
+    });
+  });
+
+  describe("setListedBatch()", async () => {
+    it("should toggle the listed state of multiple rentables", async () => {
+      await rentalMarket.connect(fan).setListedBatch(nft.address, [0,1], false);
+
+      let [rentable0, rentable1] = await rentalMarket.getRentables(nft.address, [0,1]);
+      expect(rentable0.isListed).to.equal(false);
+      expect(rentable1.isListed).to.equal(false);
+
+      await rentalMarket.connect(fan).setListedBatch(nft.address, [0,1], true);
+      [rentable0, rentable1] = await rentalMarket.getRentables(nft.address, [0,1]);
+      expect(rentable0.isListed).to.equal(true);
+      expect(rentable1.isListed).to.equal(true);
     });
   });
 

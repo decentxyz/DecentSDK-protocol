@@ -127,15 +127,35 @@ contract DCNTRentalMarket {
     return returnRentables;
   }
 
-  function toggleListed(
+  function setListed(
     address _nft,
-    uint256 _tokenId
+    uint256 _tokenId,
+    bool _isListed
   ) external {
+    _setListed(_nft, _tokenId, _isListed);
+  }
+
+  function setListedBatch(
+    address _nft,
+    uint256[] calldata _tokenIds,
+    bool _isListed
+  ) external {
+    uint256 length = _tokenIds.length;
+    for (uint i = 0; i < length; i++) {
+      _setListed(_nft, _tokenIds[i], _isListed);
+    }
+  }
+
+  function _setListed(
+    address _nft,
+    uint256 _tokenId,
+    bool _isListed
+  ) private {
     address tokenOwner = IERC4907A(_nft).ownerOf(_tokenId);
     require(_checkApproved(_nft, _tokenId, tokenOwner), 'Token is not approved for rentals');
     require(tokenOwner == msg.sender, 'Must be token owner to set listed');
     Rentable storage rentable = rentables[_nft][_tokenId];
-    rentable.isListed = ! rentable.isListed;
+    rentable.isListed = _isListed;
 
     emit SetRentable(
       _nft,

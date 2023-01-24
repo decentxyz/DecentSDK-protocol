@@ -114,6 +114,48 @@ describe("DCNTRentalMarket", async () => {
     });
   });
 
+  describe("setRentables()", async () => {
+    it("should set the rental details for multiple tokens", async () => {
+      const expectRentable = (rentable, expected) => {
+        expect(rentable.isListed).to.equal(expected.isListed);
+        expect(rentable.pricePerDay).to.equal(expected.pricePerDay);
+        expect(rentable.minDays).to.equal(expected.minDays);
+        expect(rentable.maxDays).to.equal(expected.maxDays);
+      }
+
+      await nft.connect(fan).setApprovalForAll(rentalMarket.address, true);
+      await rentalMarket.connect(fan).setRentable(nft.address, 0, false, 0, 7, 14);
+      await rentalMarket.connect(fan).setRentable(nft.address, 1, false, 0, 7, 14);
+
+      let expected = { isListed: false, pricePerDay: 0, minDays: 7, maxDays: 14 }
+      expectRentable(await rentalMarket.getRentable(nft.address, 0), expected);
+      expectRentable(await rentalMarket.getRentable(nft.address, 1), expected);
+
+      await rentalMarket.connect(fan).setRentables([
+        {
+          nft: nft.address,
+          tokenId: 0,
+          isListed: true,
+          pricePerDay: rentalPrice,
+          minDays: 1,
+          maxDays: 30
+        },
+        {
+          nft: nft.address,
+          tokenId: 1,
+          isListed: true,
+          pricePerDay: rentalPrice,
+          minDays: 1,
+          maxDays: 30
+        },
+      ]);
+
+      expected = { isListed: true, pricePerDay: rentalPrice, minDays: 1, maxDays: 30 }
+      expectRentable(await rentalMarket.getRentable(nft.address, 0), expected);
+      expectRentable(await rentalMarket.getRentable(nft.address, 1), expected);
+    });
+  });
+
   describe("toggleListed()", async () => {
     it("should toggle the listed state of the rentable ", async () => {
       await rentalMarket.connect(fan).toggleListed(nft.address, 0);
@@ -166,6 +208,7 @@ describe("DCNTRentalMarket", async () => {
     });
 
     it("should revert if the rental market is no longer approved by token owner", async () => {
+      await nft.connect(fan).setApprovalForAll(rentalMarket.address, false);
       await nft.connect(fan).mint(1, { value: tokenPrice });
       await nft.connect(fan).approve(rentalMarket.address, 3);
       await rentalMarket.connect(fan).setRentable(nft.address, 3, true, rentalPrice, 1, 30);

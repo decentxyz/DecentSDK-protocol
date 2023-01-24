@@ -22,6 +22,15 @@ contract DCNTRentalMarket {
 
   struct Rentable {
     bool isListed;
+    uint16 minDays;
+    uint16 maxDays;
+    uint256 pricePerDay;
+  }
+
+  struct RentableConfig {
+    address nft;
+    uint256 tokenId;
+    bool isListed;
     uint256 pricePerDay;
     uint16 minDays;
     uint16 maxDays;
@@ -54,20 +63,48 @@ contract DCNTRentalMarket {
     uint16 _minDays,
     uint16 _maxDays
   ) external {
+    _setRentable(_nft, _tokenId, _isListed, _pricePerDay, _minDays, _maxDays);
+  }
+
+  function setRentables(RentableConfig[] calldata _rentableConfigs) external {
+    uint256 length = _rentableConfigs.length;
+    for (uint i = 0; i < length; i++) {
+      RentableConfig memory rentableConfig = _rentableConfigs[i];
+      _setRentable(
+        rentableConfig.nft,
+        rentableConfig.tokenId,
+        rentableConfig.isListed,
+        rentableConfig.pricePerDay,
+        rentableConfig.minDays,
+        rentableConfig.maxDays
+      );
+    }
+  }
+
+  function _setRentable(
+    address _nft,
+    uint256 _tokenId,
+    bool _isListed,
+    uint256 _pricePerDay,
+    uint16 _minDays,
+    uint16 _maxDays
+  ) private {
     address tokenOwner = IERC4907A(_nft).ownerOf(_tokenId);
     require(IERC4907A(_nft).supportsInterface(0xad092b5c), 'NFT does not support ERC4907');
     require(_checkApproved(_nft, _tokenId, tokenOwner), 'Token is not approved for rentals');
     require(IERC4907A(_nft).ownerOf(_tokenId) == msg.sender, 'Must be token owner to set rentable');
-    Rentable storage rentable = rentables[_nft][_tokenId];
-    rentable.isListed = _isListed;
-    rentable.pricePerDay = _pricePerDay;
-    rentable.minDays = _minDays;
-    rentable.maxDays = _maxDays;
+
+    rentables[_nft][_tokenId] = Rentable({
+      isListed: _isListed,
+      pricePerDay: _pricePerDay,
+      minDays: _minDays,
+      maxDays: _maxDays
+    });
 
     emit SetRentable(
       _nft,
       _tokenId,
-      rentable
+      rentables[_nft][_tokenId]
     );
   }
 
@@ -76,6 +113,18 @@ contract DCNTRentalMarket {
     uint256 _tokenId
   ) external view returns(Rentable memory) {
     return rentables[_nft][_tokenId];
+  }
+
+  function getRentables(
+    address _nft,
+    uint256[] calldata _tokenIds
+  ) external view returns(Rentable[] memory) {
+    uint256 length = _tokenIds.length;
+    Rentable[] memory returnRentables = new Rentable[](length);
+    for (uint i = 0; i < length; i++) {
+      returnRentables[i] = rentables[_nft][_tokenIds[i]];
+    }
+    return returnRentables;
   }
 
   function toggleListed(

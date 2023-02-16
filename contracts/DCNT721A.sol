@@ -15,20 +15,30 @@ pragma solidity ^0.8.0;
 
 /// ============ Imports ============
 
-import "./erc721a/ERC721A.sol";
-import "./interfaces/IMetadataRenderer.sol";
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./storage/EditionConfig.sol";
-import "./storage/MetadataConfig.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "./storage/DCNT721AStorage.sol";
-import "./utils/Splits.sol";
-import './interfaces/ITokenWithBalance.sol';
-import "./utils/OperatorFilterer.sol";
+import './erc721a/ERC721A.sol';
+import './interfaces/IMetadataRenderer.sol';
+import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
+import '@openzeppelin/contracts/access/AccessControl.sol';
+import './storage/EditionConfig.sol';
+import './storage/MetadataConfig.sol';
+import './storage/DCNT721AStorage.sol';
+import './utils/Splits.sol';
+import './utils/Version.sol';
+import './utils/OperatorFilterer.sol';
 
 /// @title template NFT contract
-contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, Ownable, Splits {
+contract DCNT721A is 
+  ERC721A, 
+  AccessControl,
+  OperatorFilterer, 
+  DCNT721AStorage, 
+  Initializable, 
+  Ownable,
+  Version(3),
+  Splits 
+{
 
   uint256 public MAX_TOKENS;
   uint256 public tokenPrice;
@@ -73,6 +83,12 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
     _;
   }
 
+  modifier onlyAdmin() {
+    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "onlyAdmin");
+
+    _;
+  }
+
   /// ============ Constructor ============
 
   function initialize(
@@ -84,6 +100,7 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
     address _splitMain
   ) public initializer {
     _transferOwnership(_owner);
+    _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     _name = _editionConfig.name;
     _symbol = _editionConfig.symbol;
     _currentIndex = _startTokenId();
@@ -117,7 +134,7 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
   }
 
   /// @notice purchase nft
-  function mint(uint256 numberOfTokens)
+  function mint(address to, uint256 numberOfTokens)
     external
     payable
     verifyTokenGate(false)
@@ -135,16 +152,16 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
       require(numberOfTokens <= maxTokenPurchase, "Exceeded max number per mint");
     }
 
-    _safeMint(msg.sender, numberOfTokens);
+    _safeMint(to, numberOfTokens);
     unchecked {
       for (uint256 i = 0; i < numberOfTokens; i++) {
-        emit Minted(msg.sender, mintIndex++);
+        emit Minted(to, mintIndex++);
       }
     }
   }
 
   /// @notice allows the owner to "airdrop" users an NFT
-  function mintAirdrop(address[] calldata recipients) external onlyOwner {
+  function mintAirdrop(address[] calldata recipients) external onlyAdmin {
     uint256 atId = _nextTokenId();
     uint256 startAt = atId;
     require(atId + recipients.length <= MAX_TOKENS,
@@ -200,12 +217,12 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
     }
   }
 
-  function setPresaleMerkleRoot(bytes32 _presaleMerkleRoot) external onlyOwner {
+  function setPresaleMerkleRoot(bytes32 _presaleMerkleRoot) external onlyAdmin {
     presaleMerkleRoot = _presaleMerkleRoot;
   }
 
   /// @notice pause or unpause sale
-  function flipSaleState() external onlyOwner {
+  function flipSaleState() external onlyAdmin {
     saleIsPaused = !saleIsPaused;
   }
 
@@ -215,24 +232,24 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
   }
 
   ///change maximum number of tokens available to mint
-  function adjustCap(uint256 newCap) external onlyOwner {
+  function adjustCap(uint256 newCap) external onlyAdmin {
     require(hasAdjustableCap, 'cannot adjust size of this collection');
     require(_nextTokenId() <= newCap, 'cannot decrease cap');
     MAX_TOKENS = newCap;
   }
 
   /// @notice withdraw funds from contract to seller funds recipient
-  function withdraw() external onlyOwner {
+  function withdraw(address to) external onlyAdmin {
     require(
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"
     );
 
-    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    (bool success, ) = payable(to).call{value: address(this).balance}("");
     require(success, "Could not withdraw");
   }
 
-  function setBaseURI(string memory uri) external onlyOwner {
+  function setBaseURI(string memory uri) external onlyAdmin {
     baseURI = uri;
   }
 
@@ -240,12 +257,12 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
     return baseURI;
   }
 
-  function setMetadataRenderer(address _metadataRenderer) external onlyOwner {
+  function setMetadataRenderer(address _metadataRenderer) external onlyAdmin {
     metadataRenderer = _metadataRenderer;
   }
 
   /// @notice update the contract URI
-  function setContractURI(string memory uri) external onlyOwner {
+  function setContractURI(string memory uri) external onlyAdmin {
     _contractURI = uri;
   }
 
@@ -278,7 +295,7 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
   }
 
   /// @notice save some for creator
-  function reserveDCNT(uint256 numReserved) external onlyOwner {
+  function reserveDCNT(uint256 numReserved) external onlyAdmin {
     uint256 supply = _nextTokenId();
     require(
       supply + numReserved < MAX_TOKENS,
@@ -311,7 +328,7 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
     public
     view
     virtual
-    override(ERC721A)
+    override(ERC721A, AccessControl)
     returns (bool)
   {
     return
@@ -332,13 +349,13 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
   }
 
   /// @notice update the public sale start time
-  function updateSaleStartEnd(uint256 newStart, uint256 newEnd) external onlyOwner {
+  function updateSaleStartEnd(uint256 newStart, uint256 newEnd) external onlyAdmin {
     saleStart = newStart;
     saleEnd = newEnd;
   }
 
   /// @notice update the public sale start time
-  function updatePresaleStartEnd(uint256 newStart, uint256 newEnd) external onlyOwner {
+  function updatePresaleStartEnd(uint256 newStart, uint256 newEnd) external onlyAdmin {
     presaleStart = newStart;
     presaleEnd = newEnd;
   }
@@ -346,7 +363,7 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
   /// @notice update the registration with the operator filter registry
   /// @param enable whether or not to enable the operator filter
   /// @param operatorFilter the address for the operator filter subscription
-  function updateOperatorFilter(bool enable, address operatorFilter) external onlyOwner {
+  function updateOperatorFilter(bool enable, address operatorFilter) external onlyAdmin {
     address self = address(this);
     if (!operatorFilterRegistry.isRegistered(self) && enable) {
       operatorFilterRegistry.registerAndSubscribe(self, operatorFilter);

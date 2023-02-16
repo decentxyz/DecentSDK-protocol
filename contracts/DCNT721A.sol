@@ -55,10 +55,11 @@ contract DCNT721A is
   string internal _contractURI;
   address public metadataRenderer;
   uint256 public royaltyBPS;
+  address public payoutAddress;
 
   uint256 public presaleStart;
   uint256 public presaleEnd;
-  bytes32 internal presaleMerkleRoot;
+  bytes32 public presaleMerkleRoot;
 
   address public splitMain;
   address public splitWallet;
@@ -111,6 +112,7 @@ contract DCNT721A is
     saleStart = _editionConfig.saleStart;
     saleEnd = _editionConfig.saleEnd;
     royaltyBPS = _editionConfig.royaltyBPS;
+    payoutAddress = _editionConfig.payoutAddress;
     hasAdjustableCap = _editionConfig.hasAdjustableCap;
     isSoulbound = _editionConfig.isSoulbound;
     parentIP = _metadataConfig.parentIP;
@@ -239,13 +241,19 @@ contract DCNT721A is
     MAX_TOKENS = newCap;
   }
 
+  /// @notice set the payout address, zero address defaults to owner
+  function setPayoutAddress(address _payoutAddress) external onlyAdmin {
+    payoutAddress = _payoutAddress;
+  }
+
   /// @notice withdraw funds from contract to seller funds recipient
-  function withdraw(address to) external onlyAdmin {
+  function withdraw() external onlyAdmin {
     require(
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"
     );
 
+    address to = payoutAddress != address(0) ? payoutAddress : owner();
     (bool success, ) = payable(to).call{value: address(this).balance}("");
     require(success, "Could not withdraw");
   }
@@ -316,6 +324,8 @@ contract DCNT721A is
 
     if (splitWallet != address(0)) {
       receiver = splitWallet;
+    } else if ( payoutAddress != address(0) ) {
+      receiver = payoutAddress;
     } else {
       receiver = owner();
     }
@@ -382,8 +392,8 @@ contract DCNT721A is
   function _beforeTokenTransfers(
     address from,
     address to,
-    uint256 startTokenId,
-    uint256 quantity
+    uint256 , // startTokenId
+    uint256   // quantity
   ) internal virtual override onlyAllowedOperator(from) {
     require (!isSoulbound || (from == address(0) || to == address(0)), 'soulbound');
   }

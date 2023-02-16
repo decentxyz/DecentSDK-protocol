@@ -18,6 +18,7 @@ const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
+const payoutAddress = ethers.constants.AddressZero;
 const metadataRendererInit = {
   description: "This is the Decent unit test NFT",
   imageURI: "http://localhost/image.jpg",
@@ -66,6 +67,7 @@ describe("ZKEdition", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -110,6 +112,7 @@ describe("ZKEdition", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -135,6 +138,7 @@ describe("ZKEdition", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,

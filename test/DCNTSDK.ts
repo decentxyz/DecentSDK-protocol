@@ -77,6 +77,7 @@ describe("DCNTSDK", async () => {
       const saleStart = theFuture.time();
       const saleEnd = theFuture.time() + theFuture.oneDay;
       const royaltyBPS = 10_00;
+      const payoutAddress = ethers.constants.AddressZero;
       const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
@@ -97,6 +98,7 @@ describe("DCNTSDK", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -130,6 +132,7 @@ describe("DCNTSDK", async () => {
       const saleStart = theFuture.time();
       const saleEnd = theFuture.time() + theFuture.oneDay;
       const royaltyBPS = 10_00;
+      const payoutAddress = ethers.constants.AddressZero;
       const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
@@ -150,6 +153,7 @@ describe("DCNTSDK", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -281,6 +285,7 @@ describe("DCNTSDK", async () => {
       const saleStart = theFuture.time();
       const saleEnd = theFuture.time() + theFuture.oneDay;
       const royaltyBPS = 10_00;
+      const payoutAddress = ethers.constants.AddressZero;
       const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
@@ -301,6 +306,7 @@ describe("DCNTSDK", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,

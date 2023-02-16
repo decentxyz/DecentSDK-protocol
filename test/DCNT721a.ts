@@ -20,6 +20,7 @@ const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
+const payoutAddress = ethers.constants.AddressZero;
 const metadataRendererInit = {
   description: "This is the Decent unit test NFT",
   imageURI: "http://localhost/image.jpg",
@@ -77,6 +78,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -109,6 +111,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -153,6 +156,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         null,
@@ -179,6 +183,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         null,
@@ -215,6 +220,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -271,6 +277,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -298,6 +305,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         null,
@@ -334,6 +342,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -401,6 +410,7 @@ describe("DCNT721A", async () => {
         theFuture.time() + theFuture.oneMonth,
         theFuture.time() + theFuture.oneYear,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -514,6 +524,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -567,6 +578,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -617,6 +629,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         null,
@@ -656,6 +669,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         null,
@@ -668,14 +682,26 @@ describe("DCNT721A", async () => {
   });
 
   describe("withdraw()", async () => {
-    it("should allow owner to withdraw", async () => {
+    it("should allow admin to withdraw", async () => {
       const before = await addr1.getBalance();
-      const tx = await nft.connect(addr1).withdraw(addr1.address);
+      const tx = await nft.connect(addr1).withdraw();
       const receipt = await tx.wait();
       const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
       const after = await addr1.getBalance();
       const withdrawn = after.sub(before).add(gas);
       expect(withdrawn).to.equal(ethers.utils.parseEther("0.04"));
+    });
+
+    it("should optionally withdraw to the payout address", async () => {
+      await nft.mint(addr1.address, 2, { value: tokenPrice.mul(2) });
+      await nft.setPayoutAddress(addr2.address);
+      const before = await addr2.getBalance();
+      const tx = await nft.connect(addr1).withdraw();
+      const receipt = await tx.wait();
+      // const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
+      const after = await addr2.getBalance();
+      const withdrawn = after.sub(before);
+      expect(withdrawn).to.equal(ethers.utils.parseEther("0.02"));
     });
 
     it("should revert if a split has already been created", async () => {
@@ -696,7 +722,7 @@ describe("DCNT721A", async () => {
       split = [addresses, percents, distributorFee];
 
       await nft.createSplit(...split);
-      await expect(nft.withdraw(addr1.address)).to.be.revertedWith('Cannot withdraw with an active split');
+      await expect(nft.withdraw()).to.be.revertedWith('Cannot withdraw with an active split');
     });
   });
 
@@ -717,6 +743,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -755,6 +782,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -799,6 +827,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,

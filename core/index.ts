@@ -129,6 +129,7 @@ export const deployDCNT721A = async (
   saleStart: number,
   saleEnd: number | BigNumber,
   royaltyBPS: number,
+  payoutAddress: string | null,
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -161,6 +162,7 @@ export const deployDCNT721A = async (
       saleStart,
       saleEnd,
       royaltyBPS,
+      payoutAddress,
     },
     {
       contractURI,
@@ -195,6 +197,7 @@ export const deployDCNT4907A = async (
   saleStart: number,
   saleEnd: number | BigNumber,
   royaltyBPS: number,
+  payoutAddress: string | null,
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -227,6 +230,7 @@ export const deployDCNT4907A = async (
       saleStart,
       saleEnd,
       royaltyBPS,
+      payoutAddress,
     },
     {
       contractURI,
@@ -354,6 +358,7 @@ export const DCNTVaultNFTCreate = async (
   saleStart: number,
   saleEnd: number | BigNumber,
   royaltyBPS: number,
+  payoutAddress: string | null,
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -390,6 +395,7 @@ export const DCNTVaultNFTCreate = async (
       saleStart,
       saleEnd,
       royaltyBPS,
+      payoutAddress,
     },
     {
       contractURI,
@@ -433,6 +439,7 @@ export const deployZKEdition = async (
   saleStart: number,
   saleEnd: number | BigNumber,
   royaltyBPS: number,
+  payoutAddress: string | null,
   contractURI: string,
   metadataURI: string,
   metadata: MetadataInit | null,
@@ -466,6 +473,7 @@ export const deployZKEdition = async (
       saleStart,
       saleEnd,
       royaltyBPS,
+      payoutAddress,
     },
     {
       contractURI,

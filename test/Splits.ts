@@ -18,6 +18,7 @@ const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const saleEnd = ethers.constants.MaxUint256;
 const royaltyBPS = 10_000;
+const payoutAddress = ethers.constants.AddressZero;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
@@ -56,6 +57,7 @@ describe("Splits", async () => {
       saleStart,
       saleEnd,
       royaltyBPS,
+      payoutAddress,
       contractURI,
       metadataURI,
       metadataRendererInit,
@@ -106,6 +108,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -145,6 +148,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -190,6 +194,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -221,6 +226,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -294,6 +300,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -337,6 +344,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,

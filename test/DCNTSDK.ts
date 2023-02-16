@@ -67,6 +67,7 @@ describe("DCNTSDK", async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
       const hasAdjustableCap = false;
+      const isSoulbound = false;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
@@ -86,6 +87,7 @@ describe("DCNTSDK", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -118,6 +120,7 @@ describe("DCNTSDK", async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
       const hasAdjustableCap = false;
+      const isSoulbound = false;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
@@ -137,6 +140,7 @@ describe("DCNTSDK", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -267,6 +271,7 @@ describe("DCNTSDK", async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
       const hasAdjustableCap = false;
+      const isSoulbound = false;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
       const maxTokenPurchase = 2;
@@ -286,6 +291,7 @@ describe("DCNTSDK", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,

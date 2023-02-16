@@ -30,15 +30,15 @@ import './utils/Version.sol';
 import './utils/OperatorFilterer.sol';
 
 /// @title template NFT contract
-contract DCNT721A is 
-  ERC721A, 
+contract DCNT721A is
+  ERC721A,
   AccessControl,
-  OperatorFilterer, 
-  DCNT721AStorage, 
-  Initializable, 
+  OperatorFilterer,
+  DCNT721AStorage,
+  Initializable,
   Ownable,
   Version(3),
-  Splits 
+  Splits
 {
 
   uint256 public MAX_TOKENS;
@@ -334,6 +334,8 @@ contract DCNT721A is
   {
     return
       interfaceId == 0x2a55205a || // ERC2981 interface ID for ERC2981.
+      AccessControl.supportsInterface(interfaceId) ||
+      ERC721A.supportsInterface(interfaceId) ||
       super.supportsInterface(interfaceId);
   }
 
@@ -382,7 +384,7 @@ contract DCNT721A is
     address to,
     uint256 startTokenId,
     uint256 quantity
-  ) internal virtual override onlyAllowedOperator(from) { 
+  ) internal virtual override onlyAllowedOperator(from) {
     require (!isSoulbound || (from == address(0) || to == address(0)), 'soulbound');
   }
 

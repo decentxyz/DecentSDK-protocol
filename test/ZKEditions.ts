@@ -8,6 +8,7 @@ import { deployDCNTSDK, deployZKEdition, deployMockERC721, theFuture, sortByAddr
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = true;
+const isSoulbound = false;
 const maxTokens = 1;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -55,6 +56,7 @@ describe("ZKEdition", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -98,6 +100,7 @@ describe("ZKEdition", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -122,6 +125,7 @@ describe("ZKEdition", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,

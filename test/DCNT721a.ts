@@ -10,6 +10,7 @@ const keccak256 = require("keccak256");
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = true;
+const isSoulbound = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -66,6 +67,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -97,6 +99,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -118,6 +121,7 @@ describe("DCNT721A", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
       expect(await clone.hasAdjustableCap()).to.equal(hasAdjustableCap);
+      expect(await clone.isSoulbound()).to.equal(isSoulbound);
       expect(await clone.MAX_TOKENS()).to.equal(maxTokens);
       expect(await clone.tokenPrice()).to.equal(tokenPrice);
       expect(await clone.maxTokenPurchase()).to.equal(maxTokenPurchase);
@@ -139,6 +143,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -164,6 +169,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -199,6 +205,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -216,7 +223,7 @@ describe("DCNT721A", async () => {
     });
 
     it("should not allow mints until after the start date", async () => {
-      await expect(nft.connect(addr1).mint(1)).to.be.revertedWith(
+      await expect(nft.connect(addr1).mint(addr1.address, 1)).to.be.revertedWith(
         'Sales are not active.'
       );
       await theFuture.travel(theFuture.oneDay);
@@ -224,26 +231,26 @@ describe("DCNT721A", async () => {
     });
 
     it("should not allow more than 2 mints at a time", async () => {
-      await expect(nft.connect(addr2).mint(3, overrides3)).to.be.revertedWith(
+      await expect(nft.connect(addr2).mint(addr2.address, 3, overrides3)).to.be.revertedWith(
         "Exceeded max number per mint"
       );
     });
 
     it("should allow normal mint progression", async () => {
-      await nft.connect(addr2).mint(1, overrides);
+      await nft.connect(addr2).mint(addr2.address, 1, overrides);
       expect(await nft.ownerOf(0)).to.equal(addr2.address);
     });
 
     it("should allow additonal mints", async () => {
-      await nft.connect(addr3).mint(2, overrides2);
+      await nft.connect(addr3).mint(addr3.address, 2, overrides2);
       expect(await nft.ownerOf(1)).to.equal(addr3.address);
       expect(await nft.ownerOf(2)).to.equal(addr3.address);
-      await nft.connect(addr2).mint(1, overrides);
+      await nft.connect(addr2).mint(addr2.address, 1, overrides);
       expect(await nft.ownerOf(3)).to.equal(addr2.address);
     });
 
     it("should not allow mints after cap", async () => {
-      await expect(nft.connect(addr4).mint(1, overrides)).to.be.revertedWith(
+      await expect(nft.connect(addr4).mint(addr4.address, 1, overrides)).to.be.revertedWith(
         "Purchase would exceed max supply"
       );
     });
@@ -254,6 +261,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         0,
@@ -269,7 +277,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      await freshNFT.mint(maxTokens, { value: tokenPrice.mul(maxTokens) });
+      await freshNFT.mint(addr1.address, maxTokens, { value: tokenPrice.mul(maxTokens) });
       expect(await freshNFT.balanceOf(addr1.address)).to.equal(maxTokens);
     });
 
@@ -280,6 +288,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -299,11 +308,11 @@ describe("DCNT721A", async () => {
         }
       );
 
-      await expect(freshNFT.mint(1, { value: tokenPrice })).to.be.revertedWith(
+      await expect(freshNFT.mint(addr1.address, 1, { value: tokenPrice })).to.be.revertedWith(
         'do not own required token'
       );
       await gateNFT.mintNft(1);
-      await freshNFT.mint(1, { value: tokenPrice });
+      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
       expect(await freshNFT.balanceOf(addr1.address)).to.equal(1);
     });
   });
@@ -315,6 +324,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -349,9 +359,9 @@ describe("DCNT721A", async () => {
       );
     });
 
-    it("should prevent non-owner from minting an airdrop", async () => {
+    it("should prevent non-admin from minting an airdrop", async () => {
       await expect(nft.connect(addr2).mintAirdrop([])).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+        'onlyAdmin'
       );
     });
   });
@@ -381,6 +391,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         20,
         tokenPrice,
         maxTokenPurchase,
@@ -493,6 +504,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         false,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -515,23 +527,23 @@ describe("DCNT721A", async () => {
       expect(await freshNFT.MAX_TOKENS()).to.equal(maxTokens);
     });
 
-    it("should prevent non-owner from adjusting cap", async () => {
+    it("should prevent non-admin from adjusting cap", async () => {
       await expect(nft.connect(addr2).flipSaleState()).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+        'onlyAdmin'
       );
     });
   });
 
   describe("flipSaleState()", async () => {
-    it("should prevent non-owner from flipping state", async () => {
+    it("should prevent non-admin from flipping state", async () => {
       await expect(nft.connect(addr2).flipSaleState()).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+        'onlyAdmin'
       );
     });
 
     it("should prevent a user from minting", async () => {
       await nft.flipSaleState();
-      await expect(nft.connect(addr1).mint(1)).to.be.revertedWith(
+      await expect(nft.connect(addr1).mint(addr1.address, 1)).to.be.revertedWith(
         'Sale must be active to mint'
       );
       await nft.flipSaleState();
@@ -545,6 +557,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -560,7 +573,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      await freshNFT.mint(1, { value: tokenPrice });
+      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
       expect(await freshNFT.ownerOf(0)).to.equal(addr1.address);
 
       await freshNFT.connect(addr1).transferFrom(addr1.address, addr2.address, 0);
@@ -594,6 +607,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -609,7 +623,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      freshNFT.mint(1, { value: tokenPrice });
+      freshNFT.mint(addr1.address, 1, { value: tokenPrice });
       const response = await freshNFT.tokenURI(0);
       expect(response).to.equal(`${metadataURI}0`);
     });
@@ -632,6 +646,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -655,7 +670,7 @@ describe("DCNT721A", async () => {
   describe("withdraw()", async () => {
     it("should allow owner to withdraw", async () => {
       const before = await addr1.getBalance();
-      const tx = await nft.connect(addr1).withdraw();
+      const tx = await nft.connect(addr1).withdraw(addr1.address);
       const receipt = await tx.wait();
       const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
       const after = await addr1.getBalance();
@@ -681,7 +696,7 @@ describe("DCNT721A", async () => {
       split = [addresses, percents, distributorFee];
 
       await nft.createSplit(...split);
-      await expect(nft.withdraw()).to.be.revertedWith('Cannot withdraw with an active split');
+      await expect(nft.withdraw(addr1.address)).to.be.revertedWith('Cannot withdraw with an active split');
     });
   });
 
@@ -692,6 +707,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -706,7 +722,7 @@ describe("DCNT721A", async () => {
         metadataRendererInit,
         tokenGateConfig
       );
-      await nft.mint(1, { value: tokenPrice });
+      await nft.mint(addr1.address, 1, { value: tokenPrice });
     });
 
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
@@ -729,6 +745,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -772,6 +789,7 @@ describe("DCNT721A", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -787,7 +805,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      await freshNFT.mint(1, { value: tokenPrice });
+      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
 
       const ownerRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
       expect(ownerRoyalty.receiver).to.eq(owner.address);

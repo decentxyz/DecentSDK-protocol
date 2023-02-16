@@ -8,6 +8,7 @@ import { deployDCNTSDK, deployDCNTVaultNFT, DCNTVaultNFTCreate, theFuture } from
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = false;
+const isSoulbound = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -54,6 +55,7 @@ describe("DCNTVaultNFT", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -108,6 +110,7 @@ describe("DCNTVaultNFT", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,

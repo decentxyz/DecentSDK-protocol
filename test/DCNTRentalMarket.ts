@@ -9,6 +9,7 @@ const rentalPrice = ethers.utils.parseEther('0.01');
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = false;
+const isSoulbound = false;
 const maxTokens = 100;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -42,6 +43,7 @@ describe("DCNTRentalMarket", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -57,7 +59,7 @@ describe("DCNTRentalMarket", async () => {
         tokenGateConfig,
         parentIP.address
       );
-      await nft.connect(fan).mint(1, { value: tokenPrice });
+      await nft.connect(fan).mint(fan.address, 1, { value: tokenPrice });
       rentalMarket = await deployContract('DCNTRentalMarket');
     });
 
@@ -88,7 +90,7 @@ describe("DCNTRentalMarket", async () => {
     });
 
     it("should revert if the rental market is not approved for token or not an approved operator", async () => {
-      await nft.connect(fan).mint(1, { value: tokenPrice });
+      await nft.connect(fan).mint(fan.address, 1, { value: tokenPrice });
 
       await expect(
         rentalMarket.connect(fan).setRentable(nft.address, 1, true, rentalPrice, 1, 30)
@@ -196,7 +198,7 @@ describe("DCNTRentalMarket", async () => {
     });
 
     it("should transfer royalty amount to the royalty recipient", async () => {
-      await nft.connect(fan).mint(1, { value: tokenPrice });
+      await nft.connect(fan).mint(fan.address, 1, { value: tokenPrice });
       await nft.connect(fan).approve(rentalMarket.address, 2);
       await rentalMarket.connect(fan).setRentable(nft.address, 2, true, rentalPrice, 1, 30);
 
@@ -224,7 +226,7 @@ describe("DCNTRentalMarket", async () => {
 
     it("should revert if the rental market is no longer approved by token owner", async () => {
       await nft.connect(fan).setApprovalForAll(rentalMarket.address, false);
-      await nft.connect(fan).mint(1, { value: tokenPrice });
+      await nft.connect(fan).mint(fan.address, 1, { value: tokenPrice });
       await nft.connect(fan).approve(rentalMarket.address, 3);
       await rentalMarket.connect(fan).setRentable(nft.address, 3, true, rentalPrice, 1, 30);
       await nft.connect(fan).approve(ethers.constants.AddressZero, 3);
@@ -237,7 +239,7 @@ describe("DCNTRentalMarket", async () => {
       await rentalMarket.connect(renter).rent(nft.address, 3, 1, { value: rentalPrice })
       await nft.connect(fan).setApprovalForAll(rentalMarket.address, false);
 
-      await nft.connect(fan).mint(1, { value: tokenPrice });
+      await nft.connect(fan).mint(fan.address, 1, { value: tokenPrice });
       await expect(
         rentalMarket.connect(renter).rent(nft.address, 4, 1, { value: rentalPrice })
       ).to.be.revertedWith('Token is not approved for rentals');

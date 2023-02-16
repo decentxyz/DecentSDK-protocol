@@ -21,6 +21,7 @@ import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
+import './interfaces/ITokenWithBalance.sol';
 import './storage/EditionConfig.sol';
 import './storage/MetadataConfig.sol';
 import './storage/DCNT721AStorage.sol';

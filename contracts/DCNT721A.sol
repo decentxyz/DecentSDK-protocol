@@ -30,10 +30,12 @@ import "./utils/OperatorFilterer.sol";
 /// @title template NFT contract
 contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, Ownable, Splits {
 
-  bool public hasAdjustableCap;
   uint256 public MAX_TOKENS;
   uint256 public tokenPrice;
   uint256 public maxTokenPurchase;
+
+  bool public hasAdjustableCap;
+  bool public isSoulbound;
 
   uint256 public saleStart;
   uint256 public saleEnd;
@@ -92,6 +94,7 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
     saleEnd = _editionConfig.saleEnd;
     royaltyBPS = _editionConfig.royaltyBPS;
     hasAdjustableCap = _editionConfig.hasAdjustableCap;
+    isSoulbound = _editionConfig.isSoulbound;
     parentIP = _metadataConfig.parentIP;
     splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
@@ -361,7 +364,9 @@ contract DCNT721A is ERC721A, OperatorFilterer, DCNT721AStorage, Initializable, 
     address to,
     uint256 startTokenId,
     uint256 quantity
-  ) internal virtual override onlyAllowedOperator(from) { }
+  ) internal virtual override onlyAllowedOperator(from) { 
+    require (!isSoulbound || (from == address(0) || to == address(0)), 'soulbound');
+  }
 
   /// @dev Use OperatorFilterer modifier to restrict approvals
   function setApprovalForAll(

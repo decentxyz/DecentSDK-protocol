@@ -5,6 +5,7 @@ struct EditionConfig {
   string name;
   string symbol;
   bool hasAdjustableCap;
+  bool isSoulbound;
   uint256 maxTokens;
   uint256 tokenPrice;
   uint256 maxTokenPurchase;

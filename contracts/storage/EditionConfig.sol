@@ -15,4 +15,5 @@ struct EditionConfig {
   uint256 saleStart;
   uint256 saleEnd;
   uint256 royaltyBPS;
+  address payoutAddress;
 }

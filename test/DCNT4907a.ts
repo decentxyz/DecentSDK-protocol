@@ -8,6 +8,7 @@ import { deployDCNTSDK, deployDCNT4907A, theFuture, deployMockERC721 } from "../
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = false;
+const isSoulbound = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -17,6 +18,7 @@ const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
+const payoutAddress = ethers.constants.AddressZero;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
@@ -43,6 +45,7 @@ describe("DCNT4907A", async () => {
       name,
       symbol,
       hasAdjustableCap,
+      isSoulbound,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
@@ -52,6 +55,7 @@ describe("DCNT4907A", async () => {
       saleStart,
       saleEnd,
       royaltyBPS,
+      payoutAddress,
       contractURI,
       metadataURI,
       metadataRendererInit,
@@ -78,7 +82,7 @@ describe("DCNT4907A", async () => {
   describe("setUser()", async () => {
     before(async () => {
       [addr1, addr2] = await ethers.getSigners();
-      await clone.mint(1, { value: tokenPrice });
+      await clone.mint(addr1.address, 1, { value: tokenPrice });
       expiration = theFuture.time() + theFuture.oneDay;
       await clone.setUser(0, addr2.address, expiration);
     });

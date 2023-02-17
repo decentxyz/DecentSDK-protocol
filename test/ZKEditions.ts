@@ -8,6 +8,7 @@ import { deployDCNTSDK, deployZKEdition, deployMockERC721, theFuture, sortByAddr
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = true;
+const isSoulbound = false;
 const maxTokens = 1;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -17,6 +18,7 @@ const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
+const payoutAddress = ethers.constants.AddressZero;
 const metadataRendererInit = {
   description: "This is the Decent unit test NFT",
   imageURI: "http://localhost/image.jpg",
@@ -55,6 +57,7 @@ describe("ZKEdition", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -64,6 +67,7 @@ describe("ZKEdition", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -98,6 +102,7 @@ describe("ZKEdition", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -107,6 +112,7 @@ describe("ZKEdition", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -122,6 +128,7 @@ describe("ZKEdition", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -131,6 +138,7 @@ describe("ZKEdition", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,

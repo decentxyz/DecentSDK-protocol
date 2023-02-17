@@ -37,7 +37,7 @@ contract DCNT721A is
   DCNT721AStorage,
   Initializable,
   Ownable,
-  Version(3),
+  Version(6),
   Splits
 {
 

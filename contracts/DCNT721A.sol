@@ -247,7 +247,7 @@ contract DCNT721A is
   }
 
   /// @notice withdraw funds from contract to seller funds recipient
-  function withdraw() external onlyAdmin {
+  function withdraw() external {
     require(
       _getSplitWallet() == address(0),
       "Cannot withdraw with an active split"

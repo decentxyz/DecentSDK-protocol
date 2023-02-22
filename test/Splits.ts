@@ -8,6 +8,7 @@ import { deployDCNTSDK, deployDCNT4907A, theFuture, deployMockERC20, sortByAddre
 const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = false;
+const isSoulbound = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('1');
 const maxTokenPurchase = 2;
@@ -17,6 +18,7 @@ const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const saleEnd = ethers.constants.MaxUint256;
 const royaltyBPS = 10_000;
+const payoutAddress = ethers.constants.AddressZero;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = null;
@@ -45,6 +47,7 @@ describe("Splits", async () => {
       name,
       symbol,
       hasAdjustableCap,
+      isSoulbound,
       maxTokens,
       tokenPrice,
       maxTokenPurchase,
@@ -54,6 +57,7 @@ describe("Splits", async () => {
       saleStart,
       saleEnd,
       royaltyBPS,
+      payoutAddress,
       contractURI,
       metadataURI,
       metadataRendererInit,
@@ -94,6 +98,7 @@ describe("Splits", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -103,6 +108,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -117,7 +123,7 @@ describe("Splits", async () => {
 
   describe("distributeETH()", async () => {
     it("should transfer ETH to the split and distribute to receipients", async () => {
-      await nft.mint(1, { value: tokenPrice });
+      await nft.mint(addr1.address, 1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);
 
       await nft.distributeETH(...split, addr1.address);
@@ -132,6 +138,7 @@ describe("Splits", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -141,6 +148,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -176,6 +184,7 @@ describe("Splits", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -185,6 +194,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -206,6 +216,7 @@ describe("Splits", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -215,6 +226,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -225,7 +237,7 @@ describe("Splits", async () => {
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
       nft.createSplit(...split);
 
-      await nft.mint(1, { value: tokenPrice });
+      await nft.mint(addr1.address, 1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);
 
       const before2 = await ethers.provider.getBalance(addr2.address);
@@ -278,6 +290,7 @@ describe("Splits", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -287,6 +300,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,
@@ -301,7 +315,7 @@ describe("Splits", async () => {
 
   describe("transferToSplit()", async () => {
     it("should transfer ETH and ERC20 to the split", async () => {
-      await nft.mint(1, { value: tokenPrice });
+      await nft.mint(addr1.address, 1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);
 
       const supply = ethers.utils.parseEther('100');
@@ -320,6 +334,7 @@ describe("Splits", async () => {
         name,
         symbol,
         hasAdjustableCap,
+        isSoulbound,
         maxTokens,
         tokenPrice,
         maxTokenPurchase,
@@ -329,6 +344,7 @@ describe("Splits", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        payoutAddress,
         contractURI,
         metadataURI,
         metadataRendererInit,

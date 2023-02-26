@@ -34,6 +34,7 @@ contract ZKEdition is DCNT721A {
     address _zkVerifier
   ) public initializer {
     _transferOwnership(_owner);
+    _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     _name = _editionConfig.name;
     _symbol = _editionConfig.symbol;
     _currentIndex = _startTokenId();
@@ -43,7 +44,9 @@ contract ZKEdition is DCNT721A {
     saleStart = _editionConfig.saleStart;
     saleEnd = _editionConfig.saleEnd;
     royaltyBPS = _editionConfig.royaltyBPS;
+    payoutAddress = _editionConfig.payoutAddress;
     hasAdjustableCap = _editionConfig.hasAdjustableCap;
+    isSoulbound = _editionConfig.isSoulbound;
     parentIP = _metadataConfig.parentIP;
     splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;

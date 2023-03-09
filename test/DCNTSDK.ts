@@ -8,6 +8,7 @@ import {
   deployImplementations,
   deployDCNT721A,
   deployDCNT4907A,
+  deployDCNT1155,
   deployDCNTCrescendo,
   deployDCNTVault,
   deployDCNTStaking,
@@ -172,6 +173,61 @@ describe("DCNTSDK", async () => {
     });
   });
 
+  describe("deployDCNT1155()", async () => {
+    before(async () => {
+      const name = 'Decent';
+      const symbol = 'DCNT';
+      const hasAdjustableCap = false;
+      const isSoulbound = false;
+      const maxTokens = 4;
+      const tokenPrice = ethers.utils.parseEther('0.01');
+      const maxTokenPurchase = 2;
+      const presaleMerkleRoot = '';
+      const presaleStart = theFuture.time();
+      const presaleEnd = theFuture.time();
+      const saleStart = theFuture.time();
+      const saleEnd = theFuture.time() + theFuture.oneDay;
+      const royaltyBPS = 10_00;
+      const payoutAddress = ethers.constants.AddressZero;
+      const contractURI = 'http://localhost/contract/';
+      const metadataURI = 'http://localhost/metadata/';
+      const metadataRendererInit = null;
+      const tokenGateConfig = null;
+
+      clone = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        payoutAddress,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig,
+        parentIP.address
+      );
+    });
+
+    it("should deploy and initialize a DCNT721A contract", async () => {
+      expect(clone.address).to.be.properAddress;
+    });
+
+    it("should register the deployed DCNT721A with the contract registry", async () => {
+      const deployments = await contractRegistry.query(owner.address);
+      expect(deployments[2]).to.equal(clone.address);
+    });
+  });
+
   describe("deployDCNTCrescendo()", async () => {
     before(async () => {
       const name = 'Decent';
@@ -214,7 +270,7 @@ describe("DCNTSDK", async () => {
 
     it("should register the deployed DCNTCrescendo with the contract registry", async () => {
       const deployments = await contractRegistry.query(owner.address);
-      expect(deployments[2]).to.equal(clone.address);
+      expect(deployments[3]).to.equal(clone.address);
     });
   });
 
@@ -240,7 +296,7 @@ describe("DCNTSDK", async () => {
 
     it("should register the deployed DCNTVault with the contract registry", async () => {
       const deployments = await contractRegistry.query(owner.address);
-      expect(deployments[3]).to.equal(clone.address);
+      expect(deployments[4]).to.equal(clone.address);
     });
   });
 
@@ -266,7 +322,7 @@ describe("DCNTSDK", async () => {
 
     it("should register the deployed DCNTStaking with the contract registry", async () => {
       const deployments = await contractRegistry.query(owner.address);
-      expect(deployments[4]).to.equal(clone.address);
+      expect(deployments[5]).to.equal(clone.address);
     });
   });
 
@@ -322,7 +378,7 @@ describe("DCNTSDK", async () => {
 
     it("should register the deployed ZKEdition with the contract registry", async () => {
       const deployments = await contractRegistry.query(owner.address);
-      expect(deployments[5]).to.equal(clone.address);
+      expect(deployments[6]).to.equal(clone.address);
     });
   });
 });

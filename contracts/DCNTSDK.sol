@@ -17,10 +17,12 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
+
 import "./interfaces/IDCNTRegistry.sol";
 import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
 import "./storage/TokenGateConfig.sol";
+import "./storage/SeriesConfig.sol";
 import "./storage/CrescendoConfig.sol";
 
 contract DCNTSDK is Ownable {
@@ -28,6 +30,7 @@ contract DCNTSDK is Ownable {
   /// @notice implementation addresses for base contracts
   address public DCNT721AImplementation;
   address public DCNT4907AImplementation;
+  address public DCNT1155Implementation;
   address public DCNTCrescendoImplementation;
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
@@ -47,6 +50,7 @@ contract DCNTSDK is Ownable {
   /// @notice Emitted after successfully deploying a contract
   event DeployDCNT721A(address DCNT721A);
   event DeployDCNT4907A(address DCNT4907A);
+  event DeployDCNT1155(address DCNT1155);
   event DeployDCNTCrescendo(address DCNTCrescendo);
   event DeployDCNTVault(address DCNTVault);
   event DeployDCNTStaking(address DCNTStaking);
@@ -58,6 +62,7 @@ contract DCNTSDK is Ownable {
   constructor(
     address _DCNT721AImplementation,
     address _DCNT4907AImplementation,
+    address _DCNT1155Implementation,
     address _DCNTCrescendoImplementation,
     address _DCNTVaultImplementation,
     address _DCNTStakingImplementation,
@@ -68,6 +73,7 @@ contract DCNTSDK is Ownable {
   ) {
     DCNT721AImplementation = _DCNT721AImplementation;
     DCNT4907AImplementation = _DCNT4907AImplementation;
+    DCNT1155Implementation = _DCNT1155Implementation;
     DCNTCrescendoImplementation = _DCNTCrescendoImplementation;
     DCNTVaultImplementation = _DCNTVaultImplementation;
     DCNTStakingImplementation = _DCNTStakingImplementation;
@@ -170,6 +176,35 @@ contract DCNTSDK is Ownable {
     require(success);
     IDCNTRegistry(contractRegistry).register(msg.sender, clone, "DCNT4907A");
     emit DeployDCNT4907A(clone);
+  }
+
+  // deploy and initialize an erc1155 clone
+  function deployDCNT1155(
+    SeriesConfig memory _config,
+    Droplet[] memory _droplets
+  ) external returns (address clone) {
+    clone = Clones.clone(DCNT1155Implementation);
+    (bool success, ) = clone.call(
+      abi.encodeWithSignature(
+        "initialize("
+          "address,"
+          "(string,string,string,string,uint256,address,bool),"
+          "(bool,uint256,uint256,uint256,bytes32,uint256,uint256,uint256,uint256,(address,uint88,uint8))[],"
+          "address"
+        ")",
+        msg.sender,
+        _config,
+        _droplets,
+        SplitMain
+      )
+    );
+    require(success);
+    IDCNTRegistry(contractRegistry).register(
+      msg.sender,
+      clone,
+      "DCNT1155"
+    );
+    emit DeployDCNT1155(clone);
   }
 
   // deploy and initialize a Crescendo clone

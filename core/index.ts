@@ -33,6 +33,7 @@ export const theFuture = (() => {
 export type Implementations = {
   DCNT721A: Contract;
   DCNT4907A: Contract;
+  DCNT1155: Contract;
   DCNTCrescendo: Contract;
   DCNTVault: Contract;
   DCNTStaking: Contract;
@@ -65,6 +66,7 @@ export const deployDCNTSDK = async (
   const decentSDK = await decentSDKFactory.deploy(
     implementations.DCNT721A.address,
     implementations.DCNT4907A.address,
+    implementations.DCNT1155.address,
     implementations.DCNTCrescendo.address,
     implementations.DCNTVault.address,
     implementations.DCNTStaking.address,
@@ -88,6 +90,7 @@ export const deployDCNTMetadataRenderer = async (
 export const deployImplementations = async () => {
   const DCNT721A = await deployContract('DCNT721A');
   const DCNT4907A = await deployContract('DCNT4907A');
+  const DCNT1155 = await deployContract('DCNT1155');
   const DCNTCrescendo = await deployContract('DCNTCrescendo');
   const DCNTVault = await deployContract('DCNTVault');
   const DCNTStaking = await deployContract('DCNTStaking');
@@ -95,6 +98,7 @@ export const deployImplementations = async () => {
   return {
     DCNT721A,
     DCNT4907A,
+    DCNT1155,
     DCNTCrescendo,
     DCNTVault,
     DCNTStaking,
@@ -248,6 +252,60 @@ export const deployDCNT4907A = async (
   const receipt = await deployTx.wait();
   const address = receipt.events.find((x: any) => x.event === 'DeployDCNT4907A').args.DCNT4907A;
   return ethers.getContractAt("DCNT4907A", address);
+}
+
+export const deployDCNT1155 = async (
+  decentSDK: Contract,
+  name: string,
+  symbol: string,
+  hasAdjustableCap: boolean,
+  isSoulbound: boolean,
+  maxTokens: number,
+  tokenPrice: BigNumber,
+  maxTokensPerOwner: number,
+  presaleMerkleRoot: string | null,
+  presaleStart: number,
+  presaleEnd: number,
+  saleStart: number,
+  saleEnd: number | BigNumber,
+  royaltyBPS: number,
+  payoutAddress: string | null,
+  contractURI: string,
+  metadataURI: string,
+  metadata: MetadataInit | null,
+  tokenGateConfig: TokenGateConfig | null
+) => {
+  const deployTx = await decentSDK.deployDCNT1155(
+    {
+      name,
+      symbol,
+      contractURI,
+      metadataURI,
+      royaltyBPS,
+      payoutAddress,
+      isSoulbound,
+    },
+    [{
+      hasAdjustableCap,
+      maxTokens,
+      tokenPrice,
+      maxTokensPerOwner,
+      presaleMerkleRoot: presaleMerkleRoot || ethers.constants.HashZero,
+      presaleStart,
+      presaleEnd,
+      saleStart,
+      saleEnd,
+      tokenGate: tokenGateConfig || {
+        tokenAddress: ethers.constants.AddressZero,
+        minBalance: 0,
+        saleType: 0,
+      }
+    }],
+  );
+
+  const receipt = await deployTx.wait();
+  const address = receipt.events.find((x: any) => x.event === 'DeployDCNT1155').args.DCNT1155;
+  return ethers.getContractAt("DCNT1155", address);
 }
 
 export const deployDCNTCrescendo = async (

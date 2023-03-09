@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT721A, deployMockERC721, theFuture, sortByAddress, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNT1155, deployMockERC721, theFuture, sortByAddress, base64decode } from "../core";
 import { MerkleTree } from "merkletreejs";
 const keccak256 = require("keccak256");
 
@@ -13,7 +13,7 @@ const hasAdjustableCap = true;
 const isSoulbound = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
-const maxTokenPurchase = 2;
+const maxTokensPerOwner = 2;
 const presaleMerkleRoot = null;
 const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
@@ -34,7 +34,7 @@ const tokenGateConfig = {
   saleType: 0,
 }
 
-describe("DCNT721A", async () => {
+describe("DCNT1155", async () => {
   let owner: SignerWithAddress,
       addr1: SignerWithAddress,
       addr2: SignerWithAddress,
@@ -51,10 +51,6 @@ describe("DCNT721A", async () => {
       leaves: string[],
       snapshot: any[];
 
-  let overrides = { value: ethers.utils.parseEther("0.01") };
-  let overrides2 = { value: ethers.utils.parseEther("0.02") };
-  let overrides3 = { value: ethers.utils.parseEther("0.03") };
-
   describe("initialize()", async () => {
     before(async () => {
       [owner] = await ethers.getSigners();
@@ -63,7 +59,7 @@ describe("DCNT721A", async () => {
       metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', sdk.metadataRenderer());
       await theFuture.reset();
       saleStart = theFuture.time() + theFuture.oneDay
-      clone = await deployDCNT721A(
+      clone = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -71,7 +67,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -91,12 +87,22 @@ describe("DCNT721A", async () => {
       expect(ethers.utils.getAddress(await clone.owner())).to.equal(owner.address);
     });
 
-    it("should have the EIP-5553 based parent IP set", async () => {
-      expect(await clone.parentIP()).to.equal(parentIP.address);
+    it("should initialize state which would otherwise be set in constructor", async () => {
+      expect(await clone.name()).to.equal(name);
+      expect(await clone.symbol()).to.equal(symbol);
+      const droplet = await clone.droplets(0);
+      expect(droplet.hasAdjustableCap).to.equal(hasAdjustableCap);
+      expect(droplet.maxTokens).to.equal(maxTokens);
+      expect(droplet.tokenPrice).to.equal(tokenPrice);
+      expect(droplet.maxTokensPerOwner).to.equal(maxTokensPerOwner);
+      expect(droplet.presaleStart).to.equal(presaleStart);
+      expect(droplet.presaleEnd).to.equal(presaleEnd);
+      expect(droplet.saleStart).to.equal(saleStart);
     });
 
-    it("should optionally allow the EIP-5553 based parent IP to be empty", async () => {
-      const nftWithNoParent = await deployDCNT721A(
+    it("should optionally set configuration for a token gate", async () => {
+      const gateNFT = await deployMockERC721();
+      const freshNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -104,7 +110,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -115,78 +121,6 @@ describe("DCNT721A", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
-        tokenGateConfig
-      );
-      expect(await nftWithNoParent.parentIP()).to.equal(ethers.constants.AddressZero);
-    });
-
-    it("should initialize state which would otherwise be set in constructor", async () => {
-      expect(await clone.name()).to.equal(name);
-      expect(await clone.symbol()).to.equal(symbol);
-      expect(await clone.hasAdjustableCap()).to.equal(hasAdjustableCap);
-      expect(await clone.isSoulbound()).to.equal(isSoulbound);
-      expect(await clone.MAX_TOKENS()).to.equal(maxTokens);
-      expect(await clone.tokenPrice()).to.equal(tokenPrice);
-      expect(await clone.maxTokenPurchase()).to.equal(maxTokenPurchase);
-      expect(await clone.presaleStart()).to.equal(presaleStart);
-      expect(await clone.presaleEnd()).to.equal(presaleEnd);
-      expect(await clone.saleStart()).to.equal(saleStart);
-    });
-
-    it("should initialize the edition with the metadata renderer", async () => {
-      const response = await metadataRenderer.tokenURITarget(0, clone.address);
-      let decoded = base64decode(response);
-      const meta = JSON.parse(decoded);
-      expect(meta.name).to.equal(`${name} 0`);
-    });
-
-    it("should optionally set the base token URI", async () => {
-      clone = await deployDCNT721A(
-        sdk,
-        name,
-        symbol,
-        hasAdjustableCap,
-        isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokenPurchase,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
-        royaltyBPS,
-        payoutAddress,
-        contractURI,
-        metadataURI,
-        null,
-        tokenGateConfig
-      );
-
-      expect(await clone.baseURI()).to.equal(metadataURI);
-    });
-
-    it("should optionally set configuration for a token gate", async () => {
-      const gateNFT = await deployMockERC721();
-      const freshNFT = await deployDCNT721A(
-        sdk,
-        name,
-        symbol,
-        hasAdjustableCap,
-        isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokenPurchase,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
-        royaltyBPS,
-        payoutAddress,
-        contractURI,
-        metadataURI,
-        null,
         {
           tokenAddress: gateNFT.address,
           minBalance: 1337,
@@ -194,10 +128,10 @@ describe("DCNT721A", async () => {
         }
       );
 
-      const config = await freshNFT.tokenGateConfig();
-      expect(config.tokenAddress).to.equal(gateNFT.address);
-      expect(config.minBalance).to.equal(1337);
-      expect(config.saleType).to.equal(2);
+      const { tokenGate } = await freshNFT.droplets(0);
+      expect(tokenGate.tokenAddress).to.equal(gateNFT.address);
+      expect(tokenGate.minBalance).to.equal(1337);
+      expect(tokenGate.saleType).to.equal(2);
     });
   });
 
@@ -205,7 +139,7 @@ describe("DCNT721A", async () => {
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       const sdk = await deployDCNTSDK();
-      nft = await deployDCNT721A(
+      nft = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -213,7 +147,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -229,40 +163,40 @@ describe("DCNT721A", async () => {
     });
 
     it("should not allow mints until after the start date", async () => {
-      await expect(nft.connect(addr1).mint(addr1.address, 1)).to.be.revertedWith(
+      await expect(nft.connect(addr1).mint(0, addr1.address, 1)).to.be.revertedWith(
         'Sales are not active.'
       );
       await theFuture.travel(theFuture.oneDay);
       await theFuture.arrive();
     });
 
-    it("should not allow more than 2 mints at a time", async () => {
-      await expect(nft.connect(addr2).mint(addr2.address, 3, overrides3)).to.be.revertedWith(
-        "Exceeded max number per mint"
+    it("should not allow more than 2 mints per owner", async () => {
+      await expect(nft.connect(addr2).mint(0, addr2.address, 3, { value: tokenPrice.mul(3) })).to.be.revertedWith(
+        "Exceeded max number per owner"
       );
     });
 
     it("should allow normal mint progression", async () => {
-      await nft.connect(addr2).mint(addr2.address, 1, overrides);
-      expect(await nft.ownerOf(0)).to.equal(addr2.address);
+      await nft.connect(addr2).mint(0, addr2.address, 1, { value: tokenPrice });
+      expect(await nft.balanceOf(addr2.address, 0)).to.equal(1);
     });
 
     it("should allow additonal mints", async () => {
-      await nft.connect(addr3).mint(addr3.address, 2, overrides2);
-      expect(await nft.ownerOf(1)).to.equal(addr3.address);
-      expect(await nft.ownerOf(2)).to.equal(addr3.address);
-      await nft.connect(addr2).mint(addr2.address, 1, overrides);
-      expect(await nft.ownerOf(3)).to.equal(addr2.address);
+      await nft.connect(addr3).mint(0, addr3.address, 2, { value: tokenPrice.mul(2) });
+      expect(await nft.balanceOf(addr3.address, 0)).to.equal(2);
+      await nft.connect(addr2).mint(0, addr2.address, 1, { value: tokenPrice });
+      expect(await nft.balanceOf(addr2.address, 0)).to.equal(2);
     });
 
     it("should not allow mints after cap", async () => {
-      await expect(nft.connect(addr4).mint(addr4.address, 1, overrides)).to.be.revertedWith(
+      await expect(nft.connect(addr4).mint(0, addr4.address, 1, { value: tokenPrice })).to.be.revertedWith(
         "Purchase would exceed max supply"
       );
     });
 
-    it("should allow unlimited mints if maxTokenPurchase is set to 0", async () => {
-      const freshNFT: Contract = await deployDCNT721A(
+    it("should optionally use a token gate to restrict mints for all sales", async () => {
+      const gateNFT = await deployMockERC721();
+      const freshNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -270,7 +204,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        0,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -281,34 +215,6 @@ describe("DCNT721A", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
-        tokenGateConfig
-      );
-
-      await freshNFT.mint(addr1.address, maxTokens, { value: tokenPrice.mul(maxTokens) });
-      expect(await freshNFT.balanceOf(addr1.address)).to.equal(maxTokens);
-    });
-
-    it("should optionally use a token gate to restrict mints for all sales", async () => {
-      const gateNFT = await deployMockERC721();
-      const freshNFT = await deployDCNT721A(
-        sdk,
-        name,
-        symbol,
-        hasAdjustableCap,
-        isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokenPurchase,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
-        royaltyBPS,
-        payoutAddress,
-        contractURI,
-        metadataURI,
-        null,
         {
           tokenAddress: gateNFT.address,
           minBalance: 1,
@@ -316,18 +222,35 @@ describe("DCNT721A", async () => {
         }
       );
 
-      await expect(freshNFT.mint(addr1.address, 1, { value: tokenPrice })).to.be.revertedWith(
+      await expect(freshNFT.mint(0, addr1.address, 1, { value: tokenPrice })).to.be.revertedWith(
         'do not own required token'
       );
       await gateNFT.mintNft(1);
-      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
-      expect(await freshNFT.balanceOf(addr1.address)).to.equal(1);
+      await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
+      expect(await freshNFT.balanceOf(addr1.address, 0)).to.equal(1);
+    });
+  });
+
+  describe("burn()", async () => {
+    it("should reduce owner balance and total supply for a given tokenId", async () => {
+      expect(await nft.balanceOf(addr2.address, 0)).to.equal(2);
+      expect(await nft.totalSupply(0)).to.equal(4);
+
+      await nft.connect(addr2).burn(0, 2);
+      expect(await nft.balanceOf(addr2.address, 0)).to.equal(0);
+      expect(await nft.totalSupply(0)).to.equal(2);
+    });
+
+    it("should only burn owned tokens", async () => {
+      await expect(nft.connect(addr2).burn(0, 1)).to.be.revertedWith(
+        'Burn exceeds owned tokens'
+      );
     });
   });
 
   describe("mintAirdrop()", async () => {
     it("should mint tokens to the specified recipients", async () => {
-      const freshNFT = await deployDCNT721A(
+      const freshNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -335,7 +258,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -350,26 +273,27 @@ describe("DCNT721A", async () => {
       );
 
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
-      expect(await freshNFT.balanceOf(addr1.address)).to.equal(0);
-      expect(await freshNFT.balanceOf(addr2.address)).to.equal(0);
-      expect(await freshNFT.balanceOf(addr3.address)).to.equal(0);
-      expect(await freshNFT.balanceOf(addr4.address)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr1.address, 0)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr2.address, 0)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr3.address, 0)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr4.address, 0)).to.equal(0);
 
-      await freshNFT.mintAirdrop([addr1.address, addr2.address, addr3.address, addr4.address]);
-      expect(await freshNFT.balanceOf(addr1.address)).to.equal(1);
-      expect(await freshNFT.balanceOf(addr2.address)).to.equal(1);
-      expect(await freshNFT.balanceOf(addr3.address)).to.equal(1);
-      expect(await freshNFT.balanceOf(addr4.address)).to.equal(1);
+      await freshNFT.mintAirdrop(0, [addr1.address, addr2.address, addr3.address, addr4.address]);
+      expect(await freshNFT.balanceOf(addr1.address, 0)).to.equal(1);
+      expect(await freshNFT.balanceOf(addr2.address, 0)).to.equal(1);
+      expect(await freshNFT.balanceOf(addr3.address, 0)).to.equal(1);
+      expect(await freshNFT.balanceOf(addr4.address, 0)).to.equal(1);
     });
 
     it("should prevent an airdrop which would exceed max supply", async () => {
-      await expect(nft.mintAirdrop([addr1.address])).to.be.revertedWith(
+      await nft.connect(addr2).mint(0, addr2.address, 2, { value: tokenPrice.mul(2) });
+      await expect(nft.mintAirdrop(0, [addr1.address])).to.be.revertedWith(
         'Purchase would exceed max supply'
       );
     });
 
     it("should prevent non-admin from minting an airdrop", async () => {
-      await expect(nft.connect(addr2).mintAirdrop([])).to.be.revertedWith(
+      await expect(nft.connect(addr2).mintAirdrop(0, [])).to.be.revertedWith(
         'onlyAdmin'
       );
     });
@@ -377,8 +301,6 @@ describe("DCNT721A", async () => {
 
   describe("mintPresale()", async () => {
     it("should mint tokens to recipients providing a valid merkle proof", async () => {
-
-
       snapshot = [
         [addr1.address, 1, tokenPrice],
         [addr2.address, 2, tokenPrice],
@@ -395,7 +317,7 @@ describe("DCNT721A", async () => {
 
       tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
 
-      presaleNFT = await deployDCNT721A(
+      presaleNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -403,7 +325,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         20,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         tree.getHexRoot(),
         theFuture.time(),
         theFuture.time() + theFuture.oneDay,
@@ -417,10 +339,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      expect(await presaleNFT.balanceOf(owner.address)).to.equal(0);
-
-
-      await presaleNFT.setPresaleMerkleRoot(tree.getHexRoot());
+      expect(await presaleNFT.balanceOf(owner.address, 0)).to.equal(0);
 
       for ( let i = 0; i < snapshot.length; i++ ) {
         let quantity, maxQuantity;
@@ -428,6 +347,7 @@ describe("DCNT721A", async () => {
         const merkleProof = tree.getHexProof(leaves[i]);
         const allowlist = [addr1, addr2, addr3, addr4];
         await presaleNFT.connect(allowlist[i]).mintPresale(
+          0,
           quantity,
           maxQuantity,
           tokenPrice,
@@ -436,14 +356,14 @@ describe("DCNT721A", async () => {
         );
       }
 
-      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
-      expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
-      expect(await presaleNFT.balanceOf(addr3.address)).to.equal(3);
-      expect(await presaleNFT.balanceOf(addr4.address)).to.equal(4);
+      expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr2.address, 0)).to.equal(2);
+      expect(await presaleNFT.balanceOf(addr3.address, 0)).to.equal(3);
+      expect(await presaleNFT.balanceOf(addr4.address, 0)).to.equal(4);
     });
 
     it("should prevent minting without a valid merkle proof", async () => {
-      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
 
       const snapshot = [
         [addr1.address, 10, tokenPrice],
@@ -464,6 +384,7 @@ describe("DCNT721A", async () => {
         const allowlist = [addr1, addr2, addr3, addr4];
         await expect(
           presaleNFT.connect(allowlist[i]).mintPresale(
+            0,
             quantity,
             maxQuantity,
             tokenPrice,
@@ -473,12 +394,12 @@ describe("DCNT721A", async () => {
         ).to.be.revertedWith('not approved');
       }
 
-      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
-      expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
+      expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr2.address, 0)).to.equal(2);
     });
 
     it("should prevent minting more tokens than allowed", async () => {
-      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
 
       for ( let i = 0; i < snapshot.length; i++ ) {
         let quantity, maxQuantity;
@@ -487,6 +408,7 @@ describe("DCNT721A", async () => {
         const allowlist = [addr1, addr2, addr3, addr4];
         await expect(
           presaleNFT.connect(allowlist[i]).mintPresale(
+            0,
             1,
             maxQuantity,
             tokenPrice,
@@ -496,74 +418,30 @@ describe("DCNT721A", async () => {
         ).to.be.revertedWith('minted too many');
       }
 
-      expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
-      expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
+      expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
+      expect(await presaleNFT.balanceOf(addr2.address, 0)).to.equal(2);
     });
   });
 
-  describe("adjustCap()", async() => {
-    it("should adjust the cap on nfts with an adjustable cap", async () => {
-      expect(await nft.MAX_TOKENS()).to.equal(maxTokens);
-      await nft.adjustCap(maxTokens*2);
-      expect(await nft.MAX_TOKENS()).to.equal(maxTokens*2);
-    });
-
-    it("should prevent adjusting the cap on nfts without an adjustable cap", async () => {
-      const freshNFT = await deployDCNT721A(
-        sdk,
-        name,
-        symbol,
-        false,
-        isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokenPurchase,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
-        royaltyBPS,
-        payoutAddress,
-        contractURI,
-        metadataURI,
-        metadataRendererInit,
-        tokenGateConfig
-      );
-
-      expect(await freshNFT.MAX_TOKENS()).to.equal(maxTokens);
-      await expect(freshNFT.adjustCap(maxTokens*2)).to.be.revertedWith(
-        'cannot adjust size of this collection'
-      );
-      expect(await freshNFT.MAX_TOKENS()).to.equal(maxTokens);
-    });
-
-    it("should prevent non-admin from adjusting cap", async () => {
-      await expect(nft.connect(addr2).adjustCap(0)).to.be.revertedWith(
-        'onlyAdmin'
-      );
-    });
-  });
-
-  describe("flipSaleState()", async () => {
-    it("should prevent non-admin from flipping state", async () => {
-      await expect(nft.connect(addr2).flipSaleState()).to.be.revertedWith(
+  describe("pause()", async () => {
+    it("should prevent non-admin from pausing", async () => {
+      await expect(nft.connect(addr2).pause()).to.be.revertedWith(
         'onlyAdmin'
       );
     });
 
     it("should prevent a user from minting", async () => {
-      await nft.flipSaleState();
-      await expect(nft.connect(addr1).mint(addr1.address, 1)).to.be.revertedWith(
-        'Sale must be active to mint'
+      await nft.pause();
+      await expect(nft.connect(addr1).mint(0, addr1.address, 1)).to.be.revertedWith(
+        'Pausable: paused'
       );
-      await nft.flipSaleState();
+      await nft.unpause();
     });
   });
 
-  describe("transferFrom()", async () => {
+  describe("safeTransferFrom()", async () => {
     it('should allow transfers by the owner or approved operator', async function () {
-      const freshNFT = await deployDCNT721A(
+      const freshNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -571,7 +449,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -585,44 +463,34 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
-      expect(await freshNFT.ownerOf(0)).to.equal(addr1.address);
+      await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
+      expect(await freshNFT.balanceOf(addr1.address, 0)).to.equal(1);
+      expect(await freshNFT.balanceOf(addr2.address, 0)).to.equal(0);
 
-      await freshNFT.connect(addr1).transferFrom(addr1.address, addr2.address, 0);
-      expect(await freshNFT.ownerOf(0)).to.equal(addr2.address);
+      await freshNFT.connect(addr1).safeTransferFrom(addr1.address, addr2.address, 0, 1, []);
+      expect(await freshNFT.balanceOf(addr1.address, 0)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr2.address, 0)).to.equal(1);
 
-      await freshNFT.connect(addr2).approve(addr3.address, 0);
-      await freshNFT.connect(addr3).transferFrom(addr2.address, addr4.address, 0);
-      expect(await freshNFT.ownerOf(0)).to.equal(addr4.address);
+      await freshNFT.connect(addr2).setApprovalForAll(addr3.address, true);
+      await freshNFT.connect(addr3).safeTransferFrom(addr2.address, addr4.address, 0, 1, []);
+      expect(await freshNFT.balanceOf(addr2.address, 0)).to.equal(0);
+      expect(await freshNFT.balanceOf(addr4.address, 0)).to.equal(1);
 
       await expect(
-        freshNFT.connect(addr2).transferFrom(addr4.address, addr2.address, 0)
-      ).to.be.revertedWithCustomError(freshNFT, 'TransferCallerNotOwnerNorApproved');
-    });
-  });
-
-  describe("tokenURI()", async () => {
-    it("should return basic on chain matadata rendered as a base64 url", async () => {
-      const response = await nft.tokenURI(0);
-      const decoded = base64decode(response);
-      const meta = JSON.parse(decoded);
-
-      expect(meta.name).to.equal(`${name} 0`);
-      expect(meta.description).to.equal(metadataRendererInit.description);
-      expect(meta.image).to.equal(`${metadataRendererInit.imageURI}?id=0`);
-      expect(meta.animation_url).to.equal(`${metadataRendererInit.animationURI}?id=0`);
+        freshNFT.connect(addr2).safeTransferFrom(addr4.address, addr2.address, 0, 1, [])
+      ).to.be.revertedWith('NOT_AUTHORIZED');
     });
 
-    it("should optionally return an off chain matadata url", async () => {
-      const freshNFT: Contract = await deployDCNT721A(
+    it('should revert for soulbound tokens', async function () {
+      const freshNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
         hasAdjustableCap,
-        isSoulbound,
+        true,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -632,37 +500,49 @@ describe("DCNT721A", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        null,
+        metadataRendererInit,
         tokenGateConfig
       );
 
-      freshNFT.mint(addr1.address, 1, { value: tokenPrice });
-      const response = await freshNFT.tokenURI(0);
-      expect(response).to.equal(`${metadataURI}0`);
+      await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
+      await expect(
+        freshNFT.safeTransferFrom(addr1.address, addr2.address, 0, 1, [])
+      ).to.be.revertedWith('soulbound');
     });
   });
 
-  describe("contractURI()", async () => {
-    it("should return basic on chain contract-level matadata rendered as a base64 url", async () => {
-      const response = await nft.contractURI();
-      const decoded = base64decode(response);
-      const meta = JSON.parse(decoded);
+  describe("setDroplet()", async () => {
+    it("should adjust the cap on nfts with an adjustable cap", async () => {
+      let droplet = await nft.droplets(0);
+      expect(droplet.maxTokens).to.equal(maxTokens);
 
-      expect(meta.name).to.equal(name);
-      expect(meta.description).to.equal(metadataRendererInit.description);
-      expect(meta.image).to.equal(metadataRendererInit.imageURI);
+      await nft.setDroplets([0], [{
+        hasAdjustableCap,
+        maxTokens: maxTokens*2,
+        tokenPrice,
+        maxTokensPerOwner,
+        presaleMerkleRoot: ethers.constants.HashZero,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        tokenGate: tokenGateConfig
+      }]);
+
+      droplet = await nft.droplets(0);
+      expect(droplet.maxTokens).to.equal(maxTokens*2);
     });
 
-    it("should optionally return an off chain matadata url", async () => {
-      const freshNFT: Contract = await deployDCNT721A(
+    it("should prevent adjusting the cap on nfts without an adjustable cap", async () => {
+      const freshNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        false, // hasAdjustableCap
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -672,12 +552,68 @@ describe("DCNT721A", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        null,
+        metadataRendererInit,
         tokenGateConfig
       );
 
-      const response = await freshNFT.contractURI();
-      expect(response).to.equal(contractURI);
+      let droplet = await freshNFT.droplets(0);
+      expect(droplet.maxTokens).to.equal(maxTokens);
+
+      await expect(
+        freshNFT.setDroplets([0], [{
+          hasAdjustableCap: true,
+          maxTokens: maxTokens*2,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot: ethers.constants.HashZero,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGate: tokenGateConfig
+        }])
+      ).to.be.revertedWith(
+        'caps are locked'
+      );
+
+      droplet = await freshNFT.droplets(0);
+      expect(droplet.maxTokens).to.equal(maxTokens);
+
+      await expect(
+        freshNFT.setDroplets([0], [{
+          hasAdjustableCap,
+          maxTokens: maxTokens*2,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot: ethers.constants.HashZero,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGate: tokenGateConfig
+        }])
+      ).to.be.revertedWith(
+        'caps are locked'
+      );
+    });
+
+    it("should prevent non-admin from setting droplet", async () => {
+      await expect(
+        nft.connect(addr2).setDroplets([0], [{
+          hasAdjustableCap,
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot: ethers.constants.HashZero,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGate: tokenGateConfig
+        }])
+      ).to.be.revertedWith(
+        'onlyAdmin'
+      );
     });
   });
 
@@ -689,16 +625,15 @@ describe("DCNT721A", async () => {
       const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
       const after = await addr1.getBalance();
       const withdrawn = after.sub(before).add(gas);
-      expect(withdrawn).to.equal(ethers.utils.parseEther("0.04"));
+      expect(withdrawn).to.equal(tokenPrice.mul(6));
     });
 
     it("should optionally withdraw to the payout address", async () => {
-      await nft.mint(addr1.address, 2, { value: tokenPrice.mul(2) });
+      await nft.mint(0, addr1.address, 2, { value: tokenPrice.mul(2) });
       await nft.setPayoutAddress(addr2.address);
       const before = await addr2.getBalance();
       const tx = await nft.connect(addr1).withdraw();
       const receipt = await tx.wait();
-      // const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
       const after = await addr2.getBalance();
       const withdrawn = after.sub(before);
       expect(withdrawn).to.equal(ethers.utils.parseEther("0.02"));
@@ -728,7 +663,7 @@ describe("DCNT721A", async () => {
 
   describe("distributeAndWithdraw()", async () => {
     before(async () => {
-      nft = await deployDCNT721A(
+      nft = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -736,7 +671,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -749,7 +684,7 @@ describe("DCNT721A", async () => {
         metadataRendererInit,
         tokenGateConfig
       );
-      await nft.mint(addr1.address, 1, { value: tokenPrice });
+      await nft.mint(0, addr1.address, 1, { value: tokenPrice });
     });
 
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
@@ -767,7 +702,7 @@ describe("DCNT721A", async () => {
     });
 
     it("should revert if a split has not yet been created", async () => {
-      const freshNFT: Contract = await deployDCNT721A(
+      const freshNFT: Contract = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -775,7 +710,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -796,8 +731,8 @@ describe("DCNT721A", async () => {
   });
 
   describe("supportsInterface()", async () => {
-    it('should support the interface for ERC721', async function () {
-      expect(await nft.supportsInterface('0x80ac58cd')).to.eq(true);
+    it('should support the interface for ERC1155', async function () {
+      expect(await nft.supportsInterface('0xd9b67a26')).to.eq(true);
     });
 
     it('should support the interface for ERC2981', async function () {
@@ -812,7 +747,7 @@ describe("DCNT721A", async () => {
     });
 
     it('should set owner as the receiver, unless there is a split', async function () {
-      const freshNFT: Contract = await deployDCNT721A(
+      const freshNFT: Contract = await deployDCNT1155(
         sdk,
         name,
         symbol,
@@ -820,7 +755,7 @@ describe("DCNT721A", async () => {
         isSoulbound,
         maxTokens,
         tokenPrice,
-        maxTokenPurchase,
+        maxTokensPerOwner,
         presaleMerkleRoot,
         presaleStart,
         presaleEnd,
@@ -834,7 +769,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
+      await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
 
       const ownerRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
       expect(ownerRoyalty.receiver).to.eq(owner.address);
@@ -844,4 +779,5 @@ describe("DCNT721A", async () => {
       expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
     });
   });
+
 });

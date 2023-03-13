@@ -23,6 +23,7 @@ async function main() {
     DCNTSDK: sdk.address,
     DCNT721A: await sdk.DCNT721AImplementation(),
     DCNT4907A: await sdk.DCNT4907AImplementation(),
+    DCNT1155: await sdk.DCNT1155Implementation(),
     DCNTCrescendo: await sdk.DCNTCrescendoImplementation(),
     DCNTVault: await sdk.DCNTVaultImplementation(),
     DCNTStaking: await sdk.DCNTStakingImplementation(),

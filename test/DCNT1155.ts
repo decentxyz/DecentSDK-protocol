@@ -21,11 +21,6 @@ let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
 const payoutAddress = ethers.constants.AddressZero;
-const metadataRendererInit = {
-  description: "This is the Decent unit test NFT",
-  imageURI: "http://localhost/image.jpg",
-  animationURI: "http://localhost/song.mp3",
-};
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const tokenGateConfig = {
@@ -44,7 +39,6 @@ describe("DCNT1155", async () => {
       clone: Contract,
       nft: Contract,
       presaleNFT: Contract,
-      metadataRenderer: Contract,
       split: any[],
       parentIP: Contract,
       tree: MerkleTree,
@@ -56,7 +50,6 @@ describe("DCNT1155", async () => {
       [owner] = await ethers.getSigners();
       sdk = await deployDCNTSDK();
       parentIP = await deployMockERC721();
-      metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', sdk.metadataRenderer());
       await theFuture.reset();
       saleStart = theFuture.time() + theFuture.oneDay
       clone = await deployDCNT1155(
@@ -77,7 +70,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig,
         parentIP.address
       );
@@ -120,7 +112,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         {
           tokenAddress: gateNFT.address,
           minBalance: 1337,
@@ -157,7 +148,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
     });
@@ -214,7 +204,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         {
           tokenAddress: gateNFT.address,
           minBalance: 1,
@@ -268,7 +257,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
 
@@ -335,7 +323,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
 
@@ -459,7 +446,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
 
@@ -500,7 +486,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
 
@@ -552,7 +537,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
 
@@ -681,7 +665,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
       await nft.mint(0, addr1.address, 1, { value: tokenPrice });
@@ -720,7 +703,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
 
@@ -765,7 +747,6 @@ describe("DCNT1155", async () => {
         payoutAddress,
         contractURI,
         metadataURI,
-        metadataRendererInit,
         tokenGateConfig
       );
 

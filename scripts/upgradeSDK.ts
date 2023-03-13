@@ -4,16 +4,17 @@ const fs = require('fs');
 
 const UPGRADES = {
   DCNTSDK: true,
-  DCNT721A: true,
-  DCNT4907A: true,
+  DCNT721A: false,
+  DCNT4907A: false,
+  DCNT1155: true,
   DCNTCrescendo: false,
   DCNTVault: false,
   DCNTStaking: false,
   DCNTMetadataRenderer: false,
   DCNTRegistry: false,
-  DCNTVaultNFT: true,
+  DCNTVaultNFT: false,
   DCNTRentalMarket: false,
-  ZKEdition: true,
+  ZKEdition: false,
 }
 
 const getSDKAddresses = () => {
@@ -52,6 +53,7 @@ async function main() {
 
   const DCNT721A = await getUpgradedContractAt('DCNT721A', addresses.DCNT721A);
   const DCNT4907A = await getUpgradedContractAt('DCNT4907A', addresses.DCNT4907A);
+  const DCNT1155 = await getUpgradedContractAt('DCNT1155', addresses.DCNT1155);
   const DCNTCrescendo = await getUpgradedContractAt('DCNTCrescendo', addresses.DCNTCrescendo);
   const DCNTVault = await getUpgradedContractAt('DCNTVault', addresses.DCNTVault);
   const DCNTStaking = await getUpgradedContractAt('DCNTStaking', addresses.DCNTStaking);
@@ -71,6 +73,7 @@ async function main() {
   const DCNTSDK = await getUpgradedContractAt('DCNTSDK', addresses.DCNTSDK, [
     DCNT721A.address,
     DCNT4907A.address,
+    DCNT1155.address,
     DCNTCrescendo.address,
     DCNTVault.address,
     DCNTStaking.address,
@@ -88,6 +91,7 @@ async function main() {
     DCNTSDK: DCNTSDK.address,
     DCNT721A: DCNT721A.address,
     DCNT4907A: DCNT4907A.address,
+    DCNT1155: DCNT1155.address,
     DCNTCrescendo: DCNTCrescendo.address,
     DCNTVault: DCNTVault.address,
     DCNTStaking: DCNTStaking.address,

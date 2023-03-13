@@ -272,7 +272,6 @@ export const deployDCNT1155 = async (
   payoutAddress: string | null,
   contractURI: string,
   metadataURI: string,
-  metadata: MetadataInit | null,
   tokenGateConfig: TokenGateConfig | null
 ) => {
   const deployTx = await decentSDK.deployDCNT1155(
@@ -282,7 +281,7 @@ export const deployDCNT1155 = async (
       contractURI,
       metadataURI,
       royaltyBPS,
-      payoutAddress,
+      payoutAddress: payoutAddress || ethers.constants.AddressZero,
       isSoulbound,
     },
     [{

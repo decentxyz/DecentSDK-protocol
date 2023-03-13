@@ -18,6 +18,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import './extensions/ERC1155Hooks.sol';
 import './storage/SeriesConfig.sol';
@@ -88,6 +89,11 @@ import './utils/Version.sol';
   mapping(uint256 => uint256) public totalSupply;
 
   /*
+   * @dev The address of the ChainLink price feed oracle to convert native currency to USD.
+   */
+  AggregatorV3Interface public currencyOracle;
+
+  /*
    * @dev The address of the 0xSplits contract for generating split wallets.
    */
   address public splitMain;
@@ -143,6 +149,7 @@ import './utils/Version.sol';
     royaltyBPS = _config.royaltyBPS;
     payoutAddress = _config.payoutAddress;
     isSoulbound = _config.isSoulbound;
+    currencyOracle = AggregatorV3Interface(_config.currencyOracle);
     splitMain = _splitMain;
 
     uint256 length = _droplets.length;
@@ -272,6 +279,33 @@ import './utils/Version.sol';
   }
 
   /**
+   * @dev Gets the current price for the specified token. If a currency oracle is set,
+   * the price is calculated in native currency using the oracle exchange rate.
+   * @param tokenId The ID of the token to get the price for.
+   * @return The current price of the specified token.
+   */
+  function tokenPrice(uint256 tokenId) public view returns (uint256) {
+    if ( address(currencyOracle) != address(0) ) {
+      uint256 decimals = currencyOracle.decimals();
+      (
+          /* uint80 roundID */,
+          int price,
+          /*uint startedAt*/,
+          /*uint timeStamp*/,
+          /*uint80 answeredInRound*/
+      ) = currencyOracle.latestRoundData();
+
+      uint256 exchangeRate = decimals <= 18
+        ? uint256(price) * (10 ** (18 - decimals))
+        : uint256(price) / (10 ** (decimals - 18));
+
+      return droplets[tokenId].tokenPrice * (10 ** 18) / exchangeRate;
+    }
+
+    return droplets[tokenId].tokenPrice;
+  }
+
+  /**
    * @dev Mints a specified number of tokens to a specified address.
    * @param tokenId The ID of the token to mint.
    * @param to The address to which the minted tokens will be sent.
@@ -291,11 +325,17 @@ import './utils/Version.sol';
       "Purchase would exceed max supply"
     );
     require(supply <= droplet.maxTokens, "SOLD OUT");
-    require(msg.value >= (droplet.tokenPrice * quantity), "Insufficient funds");
+    uint256 totalPrice = tokenPrice(tokenId) * quantity;
+    require(msg.value >= totalPrice, "Insufficient funds");
     require(balanceOf[to][tokenId] + quantity <= droplet.maxTokensPerOwner, "Exceeded max number per owner");
 
     _mint(to, tokenId, quantity, '');
     totalSupply[tokenId] += quantity;
+
+    if (msg.value > totalPrice) {
+        (bool success, ) = payable(msg.sender).call{value: msg.value - totalPrice}("");
+        require(success, "Refund failed");
+    }
   }
 
   /**

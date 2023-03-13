@@ -10,6 +10,7 @@ struct SeriesConfig {
   string metadataURI;
   uint256 royaltyBPS;
   address payoutAddress;
+  address currencyOracle;
   bool isSoulbound;
 }
 

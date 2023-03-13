@@ -270,6 +270,7 @@ export const deployDCNT1155 = async (
   saleEnd: number | BigNumber,
   royaltyBPS: number,
   payoutAddress: string | null,
+  currencyOracle: string | null,
   contractURI: string,
   metadataURI: string,
   tokenGateConfig: TokenGateConfig | null
@@ -282,6 +283,7 @@ export const deployDCNT1155 = async (
       metadataURI,
       royaltyBPS,
       payoutAddress: payoutAddress || ethers.constants.AddressZero,
+      currencyOracle: currencyOracle || ethers.constants.AddressZero,
       isSoulbound,
     },
     [{

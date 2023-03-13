@@ -189,6 +189,7 @@ describe("DCNTSDK", async () => {
       const saleEnd = theFuture.time() + theFuture.oneDay;
       const royaltyBPS = 10_00;
       const payoutAddress = ethers.constants.AddressZero;
+      const currencyOracle = ethers.constants.AddressZero;
       const contractURI = 'http://localhost/contract/';
       const metadataURI = 'http://localhost/metadata/';
       const metadataRendererInit = null;
@@ -210,6 +211,7 @@ describe("DCNTSDK", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         metadataRendererInit,

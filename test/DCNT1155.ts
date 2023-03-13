@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT1155, deployMockERC721, theFuture, sortByAddress, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNT1155, deployMockERC721, deployContract, theFuture, sortByAddress, base64decode } from "../core";
 import { MerkleTree } from "merkletreejs";
 const keccak256 = require("keccak256");
 
@@ -21,6 +21,7 @@ let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
 const payoutAddress = ethers.constants.AddressZero;
+const currencyOracle = ethers.constants.AddressZero;
 const contractURI = "http://localhost/contract/";
 const metadataURI = "http://localhost/metadata/";
 const tokenGateConfig = {
@@ -68,6 +69,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig,
@@ -110,6 +112,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         {
@@ -123,6 +126,43 @@ describe("DCNT1155", async () => {
       expect(tokenGate.tokenAddress).to.equal(gateNFT.address);
       expect(tokenGate.minBalance).to.equal(1337);
       expect(tokenGate.saleType).to.equal(2);
+    });
+  });
+
+  describe("tokenPrice()", async () => {
+    it("should return the token price in native currency", async () => {
+      expect(await clone.tokenPrice(0)).to.equal(tokenPrice);
+    });
+
+    it("should optionally return dynamic pricing using price feed oracles", async () => {
+      const decimals = 2 + Math.floor(Math.random() * (35)) // random precision 10^2 through 10^36
+      const ethPrice = ethers.BigNumber.from('1500' + '0'.repeat(decimals)); // ETH @ $1500.00 USD
+      const oracle = await deployContract('MockV3Aggregator', [decimals, ethPrice]);
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        ethers.utils.parseEther('13.37'), // $13.37 USD
+        maxTokensPerOwner,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        payoutAddress,
+        oracle.address,
+        contractURI,
+        metadataURI,
+        tokenGateConfig
+      );
+
+      expect(await freshNFT.tokenPrice(0)).to.equal(
+        ethers.utils.parseEther('13.37').div(1500) // $13.37 USD / ETH @ $1500.00 USD
+      );
     });
   });
 
@@ -146,6 +186,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -184,6 +225,57 @@ describe("DCNT1155", async () => {
       );
     });
 
+    it("should refund excess gas to the caller to allow for slippage", async () => {
+      const decimals = 2 + Math.floor(Math.random() * (35)) // random precision 10^2 through 10^36
+      const ethPrice = ethers.BigNumber.from('1500' + '0'.repeat(decimals)); // ETH @ $1500.00 USD
+      const oracle = await deployContract('MockV3Aggregator', [decimals, ethPrice]);
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        ethers.utils.parseEther('13.37'), // $13.37 USD
+        maxTokensPerOwner,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        payoutAddress,
+        oracle.address,
+        contractURI,
+        metadataURI,
+        tokenGateConfig
+      );
+
+      // simulate pricing fluctuation on the oracle
+      const initialPrice = await freshNFT.tokenPrice(0);
+      const priceFluctuation = Math.random() * 2 + 99; // < 1% fluctuation
+      const newEthPrice = ethPrice.mul(Math.floor(priceFluctuation * 100_00)).div(100_00);
+      await oracle.updateAnswer(newEthPrice);
+      const newPrice = await freshNFT.tokenPrice(0);
+      expect(newPrice).to.equal(initialPrice.mul(ethPrice).div(newEthPrice));
+
+      // mint a token with an additional 1% slippage
+      const priceWithSlippage = initialPrice.mul(101_00).div(100_00);
+      const initialBalance = await ethers.provider.getBalance(addr1.address);
+      const contractBalance = await ethers.provider.getBalance(freshNFT.address);
+      const tx = await freshNFT.mint(0, addr1.address, 1, { value: priceWithSlippage });
+      expect(tx).to.changeEtherBalance(freshNFT, newPrice);
+
+      // Expect the transaction to refund excess value
+      const receipt = await tx.wait();
+      const gasUsed = receipt.cumulativeGasUsed.mul(receipt.effectiveGasPrice);
+      const expectedRefund = priceWithSlippage.sub(newPrice);
+      const finalBalance = await ethers.provider.getBalance(addr1.address);
+      expect(finalBalance).to.equal(
+        initialBalance.sub(priceWithSlippage).sub(gasUsed).add(expectedRefund)
+      );
+    });
+
     it("should optionally use a token gate to restrict mints for all sales", async () => {
       const gateNFT = await deployMockERC721();
       const freshNFT = await deployDCNT1155(
@@ -202,6 +294,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         {
@@ -255,6 +348,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -321,6 +415,7 @@ describe("DCNT1155", async () => {
         theFuture.time() + theFuture.oneYear,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -444,6 +539,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -484,6 +580,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -535,6 +632,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -663,6 +761,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -701,6 +800,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig
@@ -745,6 +845,7 @@ describe("DCNT1155", async () => {
         saleEnd,
         royaltyBPS,
         payoutAddress,
+        currencyOracle,
         contractURI,
         metadataURI,
         tokenGateConfig

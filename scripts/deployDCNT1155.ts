@@ -19,6 +19,7 @@ const saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneMonth;
 const royaltyBPS = 10_00;
 const payoutAddress = ethers.constants.AddressZero;
+const currencyOracle = ethers.constants.AddressZero;
 const contractURI = 'http://localhost/contract/';
 const metadataURI = "http://localhost/metadata/";
 const tokenGateConfig = {
@@ -45,6 +46,7 @@ async function main() {
     saleEnd,
     royaltyBPS,
     payoutAddress,
+    currencyOracle,
     contractURI,
     metadataURI,
     tokenGateConfig

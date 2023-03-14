@@ -38,23 +38,26 @@ contract ZKEdition is DCNT721A {
     _name = _editionConfig.name;
     _symbol = _editionConfig.symbol;
     _currentIndex = _startTokenId();
-    MAX_TOKENS = _editionConfig.maxTokens;
-    tokenPrice = _editionConfig.tokenPrice;
-    maxTokenPurchase = _editionConfig.maxTokenPurchase;
-    saleStart = _editionConfig.saleStart;
-    saleEnd = _editionConfig.saleEnd;
-    royaltyBPS = _editionConfig.royaltyBPS;
-    payoutAddress = _editionConfig.payoutAddress;
-    hasAdjustableCap = _editionConfig.hasAdjustableCap;
-    isSoulbound = _editionConfig.isSoulbound;
+
     parentIP = _metadataConfig.parentIP;
     splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
-    presaleMerkleRoot = _editionConfig.presaleMerkleRoot;
-    presaleStart = _editionConfig.presaleStart;
-    presaleEnd = _editionConfig.presaleEnd;
-
     zkVerifier = _zkVerifier;
+
+    edition = Edition({
+      hasAdjustableCap: _editionConfig.hasAdjustableCap,
+      isSoulbound: _editionConfig.isSoulbound,
+      maxTokens: uint32(_editionConfig.maxTokens),
+      tokenPrice: uint32(_editionConfig.tokenPrice),
+      maxTokenPurchase: uint32(_editionConfig.maxTokenPurchase),
+      presaleMerkleRoot: _editionConfig.presaleMerkleRoot,
+      presaleStart: uint32(_editionConfig.presaleStart),
+      presaleEnd: uint32(_editionConfig.presaleEnd),
+      saleStart: uint32(_editionConfig.saleStart),
+      saleEnd: uint32(_editionConfig.saleEnd),
+      royaltyBPS: uint16(_editionConfig.royaltyBPS),
+      payoutAddress: _editionConfig.payoutAddress
+    });
 
     if (
       _metadataRenderer != address(0) &&
@@ -75,7 +78,7 @@ contract ZKEdition is DCNT721A {
     require(msg.sender == zkVerifier, "Only zkVerifier can call");
     uint256 mintIndex = _nextTokenId();
     require(
-      mintIndex + 1 <= MAX_TOKENS,
+      mintIndex + 1 <= edition.maxTokenPurchase,
       "Purchase would exceed max supply"
     );
 

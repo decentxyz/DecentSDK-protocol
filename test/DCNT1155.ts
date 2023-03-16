@@ -84,14 +84,13 @@ describe("DCNT1155", async () => {
     it("should initialize state which would otherwise be set in constructor", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
-      const droplet = await clone.droplets(0);
-      expect(droplet.hasAdjustableCap).to.equal(hasAdjustableCap);
-      expect(droplet.maxTokens).to.equal(maxTokens);
-      expect(droplet.tokenPrice).to.equal(tokenPrice);
-      expect(droplet.maxTokensPerOwner).to.equal(maxTokensPerOwner);
-      expect(droplet.presaleStart).to.equal(presaleStart);
-      expect(droplet.presaleEnd).to.equal(presaleEnd);
-      expect(droplet.saleStart).to.equal(saleStart);
+      const drop = await clone.drops(0);
+      expect(drop.maxTokens).to.equal(maxTokens);
+      expect(drop.tokenPrice).to.equal(tokenPrice);
+      expect(drop.maxTokensPerOwner).to.equal(maxTokensPerOwner);
+      expect(drop.presaleStart).to.equal(presaleStart);
+      expect(drop.presaleEnd).to.equal(presaleEnd);
+      expect(drop.saleStart).to.equal(saleStart);
     });
 
     it("should optionally set configuration for a token gate", async () => {
@@ -122,7 +121,7 @@ describe("DCNT1155", async () => {
         }
       );
 
-      const { tokenGate } = await freshNFT.droplets(0);
+      const { tokenGate } = await freshNFT.drops(0);
       expect(tokenGate.tokenAddress).to.equal(gateNFT.address);
       expect(tokenGate.minBalance).to.equal(1337);
       expect(tokenGate.saleType).to.equal(2);
@@ -593,13 +592,12 @@ describe("DCNT1155", async () => {
     });
   });
 
-  describe("setDroplet()", async () => {
+  describe("setDrop()", async () => {
     it("should adjust the cap on nfts with an adjustable cap", async () => {
-      let droplet = await nft.droplets(0);
-      expect(droplet.maxTokens).to.equal(maxTokens);
+      let drop = await nft.drops(0);
+      expect(drop.maxTokens).to.equal(maxTokens);
 
-      await nft.setDroplets([0], [{
-        hasAdjustableCap,
+      await nft.setDrops([0], [{
         maxTokens: maxTokens*2,
         tokenPrice,
         maxTokensPerOwner,
@@ -611,8 +609,8 @@ describe("DCNT1155", async () => {
         tokenGate: tokenGateConfig
       }]);
 
-      droplet = await nft.droplets(0);
-      expect(droplet.maxTokens).to.equal(maxTokens*2);
+      drop = await nft.drops(0);
+      expect(drop.maxTokens).to.equal(maxTokens*2);
     });
 
     it("should prevent adjusting the cap on nfts without an adjustable cap", async () => {
@@ -638,12 +636,11 @@ describe("DCNT1155", async () => {
         tokenGateConfig
       );
 
-      let droplet = await freshNFT.droplets(0);
-      expect(droplet.maxTokens).to.equal(maxTokens);
+      let drop = await freshNFT.drops(0);
+      expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
-        freshNFT.setDroplets([0], [{
-          hasAdjustableCap: true,
+        freshNFT.setDrops([0], [{
           maxTokens: maxTokens*2,
           tokenPrice,
           maxTokensPerOwner,
@@ -658,12 +655,11 @@ describe("DCNT1155", async () => {
         'caps are locked'
       );
 
-      droplet = await freshNFT.droplets(0);
-      expect(droplet.maxTokens).to.equal(maxTokens);
+      drop = await freshNFT.drops(0);
+      expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
-        freshNFT.setDroplets([0], [{
-          hasAdjustableCap,
+        freshNFT.setDrops([0], [{
           maxTokens: maxTokens*2,
           tokenPrice,
           maxTokensPerOwner,
@@ -679,10 +675,9 @@ describe("DCNT1155", async () => {
       );
     });
 
-    it("should prevent non-admin from setting droplet", async () => {
+    it("should prevent non-admin from setting drop", async () => {
       await expect(
-        nft.connect(addr2).setDroplets([0], [{
-          hasAdjustableCap,
+        nft.connect(addr2).setDrops([0], [{
           maxTokens,
           tokenPrice,
           maxTokensPerOwner,

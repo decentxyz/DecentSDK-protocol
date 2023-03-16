@@ -20,8 +20,8 @@ import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
+import './interfaces/IDCNT1155.sol';
 import './extensions/ERC1155Hooks.sol';
-import './storage/SeriesConfig.sol';
 import './utils/Splits.sol';
 import './utils/OperatorFilterer.sol';
 import './interfaces/ITokenWithBalance.sol';
@@ -31,7 +31,8 @@ import './utils/Version.sol';
  * @title DCNT1155
  * @dev An implementation of the ERC1155 multi-token standard.
  */
- contract DCNT1155 is
+contract DCNT1155 is
+  IDCNT1155,
   ERC1155Hooks,
   Initializable,
   Ownable,
@@ -64,7 +65,7 @@ import './utils/Version.sol';
   /*
    * @dev The royalty fee in basis points (1/100th of a percent).
    */
-  uint256 public royaltyBPS;
+  uint16 public royaltyBPS;
 
   /*
    * @dev The address that will receive payouts when withdrawing funds.
@@ -77,11 +78,16 @@ import './utils/Version.sol';
    */
   bool public isSoulbound;
 
-  /**
-   * @dev An array of droplet configurations defining each token with the series.
-   * Adding a droplet creates a new token with a token ID equal to its index in this array.
+  /*
+   * @dev Whether the caps on token supplies are able to be increased.
    */
-  Droplet[] public droplets;
+  bool public hasAdjustableCaps;
+
+  /**
+   * @dev An array of drop configurations defining each token with the series.
+   * Adding a drop creates a new token with a token ID equal to its index in this array.
+   */
+  Drop[] public drops;
 
   /*
    * @dev Mapping of token ID to the total number of tokens in circulation for that ID.
@@ -109,7 +115,7 @@ import './utils/Version.sol';
    * @param isPresale A boolean indicating whether the sale type for is presale or primary sale.
    */
   modifier verifyTokenGate(uint256 tokenId, bool isPresale) {
-    TokenGateConfig memory tokenGate = droplets[tokenId].tokenGate;
+    TokenGateConfig memory tokenGate = drops[tokenId].tokenGate;
     if (tokenGate.tokenAddress != address(0)
       && (tokenGate.saleType == SaleType.ALL ||
           isPresale && tokenGate.saleType == SaleType.PRESALE) ||
@@ -131,13 +137,13 @@ import './utils/Version.sol';
    * @dev Initializes the contract with the specified parameters.
    * @param _owner The owner of the contract.
    * @param _config The configuration for the contract.
-   * @param _droplets The droplet configurations for the initial tokens.
+   * @param _drops The drop configurations for the initial tokens.
    * @param _splitMain The 0xSplits contract address.
    */
   function initialize(
     address _owner,
     SeriesConfig memory _config,
-    Droplet[] memory _droplets,
+    Drop[] memory _drops,
     address _splitMain
   ) public initializer {
     _transferOwnership(_owner);
@@ -148,13 +154,14 @@ import './utils/Version.sol';
     _contractURI = _config.contractURI;
     royaltyBPS = _config.royaltyBPS;
     payoutAddress = _config.payoutAddress;
+    hasAdjustableCaps = _config.hasAdjustableCaps;
     isSoulbound = _config.isSoulbound;
     currencyOracle = AggregatorV3Interface(_config.currencyOracle);
     splitMain = _splitMain;
 
-    uint256 length = _droplets.length;
+    uint256 length = _drops.length;
     for (uint i = 0; i < length; i++) {
-      _addDroplet(_droplets[i]);
+      _addDrop(_drops[i]);
     }
   }
 
@@ -178,7 +185,7 @@ import './utils/Version.sol';
    * Clients should replace `{id}` with the actual token type ID when calling the function.
    * @dev unused @param tokenId ID of the token to retrieve the URI for.
    */
-  function uri(uint256) public view override returns (string memory) {
+  function uri(uint256) public view override(IDCNT1155, ERC1155) returns (string memory) {
     return _uri;
   }
 
@@ -214,67 +221,61 @@ import './utils/Version.sol';
   }
 
   /**
-   * @dev Adds a single droplet to the droplet.
-   * @param droplet The droplet configuration to add.
+   * @dev Adds a single drop to the drop.
+   * @param drop The drop configuration to add.
    */
-  function _addDroplet(Droplet memory droplet) internal {
-    droplets.push(Droplet({
-      hasAdjustableCap: droplet.hasAdjustableCap,
-      maxTokens: droplet.maxTokens,
-      tokenPrice: droplet.tokenPrice,
-      maxTokensPerOwner: droplet.maxTokensPerOwner,
-      presaleMerkleRoot: droplet.presaleMerkleRoot,
-      presaleStart: droplet.presaleStart,
-      presaleEnd: droplet.presaleEnd,
-      saleStart: droplet.saleStart,
-      saleEnd: droplet.saleEnd,
-      tokenGate: droplet.tokenGate
+  function _addDrop(Drop memory drop) internal {
+    drops.push(Drop({
+      maxTokens: drop.maxTokens,
+      tokenPrice: drop.tokenPrice,
+      maxTokensPerOwner: drop.maxTokensPerOwner,
+      presaleMerkleRoot: drop.presaleMerkleRoot,
+      presaleStart: drop.presaleStart,
+      presaleEnd: drop.presaleEnd,
+      saleStart: drop.saleStart,
+      saleEnd: drop.saleEnd,
+      tokenGate: drop.tokenGate
     }));
   }
 
   /**
-   * @dev Adds the specified droplets to the droplet series, creating new token IDs.
-   * @param _droplets The droplets configurations to add.
+   * @dev Adds the specified drops to the drop series, creating new token IDs.
+   * @param _drops The drop configurations to add.
    */
-  function addDroplets(Droplet[] memory _droplets) external onlyAdmin {
-    uint256 length = _droplets.length;
+  function addDrops(Drop[] memory _drops) external onlyAdmin {
+    uint256 length = _drops.length;
     for (uint i = 0; i < length; i++) {
-      _addDroplet(_droplets[i]);
+      _addDrop(_drops[i]);
     }
   }
 
   /**
-   * @dev Updates the droplet configuration for the specified token IDs.
+   * @dev Updates the drop configuration for the specified token IDs.
    * @param _tokenIds The IDs of the tokens to update.
-   * @param _droplets The updated droplet configurations for the specified token IDs.
+   * @param _drops The updated drop configurations for the specified token IDs.
    */
-  function setDroplets(uint256[] calldata _tokenIds, Droplet[] calldata _droplets) external onlyAdmin {
-    uint256 length = _droplets.length;
+  function setDrops(uint256[] calldata _tokenIds, Drop[] calldata _drops) external onlyAdmin {
+    uint256 length = _drops.length;
     require(length == _tokenIds.length, 'uneven arrays');
     for (uint i = 0; i < length; i++) {
       uint256 tokenId = _tokenIds[i];
-      require(tokenId < droplets.length, 'nonexistent token');
-      Droplet memory _droplet = _droplets[i];
-      Droplet storage droplet = droplets[tokenId];
+      require(tokenId < drops.length, 'nonexistent token');
+      Drop memory _drop = _drops[i];
+      Drop storage drop = drops[tokenId];
 
-      if ( droplet.hasAdjustableCap == false ) {
-        require(!_droplet.hasAdjustableCap, 'caps are locked');
+      if ( drop.maxTokens != _drop.maxTokens ) {
+        require(hasAdjustableCaps, 'caps are locked');
+        require(totalSupply[tokenId] <= _drop.maxTokens, 'cannot decrease cap');
       }
 
-      if ( droplet.maxTokens != _droplet.maxTokens ) {
-        require(droplet.hasAdjustableCap, 'cannot adjust size of this collection');
-        require(totalSupply[tokenId] <= _droplet.maxTokens, 'cannot decrease cap');
-      }
-
-      droplet.hasAdjustableCap = _droplet.hasAdjustableCap;
-      droplet.maxTokens = _droplet.maxTokens;
-      droplet.tokenPrice = _droplet.tokenPrice;
-      droplet.maxTokensPerOwner = _droplet.maxTokensPerOwner;
-      droplet.presaleMerkleRoot = _droplet.presaleMerkleRoot;
-      droplet.presaleStart = _droplet.presaleStart;
-      droplet.presaleEnd = _droplet.presaleEnd;
-      droplet.saleStart = _droplet.saleStart;
-      droplet.saleEnd = _droplet.saleEnd;
+      drop.maxTokens = _drop.maxTokens;
+      drop.tokenPrice = _drop.tokenPrice;
+      drop.maxTokensPerOwner = _drop.maxTokensPerOwner;
+      drop.presaleMerkleRoot = _drop.presaleMerkleRoot;
+      drop.presaleStart = _drop.presaleStart;
+      drop.presaleEnd = _drop.presaleEnd;
+      drop.saleStart = _drop.saleStart;
+      drop.saleEnd = _drop.saleEnd;
     }
   }
 
@@ -299,10 +300,10 @@ import './utils/Version.sol';
         ? uint256(price) * (10 ** (18 - decimals))
         : uint256(price) / (10 ** (decimals - 18));
 
-      return droplets[tokenId].tokenPrice * (10 ** 18) / exchangeRate;
+      return uint256(drops[tokenId].tokenPrice) * (10 ** 18) / exchangeRate;
     }
 
-    return droplets[tokenId].tokenPrice;
+    return drops[tokenId].tokenPrice;
   }
 
   /**
@@ -317,17 +318,17 @@ import './utils/Version.sol';
     verifyTokenGate(tokenId, false)
     whenNotPaused
   {
-    Droplet memory droplet = droplets[tokenId];
+    Drop memory drop = drops[tokenId];
     uint256 supply = totalSupply[tokenId];
-    require(block.timestamp >= droplet.saleStart && block.timestamp <= droplet.saleEnd, "Sales are not active.");
+    require(block.timestamp >= drop.saleStart && block.timestamp <= drop.saleEnd, "Sales are not active.");
     require(
-      supply + quantity <= droplet.maxTokens,
+      supply + quantity <= drop.maxTokens,
       "Purchase would exceed max supply"
     );
-    require(supply <= droplet.maxTokens, "SOLD OUT");
+    require(supply <= drop.maxTokens, "SOLD OUT");
     uint256 totalPrice = tokenPrice(tokenId) * quantity;
     require(msg.value >= totalPrice, "Insufficient funds");
-    require(balanceOf[to][tokenId] + quantity <= droplet.maxTokensPerOwner, "Exceeded max number per owner");
+    require(balanceOf[to][tokenId] + quantity <= drop.maxTokensPerOwner, "Exceeded max number per owner");
 
     _mint(to, tokenId, quantity, '');
     totalSupply[tokenId] += quantity;
@@ -356,7 +357,7 @@ import './utils/Version.sol';
    */
   function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin {
     uint256 airdrops = recipients.length;
-    require(totalSupply[tokenId] + airdrops <= droplets[tokenId].maxTokens,
+    require(totalSupply[tokenId] + airdrops <= drops[tokenId].maxTokens,
       "Purchase would exceed max supply"
     );
 
@@ -389,16 +390,16 @@ import './utils/Version.sol';
     verifyTokenGate(tokenId, true)
     whenNotPaused
   {
-    Droplet memory droplet = droplets[tokenId];
-    require (block.timestamp >= droplet.presaleStart && block.timestamp <= droplet.presaleEnd, 'not presale');
+    Drop memory drop = drops[tokenId];
+    require (block.timestamp >= drop.presaleStart && block.timestamp <= drop.presaleEnd, 'not presale');
     uint256 supply = totalSupply[tokenId];
     require(
-      supply + quantity <= droplet.maxTokens,
+      supply + quantity <= drop.maxTokens,
       "Purchase would exceed max supply"
     );
     require (MerkleProof.verify(
         merkleProof,
-        droplet.presaleMerkleRoot,
+        drop.presaleMerkleRoot,
         keccak256(
           abi.encodePacked(msg.sender,maxQuantity,pricePerToken)
         )
@@ -470,7 +471,7 @@ import './utils/Version.sol';
     view
     returns (address receiver, uint256 royaltyAmount)
   {
-    require(tokenId < droplets.length, 'nonexistent token');
+    require(tokenId < drops.length, 'nonexistent token');
 
     if (splitWallet != address(0)) {
       receiver = splitWallet;
@@ -495,7 +496,7 @@ import './utils/Version.sol';
     public
     view
     virtual
-    override(ERC1155, AccessControl)
+    override(IDCNT1155, ERC1155, AccessControl)
     returns (bool)
   {
     return
@@ -546,7 +547,7 @@ import './utils/Version.sol';
   function setApprovalForAll(
     address operator,
     bool approved
-  ) public virtual override onlyAllowedOperatorApproval(operator) {
+  ) public virtual override(IDCNT1155, ERC1155) onlyAllowedOperatorApproval(operator) {
     super.setApprovalForAll(operator, approved);
   }
 }

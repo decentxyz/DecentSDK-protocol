@@ -19,10 +19,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 
 import "./interfaces/IDCNTRegistry.sol";
+import "./interfaces/IDCNT1155.sol";
 import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
 import "./storage/TokenGateConfig.sol";
-import "./storage/SeriesConfig.sol";
 import "./storage/CrescendoConfig.sol";
 
 contract DCNTSDK is Ownable {
@@ -180,21 +180,21 @@ contract DCNTSDK is Ownable {
 
   // deploy and initialize an erc1155 clone
   function deployDCNT1155(
-    SeriesConfig memory _config,
-    Droplet[] memory _droplets
+    IDCNT1155.SeriesConfig memory _config,
+    IDCNT1155.Drop[] memory _drops
   ) external returns (address clone) {
     clone = Clones.clone(DCNT1155Implementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,string,string,uint256,address,address,bool),"
-          "(bool,uint256,uint256,uint256,bytes32,uint256,uint256,uint256,uint256,(address,uint88,uint8))[],"
+          "(string,string,string,string,uint16,address,address,bool,bool),"
+          "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[],"
           "address"
         ")",
         msg.sender,
         _config,
-        _droplets,
+        _drops,
         SplitMain
       )
     );

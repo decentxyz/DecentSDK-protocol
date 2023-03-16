@@ -47,15 +47,15 @@ contract ZKEdition is DCNT721A {
     edition = Edition({
       hasAdjustableCap: _editionConfig.hasAdjustableCap,
       isSoulbound: _editionConfig.isSoulbound,
-      maxTokens: uint32(_editionConfig.maxTokens),
-      tokenPrice: uint32(_editionConfig.tokenPrice),
-      maxTokenPurchase: uint32(_editionConfig.maxTokenPurchase),
+      maxTokens: _editionConfig.maxTokens,
+      tokenPrice: _editionConfig.tokenPrice,
+      maxTokenPurchase: _editionConfig.maxTokenPurchase,
       presaleMerkleRoot: _editionConfig.presaleMerkleRoot,
-      presaleStart: uint32(_editionConfig.presaleStart),
-      presaleEnd: uint32(_editionConfig.presaleEnd),
-      saleStart: uint32(_editionConfig.saleStart),
-      saleEnd: uint32(_editionConfig.saleEnd),
-      royaltyBPS: uint16(_editionConfig.royaltyBPS),
+      presaleStart: _editionConfig.presaleStart,
+      presaleEnd: _editionConfig.presaleEnd,
+      saleStart: _editionConfig.saleStart,
+      saleEnd: _editionConfig.saleEnd,
+      royaltyBPS: _editionConfig.royaltyBPS,
       payoutAddress: _editionConfig.payoutAddress
     });
 
@@ -78,7 +78,7 @@ contract ZKEdition is DCNT721A {
     require(msg.sender == zkVerifier, "Only zkVerifier can call");
     uint256 mintIndex = _nextTokenId();
     require(
-      mintIndex + 1 <= edition.maxTokenPurchase,
+      mintIndex + 1 <= edition.maxTokens,
       "Purchase would exceed max supply"
     );
 

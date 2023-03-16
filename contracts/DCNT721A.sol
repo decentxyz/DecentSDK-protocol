@@ -37,7 +37,7 @@ contract DCNT721A is
   DCNT721AStorage,
   Initializable,
   Ownable,
-  Version(6),
+  Version(7),
   Splits
 {
   struct Edition {
@@ -115,15 +115,15 @@ contract DCNT721A is
     edition = Edition({
       hasAdjustableCap: _editionConfig.hasAdjustableCap,
       isSoulbound: _editionConfig.isSoulbound,
-      maxTokens: uint32(_editionConfig.maxTokens),
-      tokenPrice: uint32(_editionConfig.tokenPrice),
-      maxTokenPurchase: uint32(_editionConfig.maxTokenPurchase),
+      maxTokens: _editionConfig.maxTokens,
+      tokenPrice: _editionConfig.tokenPrice,
+      maxTokenPurchase: _editionConfig.maxTokenPurchase,
       presaleMerkleRoot: _editionConfig.presaleMerkleRoot,
-      presaleStart: uint32(_editionConfig.presaleStart),
-      presaleEnd: uint32(_editionConfig.presaleEnd),
-      saleStart: uint32(_editionConfig.saleStart),
-      saleEnd: uint32(_editionConfig.saleEnd),
-      royaltyBPS: uint16(_editionConfig.royaltyBPS),
+      presaleStart: _editionConfig.presaleStart,
+      presaleEnd: _editionConfig.presaleEnd,
+      saleStart: _editionConfig.saleStart,
+      saleEnd: _editionConfig.saleEnd,
+      royaltyBPS: _editionConfig.royaltyBPS,
       payoutAddress: _editionConfig.payoutAddress
     });
 

@@ -116,11 +116,17 @@ contract DCNT1155 is
    */
   modifier verifyTokenGate(uint256 tokenId, bool isPresale) {
     TokenGateConfig memory tokenGate = drops[tokenId].tokenGate;
-    if (tokenGate.tokenAddress != address(0)
-      && (tokenGate.saleType == SaleType.ALL ||
-          isPresale && tokenGate.saleType == SaleType.PRESALE) ||
-          !isPresale && tokenGate.saleType == SaleType.PRIMARY) {
-            require(ITokenWithBalance(tokenGate.tokenAddress).balanceOf(msg.sender) >= tokenGate.minBalance, 'do not own required token');
+    if (
+        tokenGate.tokenAddress != address(0)
+        && (
+          tokenGate.saleType == SaleType.ALL
+          || (isPresale && tokenGate.saleType == SaleType.PRESALE)
+          || (!isPresale && tokenGate.saleType == SaleType.PRIMARY)
+        )
+    ) {
+      if ( ITokenWithBalance(tokenGate.tokenAddress).balanceOf(msg.sender) < tokenGate.minBalance ) {
+        revert TokenGateDenied();
+      }
     }
     _;
   }
@@ -129,7 +135,9 @@ contract DCNT1155 is
    * @dev Restricts access to only addresses with the DEFAULT_ADMIN_ROLE.
    */
   modifier onlyAdmin() {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "onlyAdmin");
+    if ( ! hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) ) {
+      revert OnlyAdmin();
+    }
     _;
   }
 
@@ -152,7 +160,7 @@ contract DCNT1155 is
     _symbol = _config.symbol;
     _uri = _config.metadataURI;
     _contractURI = _config.contractURI;
-    royaltyBPS = _config.royaltyBPS;
+    setRoyaltyBPS(_config.royaltyBPS);
     payoutAddress = _config.payoutAddress;
     hasAdjustableCaps = _config.hasAdjustableCaps;
     isSoulbound = _config.isSoulbound;
@@ -203,6 +211,11 @@ contract DCNT1155 is
    */
   function setURI(string memory uri_) external onlyAdmin {
     _uri = uri_;
+
+    uint256 numberOfDrops = drops.length;
+    for (uint256 i = 0; i < numberOfDrops; i++) {
+      emit URI(_uri, i);
+    }
   }
 
   /**
@@ -256,16 +269,28 @@ contract DCNT1155 is
    */
   function setDrops(uint256[] calldata _tokenIds, Drop[] calldata _drops) external onlyAdmin {
     uint256 length = _drops.length;
-    require(length == _tokenIds.length, 'uneven arrays');
+
+    if ( length != _tokenIds.length ) {
+      revert ArrayLengthMismatch();
+    }
+
     for (uint i = 0; i < length; i++) {
       uint256 tokenId = _tokenIds[i];
-      require(tokenId < drops.length, 'nonexistent token');
+
+      if ( tokenId >= drops.length ) {
+        revert NonexistentToken();
+      }
+
       Drop memory _drop = _drops[i];
       Drop storage drop = drops[tokenId];
 
       if ( drop.maxTokens != _drop.maxTokens ) {
-        require(hasAdjustableCaps, 'caps are locked');
-        require(totalSupply[tokenId] <= _drop.maxTokens, 'cannot decrease cap');
+        if ( ! hasAdjustableCaps ) {
+          revert CapsAreLocked();
+        }
+        if ( totalSupply[tokenId] > _drop.maxTokens ) {
+          revert CannotDecreaseCap();
+        }
       }
 
       drop.maxTokens = _drop.maxTokens;
@@ -320,22 +345,32 @@ contract DCNT1155 is
   {
     Drop memory drop = drops[tokenId];
     uint256 supply = totalSupply[tokenId];
-    require(block.timestamp >= drop.saleStart && block.timestamp <= drop.saleEnd, "Sales are not active.");
-    require(
-      supply + quantity <= drop.maxTokens,
-      "Purchase would exceed max supply"
-    );
-    require(supply <= drop.maxTokens, "SOLD OUT");
     uint256 totalPrice = tokenPrice(tokenId) * quantity;
-    require(msg.value >= totalPrice, "Insufficient funds");
-    require(balanceOf[to][tokenId] + quantity <= drop.maxTokensPerOwner, "Exceeded max number per owner");
+
+    if ( block.timestamp < drop.saleStart || block.timestamp > drop.saleEnd ) {
+      revert SaleNotActive();
+    }
+
+    if ( supply + quantity > drop.maxTokens ) {
+      revert MintExceedsMaxSupply();
+    }
+
+    if ( msg.value < totalPrice ) {
+      revert InsufficientFunds();
+    }
+
+    if ( balanceOf[to][tokenId] + quantity > drop.maxTokensPerOwner ) {
+      revert MintExceedsMaxTokensPerOwner();
+    }
 
     _mint(to, tokenId, quantity, '');
     totalSupply[tokenId] += quantity;
 
-    if (msg.value > totalPrice) {
-        (bool success, ) = payable(msg.sender).call{value: msg.value - totalPrice}("");
-        require(success, "Refund failed");
+    if ( msg.value > totalPrice ) {
+      (bool success, ) = payable(msg.sender).call{value: msg.value - totalPrice}("");
+      if ( ! success ) {
+        revert RefundFailed();
+      }
     }
   }
 
@@ -345,7 +380,9 @@ contract DCNT1155 is
    * @param quantity The quantity of tokens to burn.
    */
   function burn(uint256 tokenId, uint256 quantity) external {
-    require(balanceOf[msg.sender][tokenId] >= quantity, 'Burn exceeds owned tokens');
+    if ( balanceOf[msg.sender][tokenId] < quantity ) {
+      revert BurnExceedsOwnedTokens();
+    }
     _burn(msg.sender, tokenId, quantity);
     totalSupply[tokenId] -= quantity;
   }
@@ -357,9 +394,10 @@ contract DCNT1155 is
    */
   function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin {
     uint256 airdrops = recipients.length;
-    require(totalSupply[tokenId] + airdrops <= drops[tokenId].maxTokens,
-      "Purchase would exceed max supply"
-    );
+
+    if ( totalSupply[tokenId] + airdrops > drops[tokenId].maxTokens ) {
+      revert AirdropExceedsMaxSupply();
+    }
 
     unchecked {
       for (uint i = 0; i < airdrops; i++) {
@@ -391,22 +429,40 @@ contract DCNT1155 is
     whenNotPaused
   {
     Drop memory drop = drops[tokenId];
-    require (block.timestamp >= drop.presaleStart && block.timestamp <= drop.presaleEnd, 'not presale');
-    uint256 supply = totalSupply[tokenId];
-    require(
-      supply + quantity <= drop.maxTokens,
-      "Purchase would exceed max supply"
-    );
-    require (MerkleProof.verify(
-        merkleProof,
-        drop.presaleMerkleRoot,
-        keccak256(
-          abi.encodePacked(msg.sender,maxQuantity,pricePerToken)
-        )
-      ), 'not approved');
+    if ( block.timestamp < drop.presaleStart || block.timestamp > drop.presaleEnd ) {
+      revert PresaleNotActive();
+    }
 
-    require(msg.value >= (pricePerToken * quantity), "Insufficient funds");
-    require(balanceOf[msg.sender][tokenId] + quantity <= maxQuantity, 'minted too many');
+    uint256 supply = totalSupply[tokenId];
+
+    if ( supply + quantity > drop.maxTokens ) {
+      revert MintExceedsMaxSupply();
+    }
+
+    bool presaleVerification = MerkleProof.verify(
+      merkleProof,
+      drop.presaleMerkleRoot,
+      keccak256(
+        abi.encodePacked(
+          msg.sender,
+          maxQuantity,
+          pricePerToken
+        )
+      )
+    );
+
+    if ( ! presaleVerification ) {
+      revert PresaleVerificationFailed();
+    }
+
+    if ( msg.value < pricePerToken * quantity ) {
+      revert InsufficientFunds();
+    }
+
+    if ( balanceOf[msg.sender][tokenId] + quantity > maxQuantity ) {
+      revert MintExceedsMaxTokensPerOwner();
+    }
+
     _mint(msg.sender, tokenId, quantity, '');
   }
 
@@ -437,14 +493,14 @@ contract DCNT1155 is
    * @dev Withdraws the balance of the contract to the payout address or the contract owner.
   */
   function withdraw() external {
-    require(
-      _getSplitWallet() == address(0),
-      "Cannot withdraw with an active split"
-    );
-
+    if ( _getSplitWallet() != address(0) ) {
+      revert SplitsAreActive();
+    }
     address to = payoutAddress != address(0) ? payoutAddress : owner();
     (bool success, ) = payable(to).call{value: address(this).balance}("");
-    require(success, "Could not withdraw");
+    if ( ! success ) {
+      revert  WithdrawFailed();
+    }
   }
 
   function _getSplitMain() internal virtual override returns (address) {
@@ -460,6 +516,17 @@ contract DCNT1155 is
   }
 
   /**
+   * @dev Sets the royalty fee (ERC-2981: NFT Royalty Standard).
+   * @param _royaltyBPS The royalty fee in basis points. (1/100th of a percent)
+   */
+  function setRoyaltyBPS(uint16 _royaltyBPS) public {
+    if ( _royaltyBPS > 100_00 ) {
+      revert InvalidBPS();
+    }
+    royaltyBPS = _royaltyBPS;
+  }
+
+  /**
    * @dev Returns the royalty recipient and amount for a given sale price.
    * @param tokenId The ID of the token being sold.
    * @param salePrice The sale price of the token.
@@ -471,9 +538,11 @@ contract DCNT1155 is
     view
     returns (address receiver, uint256 royaltyAmount)
   {
-    require(tokenId < drops.length, 'nonexistent token');
+    if ( tokenId >= drops.length ) {
+      revert NonexistentToken();
+    }
 
-    if (splitWallet != address(0)) {
+    if ( splitWallet != address(0) ) {
       receiver = splitWallet;
     } else if ( payoutAddress != address(0) ) {
       receiver = payoutAddress;
@@ -512,9 +581,9 @@ contract DCNT1155 is
    */
   function updateOperatorFilter(bool enable, address operatorFilter) external onlyAdmin {
     address self = address(this);
-    if (!operatorFilterRegistry.isRegistered(self) && enable) {
+    if ( ! operatorFilterRegistry.isRegistered(self) && enable ) {
       operatorFilterRegistry.registerAndSubscribe(self, operatorFilter);
-    } else if (enable) {
+    } else if ( enable ) {
       operatorFilterRegistry.subscribe(self, operatorFilter);
     } else {
       operatorFilterRegistry.unsubscribe(self, false);
@@ -536,7 +605,9 @@ contract DCNT1155 is
     uint256[] memory,
     uint256[] memory
   ) internal virtual override onlyAllowedOperator(from) {
-    require (!isSoulbound || (from == address(0) || to == address(0)), 'soulbound');
+    if ( isSoulbound && from != address(0) && to != address(0) ) {
+      revert CannotTransferSoulbound();
+    }
   }
 
   /**

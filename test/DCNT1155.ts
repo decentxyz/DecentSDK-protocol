@@ -193,16 +193,20 @@ describe("DCNT1155", async () => {
     });
 
     it("should not allow mints until after the start date", async () => {
-      await expect(nft.connect(addr1).mint(0, addr1.address, 1)).to.be.revertedWith(
-        'Sales are not active.'
+      await expect(nft.connect(addr1).mint(0, addr1.address, 1)).to.be.revertedWithCustomError(
+        nft,
+        'SaleNotActive'
       );
       await theFuture.travel(theFuture.oneDay);
       await theFuture.arrive();
     });
 
     it("should not allow more than 2 mints per owner", async () => {
-      await expect(nft.connect(addr2).mint(0, addr2.address, 3, { value: tokenPrice.mul(3) })).to.be.revertedWith(
-        "Exceeded max number per owner"
+      await expect(
+        nft.connect(addr2).mint(0, addr2.address, 3, { value: tokenPrice.mul(3) })
+      ).to.be.revertedWithCustomError(
+        nft,
+        'MintExceedsMaxTokensPerOwner'
       );
     });
 
@@ -219,8 +223,11 @@ describe("DCNT1155", async () => {
     });
 
     it("should not allow mints after cap", async () => {
-      await expect(nft.connect(addr4).mint(0, addr4.address, 1, { value: tokenPrice })).to.be.revertedWith(
-        "Purchase would exceed max supply"
+      await expect(
+        nft.connect(addr4).mint(0, addr4.address, 1, { value: tokenPrice })
+      ).to.be.revertedWithCustomError(
+        nft,
+        'MintExceedsMaxSupply'
       );
     });
 
@@ -303,8 +310,11 @@ describe("DCNT1155", async () => {
         }
       );
 
-      await expect(freshNFT.mint(0, addr1.address, 1, { value: tokenPrice })).to.be.revertedWith(
-        'do not own required token'
+      await expect(
+        freshNFT.mint(0, addr1.address, 1, { value: tokenPrice })
+      ).to.be.revertedWithCustomError(
+        freshNFT,
+        'TokenGateDenied'
       );
       await gateNFT.mintNft(1);
       await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
@@ -323,8 +333,9 @@ describe("DCNT1155", async () => {
     });
 
     it("should only burn owned tokens", async () => {
-      await expect(nft.connect(addr2).burn(0, 1)).to.be.revertedWith(
-        'Burn exceeds owned tokens'
+      await expect(nft.connect(addr2).burn(0, 1)).to.be.revertedWithCustomError(
+        nft,
+        'BurnExceedsOwnedTokens'
       );
     });
   });
@@ -368,14 +379,16 @@ describe("DCNT1155", async () => {
 
     it("should prevent an airdrop which would exceed max supply", async () => {
       await nft.connect(addr2).mint(0, addr2.address, 2, { value: tokenPrice.mul(2) });
-      await expect(nft.mintAirdrop(0, [addr1.address])).to.be.revertedWith(
-        'Purchase would exceed max supply'
+      await expect(nft.mintAirdrop(0, [addr1.address])).to.be.revertedWithCustomError(
+        nft,
+        'AirdropExceedsMaxSupply'
       );
     });
 
     it("should prevent non-admin from minting an airdrop", async () => {
-      await expect(nft.connect(addr2).mintAirdrop(0, [])).to.be.revertedWith(
-        'onlyAdmin'
+      await expect(nft.connect(addr2).mintAirdrop(0, [])).to.be.revertedWithCustomError(
+        nft,
+        'OnlyAdmin'
       );
     });
   });
@@ -472,7 +485,7 @@ describe("DCNT1155", async () => {
             merkleProof,
             { value: tokenPrice.mul(quantity) }
           )
-        ).to.be.revertedWith('not approved');
+        ).to.be.revertedWithCustomError(presaleNFT, 'PresaleVerificationFailed');
       }
 
       expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
@@ -496,7 +509,7 @@ describe("DCNT1155", async () => {
             merkleProof,
             { value: tokenPrice }
           )
-        ).to.be.revertedWith('minted too many');
+        ).to.be.revertedWithCustomError(presaleNFT, 'MintExceedsMaxTokensPerOwner');
       }
 
       expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
@@ -506,8 +519,9 @@ describe("DCNT1155", async () => {
 
   describe("pause()", async () => {
     it("should prevent non-admin from pausing", async () => {
-      await expect(nft.connect(addr2).pause()).to.be.revertedWith(
-        'onlyAdmin'
+      await expect(nft.connect(addr2).pause()).to.be.revertedWithCustomError(
+        nft,
+        'OnlyAdmin'
       );
     });
 
@@ -588,7 +602,7 @@ describe("DCNT1155", async () => {
       await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
       await expect(
         freshNFT.safeTransferFrom(addr1.address, addr2.address, 0, 1, [])
-      ).to.be.revertedWith('soulbound');
+      ).to.be.revertedWithCustomError(freshNFT, 'CannotTransferSoulbound');
     });
   });
 
@@ -651,8 +665,9 @@ describe("DCNT1155", async () => {
           saleEnd,
           tokenGate: tokenGateConfig
         }])
-      ).to.be.revertedWith(
-        'caps are locked'
+      ).to.be.revertedWithCustomError(
+        freshNFT,
+        'CapsAreLocked'
       );
 
       drop = await freshNFT.drops(0);
@@ -670,8 +685,9 @@ describe("DCNT1155", async () => {
           saleEnd,
           tokenGate: tokenGateConfig
         }])
-      ).to.be.revertedWith(
-        'caps are locked'
+      ).to.be.revertedWithCustomError(
+        freshNFT,
+        'CapsAreLocked'
       );
     });
 
@@ -688,8 +704,9 @@ describe("DCNT1155", async () => {
           saleEnd,
           tokenGate: tokenGateConfig
         }])
-      ).to.be.revertedWith(
-        'onlyAdmin'
+      ).to.be.revertedWithCustomError(
+        nft,
+        'OnlyAdmin'
       );
     });
   });
@@ -734,7 +751,7 @@ describe("DCNT1155", async () => {
       split = [addresses, percents, distributorFee];
 
       await nft.createSplit(...split);
-      await expect(nft.withdraw()).to.be.revertedWith('Cannot withdraw with an active split');
+      await expect(nft.withdraw()).to.be.revertedWithCustomError(nft, 'SplitsAreActive');
     });
   });
 

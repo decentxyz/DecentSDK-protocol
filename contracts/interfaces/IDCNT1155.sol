@@ -51,6 +51,101 @@ interface IDCNT1155 {
     TokenGateConfig tokenGate;         // Slot 3: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 32 bytes
   }
 
+  /*
+   * @dev Only admins can perform this action.
+   */
+  error OnlyAdmin();
+
+  /*
+   * @dev The provided arrays have unequal lengths.
+   */
+  error ArrayLengthMismatch();
+
+  /*
+   * @dev The requested token does not exist.
+   */
+  error NonexistentToken();
+
+  /*
+   * @dev The token supply caps are locked and cannot be adjusted.
+   */
+  error CapsAreLocked();
+
+  /*
+   * @dev The token supply cap cannot be decreased.
+   */
+  error CannotDecreaseCap();
+
+  /*
+   * @dev Insufficient minimum balance for the token gate.
+   */
+  error TokenGateDenied();
+
+  /*
+   * @dev Sales for this drop are not currently active.
+   */
+  error SaleNotActive();
+
+  /*
+   * @dev The provided funds are insufficient to complete this transaction.
+   */
+  error InsufficientFunds();
+
+  /*
+   * @dev The requested mint exceeds the maximum supply for this drop.
+   */
+  error MintExceedsMaxSupply();
+
+  /*
+   * @dev The requested mint exceeds the maximum tokens per owner for this drop.
+   */
+  error MintExceedsMaxTokensPerOwner();
+
+  /*
+   * @dev The requested airdrop exceeds the maximum supply for this drop.
+   */
+  error AirdropExceedsMaxSupply();
+
+  /*
+   * @dev The requested burn exceeds the number of owned tokens.
+   */
+  error BurnExceedsOwnedTokens();
+
+  /*
+   * @dev The presale is not currently active.
+   */
+  error PresaleNotActive();
+
+  /*
+   * @dev Verification for the presale failed.
+   */
+  error PresaleVerificationFailed();
+
+  /*
+   * @dev Soulbound tokens cannot be transferred.
+   */
+  error CannotTransferSoulbound();
+
+  /*
+   * @dev Basis points may not exceed 100_00 (100 percent)
+   */
+  error InvalidBPS();
+
+  /*
+   * @dev Splits are currently active and withdrawals are disabled.
+   */
+  error SplitsAreActive();
+
+  /*
+   * @dev Refund of excess funds failed.
+   */
+  error RefundFailed();
+
+  /*
+   * @dev Withdrawal of funds failed.
+   */
+  error WithdrawFailed();
+
   /**
    * @dev Initializes the contract with the specified parameters.
    * @param _owner The owner of the contract.
@@ -180,6 +275,12 @@ interface IDCNT1155 {
    * @dev Withdraws the balance of the contract to the payout address or the contract owner.
   */
   function withdraw() external;
+
+  /**
+   * @dev Sets the royalty fee (ERC-2981: NFT Royalty Standard).
+   * @param _royaltyBPS The royalty fee in basis points. (1/100th of a percent)
+   */
+  function setRoyaltyBPS(uint16 _royaltyBPS) external;
 
   /**
    * @dev Returns the royalty recipient and amount for a given sale price.

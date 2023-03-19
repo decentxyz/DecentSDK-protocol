@@ -26,7 +26,7 @@ describe("DCNTSDK", async () => {
       contractRegistry: Contract,
       sdk: Contract,
       clone: Contract,
-      parentIP: Contract;
+      parentIP: string;
 
   before(async () => {
     [owner] = await ethers.getSigners();
@@ -34,7 +34,7 @@ describe("DCNTSDK", async () => {
     metadataRenderer = await deployDCNTMetadataRenderer();
     contractRegistry = await deployContract('DCNTRegistry');
     sdk = await deployDCNTSDK(implementations, metadataRenderer, contractRegistry);
-    parentIP = await deployMockERC721();
+    parentIP = ethers.constants.AddressZero;
   });
 
   describe("constructor()", async () => {
@@ -104,7 +104,7 @@ describe("DCNTSDK", async () => {
         metadataURI,
         metadataRendererInit,
         tokenGateConfig,
-        parentIP.address
+        parentIP
       );
     });
 
@@ -159,7 +159,7 @@ describe("DCNTSDK", async () => {
         metadataURI,
         metadataRendererInit,
         tokenGateConfig,
-        parentIP.address
+        parentIP
       );
     });
 
@@ -262,7 +262,7 @@ describe("DCNTSDK", async () => {
         contractURI,
         metadataURI,
         metadataRendererInit,
-        parentIP.address
+        parentIP
       );
     });
 
@@ -370,7 +370,7 @@ describe("DCNTSDK", async () => {
         metadataRendererInit,
         tokenGateConfig,
         ethers.constants.AddressZero,
-        parentIP.address
+        parentIP
       );
     });
 

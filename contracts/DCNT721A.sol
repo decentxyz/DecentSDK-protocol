@@ -37,29 +37,30 @@ contract DCNT721A is
   DCNT721AStorage,
   Initializable,
   Ownable,
-  Version(6),
+  Version(7),
   Splits
 {
+  struct Edition {
+    bool hasAdjustableCap;      // Slot 1: X------------------------------- 1  byte
+    bool isSoulbound;           // Slot 1: -X------------------------------ 1  byte
+    uint32 maxTokens;           // Slot 1: --XXXX-------------------------- 4  bytes (max: 4,294,967,295)
+    uint32 maxTokenPurchase;    // Slot 1: ------XXXX---------------------- 4  bytes (max: 4,294,967,295)
+    uint32 presaleStart;        // Slot 1: ----------XXXX------------------ 4  bytes (max: Feburary 7th, 2106)
+    uint32 presaleEnd;          // Slot 1: --------------XXXX-------------- 4  bytes (max: Feburary 7th, 2106)
+    uint32 saleStart;           // Slot 1: ------------------XXXX---------- 4  bytes (max: Feburary 7th, 2106)
+    uint32 saleEnd;             // Slot 1: ----------------------XXXX------ 4  bytes (max: Feburary 7th, 2106)
+    uint16 royaltyBPS;          // Slot 1: --------------------------XX---- 2  bytes (max: 65,535)
+    uint96 tokenPrice;          // Slot 2: XXXXXXXXXXXX-------------------- 12 bytes (max: 79,228,162,514 ETH)
+    address payoutAddress;      // Slot 2: ------------XXXXXXXXXXXXXXXXXXXX 20 bytes
+    bytes32 presaleMerkleRoot;  // Slot 3: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 32 bytes
+  }
 
-  uint256 public MAX_TOKENS;
-  uint256 public tokenPrice;
-  uint256 public maxTokenPurchase;
+  Edition public edition;
 
-  bool public hasAdjustableCap;
-  bool public isSoulbound;
-
-  uint256 public saleStart;
-  uint256 public saleEnd;
-  bool public saleIsPaused;
   string public baseURI;
   string internal _contractURI;
   address public metadataRenderer;
-  uint256 public royaltyBPS;
-  address public payoutAddress;
-
-  uint256 public presaleStart;
-  uint256 public presaleEnd;
-  bytes32 public presaleMerkleRoot;
+  bool public saleIsPaused;
 
   address public splitMain;
   address public splitWallet;
@@ -106,21 +107,25 @@ contract DCNT721A is
     _name = _editionConfig.name;
     _symbol = _editionConfig.symbol;
     _currentIndex = _startTokenId();
-    MAX_TOKENS = _editionConfig.maxTokens;
-    tokenPrice = _editionConfig.tokenPrice;
-    maxTokenPurchase = _editionConfig.maxTokenPurchase;
-    saleStart = _editionConfig.saleStart;
-    saleEnd = _editionConfig.saleEnd;
-    royaltyBPS = _editionConfig.royaltyBPS;
-    payoutAddress = _editionConfig.payoutAddress;
-    hasAdjustableCap = _editionConfig.hasAdjustableCap;
-    isSoulbound = _editionConfig.isSoulbound;
+
     parentIP = _metadataConfig.parentIP;
     splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
-    presaleMerkleRoot = _editionConfig.presaleMerkleRoot;
-    presaleStart = _editionConfig.presaleStart;
-    presaleEnd = _editionConfig.presaleEnd;
+
+    edition = Edition({
+      hasAdjustableCap: _editionConfig.hasAdjustableCap,
+      isSoulbound: _editionConfig.isSoulbound,
+      maxTokens: _editionConfig.maxTokens,
+      tokenPrice: _editionConfig.tokenPrice,
+      maxTokenPurchase: _editionConfig.maxTokenPurchase,
+      presaleMerkleRoot: _editionConfig.presaleMerkleRoot,
+      presaleStart: _editionConfig.presaleStart,
+      presaleEnd: _editionConfig.presaleEnd,
+      saleStart: _editionConfig.saleStart,
+      saleEnd: _editionConfig.saleEnd,
+      royaltyBPS: _editionConfig.royaltyBPS,
+      payoutAddress: _editionConfig.payoutAddress
+    });
 
     if (
       _metadataRenderer != address(0) &&
@@ -143,16 +148,16 @@ contract DCNT721A is
     verifyTokenGate(false)
   {
     uint256 mintIndex = _nextTokenId();
-    require(block.timestamp >= saleStart && block.timestamp <= saleEnd, "Sales are not active.");
+    require(block.timestamp >= edition.saleStart && block.timestamp <= edition.saleEnd, "Sales are not active.");
     require(!saleIsPaused, "Sale must be active to mint");
     require(
-      mintIndex + numberOfTokens <= MAX_TOKENS,
+      mintIndex + numberOfTokens <= edition.maxTokens,
       "Purchase would exceed max supply"
     );
-    require(mintIndex <= MAX_TOKENS, "SOLD OUT");
-    require(msg.value >= (tokenPrice * numberOfTokens), "Insufficient funds");
-    if ( maxTokenPurchase != 0 ) {
-      require(numberOfTokens <= maxTokenPurchase, "Exceeded max number per mint");
+    require(mintIndex <= edition.maxTokens, "SOLD OUT");
+    require(msg.value >= (edition.tokenPrice * numberOfTokens), "Insufficient funds");
+    if ( edition.maxTokenPurchase != 0 ) {
+      require(numberOfTokens <= edition.maxTokenPurchase, "Exceeded max number per mint");
     }
 
     _safeMint(to, numberOfTokens);
@@ -167,7 +172,7 @@ contract DCNT721A is
   function mintAirdrop(address[] calldata recipients) external onlyAdmin {
     uint256 atId = _nextTokenId();
     uint256 startAt = atId;
-    require(atId + recipients.length <= MAX_TOKENS,
+    require(atId + recipients.length <= edition.maxTokens,
       "Purchase would exceed max supply"
     );
 
@@ -194,16 +199,16 @@ contract DCNT721A is
     payable
     verifyTokenGate(true)
   {
-    require (block.timestamp >= presaleStart && block.timestamp <= presaleEnd, 'not presale');
+    require (block.timestamp >= edition.presaleStart && block.timestamp <= edition.presaleEnd, 'not presale');
     uint256 mintIndex = _nextTokenId();
     require(!saleIsPaused, "Sale must be active to mint");
     require(
-      mintIndex + quantity <= MAX_TOKENS,
+      mintIndex + quantity <= edition.maxTokens,
       "Purchase would exceed max supply"
     );
     require (MerkleProof.verify(
         merkleProof,
-        presaleMerkleRoot,
+        edition.presaleMerkleRoot,
         keccak256(
           // address, uint256, uint256
           abi.encodePacked(msg.sender,maxQuantity,pricePerToken)
@@ -221,7 +226,7 @@ contract DCNT721A is
   }
 
   function setPresaleMerkleRoot(bytes32 _presaleMerkleRoot) external onlyAdmin {
-    presaleMerkleRoot = _presaleMerkleRoot;
+    edition.presaleMerkleRoot = _presaleMerkleRoot;
   }
 
   /// @notice pause or unpause sale
@@ -231,19 +236,67 @@ contract DCNT721A is
 
   /// @notice is the current sale active
   function saleIsActive() external view returns(bool _saleIsActive) {
-    _saleIsActive = (block.timestamp >= saleStart && block.timestamp <= saleEnd) && (!saleIsPaused);
+    _saleIsActive = (block.timestamp >= edition.saleStart && block.timestamp <= edition.saleEnd) && (!saleIsPaused);
+  }
+
+  function MAX_TOKENS() external view returns (uint32) {
+    return edition.maxTokens;
+  }
+
+  function tokenPrice() external view returns (uint96) {
+    return edition.tokenPrice;
+  }
+
+  function maxTokenPurchase() external view returns (uint32) {
+    return edition.maxTokenPurchase;
+  }
+
+  function hasAdjustableCap() external view returns (bool) {
+    return edition.hasAdjustableCap;
+  }
+
+  function isSoulbound() external view returns (bool) {
+    return edition.isSoulbound;
+  }
+
+  function royaltyBPS() external view returns (uint16) {
+    return edition.royaltyBPS;
+  }
+
+  function payoutAddress() external view returns (address) {
+    return edition.payoutAddress;
+  }
+
+  function presaleMerkleRoot() external view returns (bytes32) {
+    return edition.presaleMerkleRoot;
+  }
+
+  function presaleStart() external view returns (uint32) {
+    return edition.presaleStart;
+  }
+
+  function presaleEnd() external view returns (uint32) {
+    return edition.presaleEnd;
+  }
+
+  function saleStart() external view returns (uint32) {
+    return edition.saleStart;
+  }
+
+  function saleEnd() external view returns (uint32) {
+    return edition.saleEnd;
   }
 
   ///change maximum number of tokens available to mint
-  function adjustCap(uint256 newCap) external onlyAdmin {
-    require(hasAdjustableCap, 'cannot adjust size of this collection');
+  function adjustCap(uint32 newCap) external onlyAdmin {
+    require(edition.hasAdjustableCap, 'cannot adjust size of this collection');
     require(_nextTokenId() <= newCap, 'cannot decrease cap');
-    MAX_TOKENS = newCap;
+    edition.maxTokens = newCap;
   }
 
   /// @notice set the payout address, zero address defaults to owner
   function setPayoutAddress(address _payoutAddress) external onlyAdmin {
-    payoutAddress = _payoutAddress;
+    edition.payoutAddress = _payoutAddress;
   }
 
   /// @notice withdraw funds from contract to seller funds recipient
@@ -253,7 +306,7 @@ contract DCNT721A is
       "Cannot withdraw with an active split"
     );
 
-    address to = payoutAddress != address(0) ? payoutAddress : owner();
+    address to = edition.payoutAddress != address(0) ? edition.payoutAddress : owner();
     (bool success, ) = payable(to).call{value: address(this).balance}("");
     require(success, "Could not withdraw");
   }
@@ -307,7 +360,7 @@ contract DCNT721A is
   function reserveDCNT(uint256 numReserved) external onlyAdmin {
     uint256 supply = _nextTokenId();
     require(
-      supply + numReserved < MAX_TOKENS,
+      supply + numReserved < edition.maxTokens,
       "Purchase would exceed max supply"
     );
     for (uint256 i = 0; i < numReserved; i++) {
@@ -324,13 +377,13 @@ contract DCNT721A is
 
     if (splitWallet != address(0)) {
       receiver = splitWallet;
-    } else if ( payoutAddress != address(0) ) {
-      receiver = payoutAddress;
+    } else if ( edition.payoutAddress != address(0) ) {
+      receiver = edition.payoutAddress;
     } else {
       receiver = owner();
     }
 
-    uint256 royaltyPayment = (salePrice * royaltyBPS) / 10_000;
+    uint256 royaltyPayment = (salePrice * edition.royaltyBPS) / 10_000;
 
     return (receiver, royaltyPayment);
   }
@@ -362,15 +415,15 @@ contract DCNT721A is
   }
 
   /// @notice update the public sale start time
-  function updateSaleStartEnd(uint256 newStart, uint256 newEnd) external onlyAdmin {
-    saleStart = newStart;
-    saleEnd = newEnd;
+  function updateSaleStartEnd(uint32 newStart, uint32 newEnd) external onlyAdmin {
+    edition.saleStart = newStart;
+    edition.saleEnd = newEnd;
   }
 
   /// @notice update the public sale start time
-  function updatePresaleStartEnd(uint256 newStart, uint256 newEnd) external onlyAdmin {
-    presaleStart = newStart;
-    presaleEnd = newEnd;
+  function updatePresaleStartEnd(uint32 newStart, uint32 newEnd) external onlyAdmin {
+    edition.presaleStart = newStart;
+    edition.presaleEnd = newEnd;
   }
 
   /// @notice update the registration with the operator filter registry
@@ -395,7 +448,7 @@ contract DCNT721A is
     uint256 , // startTokenId
     uint256   // quantity
   ) internal virtual override onlyAllowedOperator(from) {
-    require (!isSoulbound || (from == address(0) || to == address(0)), 'soulbound');
+    require (!edition.isSoulbound || (from == address(0) || to == address(0)), 'soulbound');
   }
 
   /// @dev Use OperatorFilterer modifier to restrict approvals

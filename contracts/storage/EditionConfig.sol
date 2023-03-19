@@ -6,14 +6,14 @@ struct EditionConfig {
   string symbol;
   bool hasAdjustableCap;
   bool isSoulbound;
-  uint256 maxTokens;
-  uint256 tokenPrice;
-  uint256 maxTokenPurchase;
-  bytes32 presaleMerkleRoot;
-  uint256 presaleStart;
-  uint256 presaleEnd;
-  uint256 saleStart;
-  uint256 saleEnd;
-  uint256 royaltyBPS;
+  uint32 maxTokens;
+  uint32 maxTokenPurchase;
+  uint32 presaleStart;
+  uint32 presaleEnd;
+  uint32 saleStart;
+  uint32 saleEnd;
+  uint16 royaltyBPS;
+  uint96 tokenPrice;
   address payoutAddress;
+  bytes32 presaleMerkleRoot;
 }

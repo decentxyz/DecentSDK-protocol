@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNTCrescendo, theFuture, sortByAddress, deployDCNTMetadataRenderer, deployMockERC721, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNTCrescendo, deployContract, theFuture, sortByAddress, deployDCNTMetadataRenderer, deployMockERC721, base64decode } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -35,6 +35,7 @@ describe("DCNTCrescendo", async () => {
       clone: Contract,
       crescendo: Contract,
       metadataRenderer: Contract,
+      splitMain: Contract,
       split: any[],
       parentIP: Contract;
 
@@ -288,7 +289,8 @@ describe("DCNTCrescendo", async () => {
       const distributorFee = 0;
       split = [addresses, percents, distributorFee];
 
-      await crescendo.createSplit(...split);
+      splitMain = await deployContract('SplitMain');
+      await crescendo.createSplit(splitMain.address, ...split);
       await expect(crescendo.withdraw()).to.be.revertedWith('Cannot withdraw with an active split');
     });
 
@@ -335,7 +337,7 @@ describe("DCNTCrescendo", async () => {
 
 
     it("should revert if a split has already been created", async () => {
-      await crescendo.createSplit(...split);
+      await crescendo.createSplit(splitMain.address, ...split);
       await expect(crescendo.withdrawFund()).to.be.revertedWith('Cannot withdraw with an active split');
     });
 
@@ -388,7 +390,7 @@ describe("DCNTCrescendo", async () => {
         metadataRendererInit
       );
       await crescendo.buy(0, { value: initialPrice });
-      await crescendo.createSplit(...split);
+      await crescendo.createSplit(splitMain.address, ...split);
     });
 
     it("should transfer excess liquidity to the split, distribute to receipients, and withdraw", async () => {
@@ -448,7 +450,7 @@ describe("DCNTCrescendo", async () => {
         metadataRendererInit
       );
       await crescendo.buy(0, { value: initialPrice });
-      await crescendo.createSplit(...split);
+      await crescendo.createSplit(splitMain.address, ...split);
     });
 
     it("should transfer all funds to the split, distribute to receipients, and withdraw", async () => {
@@ -507,7 +509,7 @@ describe("DCNTCrescendo", async () => {
       );
 
       await crescendo.buy(0, { value: initialPrice });
-      await crescendo.createSplit(...split);
+      await crescendo.createSplit(splitMain.address, ...split);
 
       await expect(
         crescendo.distributeAndWithdrawFund(addr2.address, 1, [], ...split, addr1.address)
@@ -548,7 +550,7 @@ describe("DCNTCrescendo", async () => {
     });
 
     it("should revert if crescendo is still locked", async () => {
-      await crescendo.createSplit(...split);
+      await crescendo.createSplit(splitMain.address, ...split);
       await expect(
         crescendo.transferFundToSplit(1, [])
       ).to.be.revertedWith('Crescendo is still locked');
@@ -591,7 +593,7 @@ describe("DCNTCrescendo", async () => {
       const ownerRoyalty = await freshNFT.royaltyInfo(0, initialPrice);
       expect(ownerRoyalty.receiver).to.eq(owner.address);
 
-      await freshNFT.createSplit(...split);
+      await freshNFT.createSplit(splitMain.address, ...split);
       const splitRoyalty = await freshNFT.royaltyInfo(0, initialPrice);
       expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
     });

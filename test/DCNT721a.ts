@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT721A, deployMockERC721, theFuture, sortByAddress, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNT721A, deployContract, deployMockERC721, theFuture, sortByAddress, base64decode } from "../core";
 import { MerkleTree } from "merkletreejs";
 const keccak256 = require("keccak256");
 
@@ -45,6 +45,7 @@ describe("DCNT721A", async () => {
       nft: Contract,
       presaleNFT: Contract,
       metadataRenderer: Contract,
+      splitMain: Contract,
       split: any[],
       parentIP: Contract,
       tree: MerkleTree,
@@ -636,7 +637,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      freshNFT.mint(addr1.address, 1, { value: tokenPrice });
+      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
       const response = await freshNFT.tokenURI(0);
       expect(response).to.equal(`${metadataURI}0`);
     });
@@ -721,7 +722,8 @@ describe("DCNT721A", async () => {
       const distributorFee = 0;
       split = [addresses, percents, distributorFee];
 
-      await nft.createSplit(...split);
+      splitMain = await deployContract('SplitMain');
+      await nft.createSplit(splitMain.address, ...split);
       await expect(nft.withdraw()).to.be.revertedWith('Cannot withdraw with an active split');
     });
   });
@@ -753,7 +755,7 @@ describe("DCNT721A", async () => {
     });
 
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
-      await nft.createSplit(...split);
+      await nft.createSplit(splitMain.address, ...split);
       const before2 = await ethers.provider.getBalance(addr2.address);
       const before3 = await ethers.provider.getBalance(addr3.address);
 
@@ -839,7 +841,7 @@ describe("DCNT721A", async () => {
       const ownerRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
       expect(ownerRoyalty.receiver).to.eq(owner.address);
 
-      await freshNFT.createSplit(...split);
+      await freshNFT.createSplit(splitMain.address, ...split);
       const splitRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
       expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
     });

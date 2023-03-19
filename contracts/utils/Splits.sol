@@ -11,19 +11,19 @@ abstract contract Splits is Ownable {
   address public splitWallet;
 
   function createSplit(
+    address _splitMain,
     address[] calldata accounts,
     uint32[] calldata percentAllocations,
     uint32 distributorFee
   ) public virtual onlyOwner {
-    require(splitMain != address(0), 'SplitMain not set');
     require(splitWallet == address(0), "Split already created");
-    address splitAddress = ISplitMain(splitMain).createSplit(
+    splitMain = _splitMain;
+    splitWallet = ISplitMain(splitMain).createSplit(
       accounts,
       percentAllocations,
       distributorFee,
       msg.sender
     );
-    splitWallet = splitAddress;
   }
 
   function distributeETH(

@@ -15,9 +15,6 @@ contract FeeManager is IFeeManager, Ownable, Splits, Version(1) {
   uint256 public fee;
   uint256 public commissionBPS;
 
-  address public splitMain;
-  address public splitWallet;
-
   constructor(uint256 _fee, uint256 _commissionBPS) {
     fee = _fee;
     commissionBPS = _commissionBPS;
@@ -41,16 +38,4 @@ contract FeeManager is IFeeManager, Ownable, Splits, Version(1) {
   }
 
   receive() external payable { }
-
-  function _getSplitMain() internal virtual override returns (address) {
-    return splitMain;
-  }
-
-  function _getSplitWallet() internal virtual override returns (address) {
-    return splitWallet;
-  }
-
-  function _setSplitWallet(address _splitWallet) internal virtual override {
-    splitWallet = _splitWallet;
-  }
 }

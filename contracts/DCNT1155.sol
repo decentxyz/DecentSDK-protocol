@@ -21,6 +21,7 @@ import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import './interfaces/IDCNT1155.sol';
+import './interfaces/IFeeManager.sol';
 import './extensions/ERC1155Hooks.sol';
 import './utils/Splits.sol';
 import './utils/OperatorFilterer.sol';
@@ -94,6 +95,8 @@ contract DCNT1155 is
    */
   mapping(uint256 => uint256) public totalSupply;
 
+  address public feeManager;
+
   /*
    * @dev The address of the ChainLink price feed oracle to convert native currency to USD.
    */
@@ -164,6 +167,7 @@ contract DCNT1155 is
     payoutAddress = _config.payoutAddress;
     hasAdjustableCaps = _config.hasAdjustableCaps;
     isSoulbound = _config.isSoulbound;
+    feeManager = _config.feeManager;
     currencyOracle = AggregatorV3Interface(_config.currencyOracle);
     splitMain = _splitMain;
 
@@ -331,6 +335,12 @@ contract DCNT1155 is
     return drops[tokenId].tokenPrice;
   }
 
+  function mintFee(uint256 tokenId) external view returns (uint256) {
+    return feeManager != address(0)
+      ? IFeeManager(feeManager).calculateFee(tokenPrice(tokenId))
+      : 0;
+  }
+
   /**
    * @dev Mints a specified number of tokens to a specified address.
    * @param tokenId The ID of the token to mint.
@@ -345,7 +355,16 @@ contract DCNT1155 is
   {
     Drop memory drop = drops[tokenId];
     uint256 supply = totalSupply[tokenId];
-    uint256 totalPrice = tokenPrice(tokenId) * quantity;
+    uint256 price = tokenPrice(tokenId);
+    uint256 fee;
+    uint256 commission;
+
+    if ( feeManager != address(0) ) {
+      fee = IFeeManager(feeManager).calculateFee(price);
+      commission = IFeeManager(feeManager).calculateCommission(price);
+    }
+
+    uint256 totalPrice = (price + fee) * quantity;
 
     if ( block.timestamp < drop.saleStart || block.timestamp > drop.saleEnd ) {
       revert SaleNotActive();
@@ -365,6 +384,13 @@ contract DCNT1155 is
 
     _mint(to, tokenId, quantity, '');
     totalSupply[tokenId] += quantity;
+
+    if ( fee != 0 || commission != 0 ) {
+      (bool success, ) = payable(IFeeManager(feeManager).recipient()).call{value: fee + commission}("");
+      if ( ! success ) {
+        revert FeeTransferFailed();
+      }
+    }
 
     if ( msg.value > totalPrice ) {
       (bool success, ) = payable(msg.sender).call{value: msg.value - totalPrice}("");

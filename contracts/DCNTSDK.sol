@@ -188,7 +188,7 @@ contract DCNTSDK is Ownable {
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,string,string,uint16,address,address,bool,bool),"
+          "(string,string,string,string,uint16,address,address,address,bool,bool),"
           "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[],"
           "address"
         ")",

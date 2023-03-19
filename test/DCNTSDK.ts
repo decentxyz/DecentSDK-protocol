@@ -188,6 +188,7 @@ describe("DCNTSDK", async () => {
       const saleStart = theFuture.time();
       const saleEnd = theFuture.time() + theFuture.oneDay;
       const royaltyBPS = 10_00;
+      const feeManager = await deployContract('FeeManager',[0,0]);
       const payoutAddress = ethers.constants.AddressZero;
       const currencyOracle = ethers.constants.AddressZero;
       const contractURI = 'http://localhost/contract/';
@@ -210,6 +211,7 @@ describe("DCNTSDK", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager.address,
         payoutAddress,
         currencyOracle,
         contractURI,

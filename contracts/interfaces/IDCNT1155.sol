@@ -30,6 +30,7 @@ interface IDCNT1155 {
     string contractURI;
     string metadataURI;
     uint16 royaltyBPS;
+    address feeManager;
     address payoutAddress;
     address currencyOracle;
     bool isSoulbound;
@@ -135,6 +136,11 @@ interface IDCNT1155 {
    * @dev Splits are currently active and withdrawals are disabled.
    */
   error SplitsAreActive();
+
+  /*
+   * @dev Transfer of fees failed.
+   */
+  error FeeTransferFailed();
 
   /*
    * @dev Refund of excess funds failed.

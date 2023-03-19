@@ -20,6 +20,7 @@ const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
+const feeManager = ethers.constants.AddressZero;
 const payoutAddress = ethers.constants.AddressZero;
 const currencyOracle = ethers.constants.AddressZero;
 const contractURI = "http://localhost/contract/";
@@ -68,6 +69,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -110,6 +112,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -152,6 +155,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         oracle.address,
         contractURI,
@@ -162,6 +166,41 @@ describe("DCNT1155", async () => {
       expect(await freshNFT.tokenPrice(0)).to.equal(
         ethers.utils.parseEther('13.37').div(1500) // $13.37 USD / ETH @ $1500.00 USD
       );
+    });
+  });
+
+
+  describe("mintFee()", async () => {
+    it("should return the mint fee", async () => {
+      const feeManager = await deployContract('FeeManager',[
+        tokenPrice.div(10), // 10% in wei
+        10_00 // 10% in BPS
+      ]);
+
+      const freshNFT: Contract = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokensPerOwner,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        tokenGateConfig
+      );
+
+      expect(await freshNFT.mintFee(0)).to.equal(tokenPrice.div(10));
     });
   });
 
@@ -184,6 +223,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -231,6 +271,47 @@ describe("DCNT1155", async () => {
       );
     });
 
+    it("should payout fees and commission to the optional fee manager", async () => {
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager',[fixedFee, commissionBPS]);
+
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokensPerOwner,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        tokenGateConfig
+      );
+
+      expect(await freshNFT.mintFee(0)).to.equal(fixedFee);
+      expect(await feeManager.fee()).to.equal(fixedFee);
+
+      const initialBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(initialBalance).to.equal(0);
+
+      await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice.add(fixedFee) });
+      const commission = tokenPrice.mul(commissionBPS).div(100_00);
+      const totalFees = commission.add(fixedFee);
+      const finalBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(finalBalance).to.equal(totalFees);
+    });
+
     it("should refund excess gas to the caller to allow for slippage", async () => {
       const decimals = 2 + Math.floor(Math.random() * (35)) // random precision 10^2 through 10^36
       const ethPrice = ethers.BigNumber.from('1500' + '0'.repeat(decimals)); // ETH @ $1500.00 USD
@@ -250,6 +331,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         oracle.address,
         contractURI,
@@ -299,6 +381,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -357,6 +440,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -426,6 +510,7 @@ describe("DCNT1155", async () => {
         theFuture.time() + theFuture.oneMonth,
         theFuture.time() + theFuture.oneYear,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -551,6 +636,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -592,6 +678,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -643,6 +730,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -772,6 +860,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -811,6 +900,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
@@ -856,6 +946,7 @@ describe("DCNT1155", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,

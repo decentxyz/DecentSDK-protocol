@@ -62,8 +62,6 @@ contract DCNT721A is
   address public metadataRenderer;
   bool public saleIsPaused;
 
-  address public splitMain;
-  address public splitWallet;
   address public parentIP;
 
   /// ============ Events ============
@@ -302,7 +300,7 @@ contract DCNT721A is
   /// @notice withdraw funds from contract to seller funds recipient
   function withdraw() external {
     require(
-      _getSplitWallet() == address(0),
+      splitWallet == address(0),
       "Cannot withdraw with an active split"
     );
 
@@ -400,18 +398,6 @@ contract DCNT721A is
       AccessControl.supportsInterface(interfaceId) ||
       ERC721A.supportsInterface(interfaceId) ||
       super.supportsInterface(interfaceId);
-  }
-
-  function _getSplitMain() internal virtual override returns (address) {
-    return splitMain;
-  }
-
-  function _getSplitWallet() internal virtual override returns (address) {
-    return splitWallet;
-  }
-
-  function _setSplitWallet(address _splitWallet) internal virtual override {
-    splitWallet = _splitWallet;
   }
 
   /// @notice update the public sale start time

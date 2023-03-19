@@ -78,22 +78,16 @@ describe("DCNTCrescendo", async () => {
       expect(await clone.parentIP()).to.equal(parentIP.address);
 
       // private state
-      const key = ethers.utils.defaultAbiCoder.encode(["uint256","uint256"],[0,13]);
+      const key = ethers.utils.defaultAbiCoder.encode(["uint256","uint256"],[0,15]);
       const slot = ethers.utils.keccak256(key);
+      const expectedInitialPrice = await ethers.provider.getStorageAt(clone.address, slot);
+      expect(expectedInitialPrice).to.equal(initialPrice);
 
-      const state = {
-        initialPrice: await ethers.provider.getStorageAt(clone.address, slot),
-        step1: await ethers.provider.getStorageAt(clone.address, 7),
-        step2: await ethers.provider.getStorageAt(clone.address, 8),
-        hitch: parseInt(await ethers.provider.getStorageAt(clone.address, 9)),
-        takeRateBPS: parseInt(await ethers.provider.getStorageAt(clone.address, 10)),
-      }
-
-      expect(state.step1).to.equal(step1);
-      expect(state.step2).to.equal(step2);
-      expect(state.hitch).to.equal(hitch);
-      expect(state.takeRateBPS).to.equal(takeRateBPS);
-      expect(state.initialPrice).to.equal(initialPrice);
+      // public state
+      expect(await clone.step1()).to.equal(step1);
+      expect(await clone.step2()).to.equal(step2);
+      expect(await clone.hitch()).to.equal(hitch);
+      expect(await clone.takeRateBPS()).to.equal(takeRateBPS);
     });
   });
 

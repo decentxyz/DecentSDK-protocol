@@ -136,13 +136,11 @@ contract DCNT1155 is
    * @param _owner The owner of the contract.
    * @param _config The configuration for the contract.
    * @param _drops The drop configurations for the initial tokens.
-   * @param _splitMain The 0xSplits contract address.
    */
   function initialize(
     address _owner,
     SeriesConfig memory _config,
-    Drop[] memory _drops,
-    address _splitMain
+    Drop[] memory _drops
   ) public initializer {
     _transferOwnership(_owner);
     _grantRole(DEFAULT_ADMIN_ROLE, _owner);
@@ -155,7 +153,6 @@ contract DCNT1155 is
     hasAdjustableCaps = _config.hasAdjustableCaps;
     isSoulbound = _config.isSoulbound;
     currencyOracle = AggregatorV3Interface(_config.currencyOracle);
-    splitMain = _splitMain;
 
     uint256 length = _drops.length;
     for (uint i = 0; i < length; i++) {

@@ -97,8 +97,7 @@ contract DCNT721A is
     EditionConfig memory _editionConfig,
     MetadataConfig memory _metadataConfig,
     TokenGateConfig memory _tokenGateConfig,
-    address _metadataRenderer,
-    address _splitMain
+    address _metadataRenderer
   ) public initializer {
     _transferOwnership(_owner);
     _grantRole(DEFAULT_ADMIN_ROLE, _owner);
@@ -107,7 +106,6 @@ contract DCNT721A is
     _currentIndex = _startTokenId();
 
     parentIP = _metadataConfig.parentIP;
-    splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
 
     edition = Edition({

@@ -40,9 +40,6 @@ contract DCNTVaultNFT is Ownable {
   /// @notice address of the associated registry
   address public contractRegistry;
 
-  /// @notice addresses for splits contract
-  address public SplitMain;
-
   /// ============ Events ============
 
   /// @notice Emitted after successfully deploying a contract
@@ -58,7 +55,6 @@ contract DCNTVaultNFT is Ownable {
     DCNTVaultImplementation = sdk.DCNTVaultImplementation();
     metadataRenderer = sdk.metadataRenderer();
     contractRegistry = sdk.contractRegistry();
-    SplitMain = sdk.SplitMain();
   }
 
   /// ============ Functions ============

@@ -151,13 +151,11 @@ interface IDCNT1155 {
    * @param _owner The owner of the contract.
    * @param _config The configuration for the contract.
    * @param _drops The drop configurations for the initial tokens.
-   * @param _splitMain The 0xSplits contract address.
    */
   function initialize(
     address _owner,
     SeriesConfig memory _config,
-    Drop[] memory _drops,
-    address _splitMain
+    Drop[] memory _drops
   ) external;
 
   /**

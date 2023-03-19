@@ -210,7 +210,7 @@ describe("Splits", async () => {
   describe("distributeAndWithdraw()", async () => {
     before(async () => {
       sdk = await deployDCNTSDK();
-      splitMain = await ethers.getContractAt('SplitMain', sdk.SplitMain());
+      splitMain = await deployContract('SplitMain');
       nft = await deployDCNT4907A(
         sdk,
         name,

@@ -78,8 +78,7 @@ contract DCNTCrescendo is
     // string memory uri_,
     CrescendoConfig memory _config,
     MetadataConfig memory _metadataConfig,
-    address _metadataRenderer,
-    address _splitMain
+    address _metadataRenderer
   ) public initializer {
     _transferOwnership(_owner);
     _currentPrice[0] = _config.initialPrice;
@@ -92,7 +91,6 @@ contract DCNTCrescendo is
     _symbol = _config.symbol;
     saleStart = _config.saleStart;
     royaltyBPS = _config.royaltyBPS;
-    splitMain = _splitMain;
     parentIP = _metadataConfig.parentIP;
 
     if (

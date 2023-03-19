@@ -30,7 +30,6 @@ contract ZKEdition is DCNT721A {
     MetadataConfig memory _metadataConfig,
     TokenGateConfig memory _tokenGateConfig,
     address _metadataRenderer,
-    address _splitMain,
     address _zkVerifier
   ) public initializer {
     _transferOwnership(_owner);
@@ -40,7 +39,6 @@ contract ZKEdition is DCNT721A {
     _currentIndex = _startTokenId();
 
     parentIP = _metadataConfig.parentIP;
-    splitMain = _splitMain;
     tokenGateConfig = _tokenGateConfig;
     zkVerifier = _zkVerifier;
 

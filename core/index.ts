@@ -56,12 +56,10 @@ export const deployDCNTSDK = async (
   implementations?: Implementations | null,
   metadataRenderer?: Contract | null,
   contractRegistry?: Contract | null,
-  splitMain?: Contract | null
 ) => {
   implementations = implementations ?? await deployImplementations();
   metadataRenderer = metadataRenderer ?? await deployDCNTMetadataRenderer();
   contractRegistry = contractRegistry ?? await deployContract('DCNTRegistry');
-  splitMain = splitMain ?? await deployContract('SplitMain');
   const decentSDKFactory = await ethers.getContractFactory('DCNTSDK');
   const decentSDK = await decentSDKFactory.deploy(
     implementations.DCNT721A.address,
@@ -72,7 +70,6 @@ export const deployDCNTSDK = async (
     implementations.DCNTStaking.address,
     metadataRenderer.address,
     contractRegistry.address,
-    splitMain.address,
     implementations.ZKEdition.address
   );
   return await decentSDK.deployed();

@@ -6,26 +6,24 @@ import "../splits/interfaces/ISplitMain.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract Splits is Ownable {
-  function _getSplitMain() internal virtual returns (address);
 
-  function _getSplitWallet() internal virtual returns (address);
-
-  function _setSplitWallet(address _splitWallet) internal virtual;
+  address public splitMain;
+  address public splitWallet;
 
   function createSplit(
+    address _splitMain,
     address[] calldata accounts,
     uint32[] calldata percentAllocations,
     uint32 distributorFee
   ) public virtual onlyOwner {
-    require(_getSplitMain() != address(0), 'SplitMain not set');
-    require(_getSplitWallet() == address(0), "Split already created");
-    address splitAddress = ISplitMain(_getSplitMain()).createSplit(
+    require(splitWallet == address(0), "Split already created");
+    splitMain = _splitMain;
+    splitWallet = ISplitMain(splitMain).createSplit(
       accounts,
       percentAllocations,
       distributorFee,
       msg.sender
     );
-    _setSplitWallet(splitAddress);
   }
 
   function distributeETH(
@@ -35,8 +33,8 @@ abstract contract Splits is Ownable {
     address distributorAddress
   ) public virtual requireSplit {
     _transferETHToSplit();
-    ISplitMain(_getSplitMain()).distributeETH(
-      _getSplitWallet(),
+    ISplitMain(splitMain).distributeETH(
+      splitWallet,
       accounts,
       percentAllocations,
       distributorFee,
@@ -52,8 +50,8 @@ abstract contract Splits is Ownable {
     address distributorAddress
   ) public virtual requireSplit {
     _transferERC20ToSplit(token);
-    ISplitMain(_getSplitMain()).distributeERC20(
-      _getSplitWallet(),
+    ISplitMain(splitMain).distributeERC20(
+      splitWallet,
       token,
       accounts,
       percentAllocations,
@@ -108,13 +106,13 @@ abstract contract Splits is Ownable {
   }
 
   function _transferETHToSplit() internal virtual {
-    (bool success, ) = _getSplitWallet().call{value: address(this).balance}("");
+    (bool success, ) = splitWallet.call{value: address(this).balance}("");
     require(success, "Could not transfer ETH to split");
   }
 
   function _transferERC20ToSplit(ERC20 token) internal virtual {
     uint256 balance = token.balanceOf(address(this));
-    token.transfer(_getSplitWallet(), balance);
+    token.transfer(splitWallet, balance);
   }
 
   function _withdraw(
@@ -122,7 +120,7 @@ abstract contract Splits is Ownable {
     uint256 withdrawETH,
     ERC20[] memory tokens
   ) internal virtual {
-    ISplitMain(_getSplitMain()).withdraw(
+    ISplitMain(splitMain).withdraw(
       account,
       withdrawETH,
       tokens
@@ -130,7 +128,7 @@ abstract contract Splits is Ownable {
   }
 
   modifier requireSplit() {
-    require(_getSplitWallet() != address(0), "Split not created yet");
+    require(splitWallet != address(0), "Split not created yet");
     _;
   }
 }

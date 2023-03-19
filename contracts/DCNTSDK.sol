@@ -42,9 +42,6 @@ contract DCNTSDK is Ownable {
   /// @notice address of the associated registry
   address public contractRegistry;
 
-  /// @notice addresses for splits contract
-  address public SplitMain;
-
   /// ============ Events ============
 
   /// @notice Emitted after successfully deploying a contract
@@ -68,7 +65,6 @@ contract DCNTSDK is Ownable {
     address _DCNTStakingImplementation,
     address _metadataRenderer,
     address _contractRegistry,
-    address _SplitMain,
     address _ZKEditionImplementation
   ) {
     DCNT721AImplementation = _DCNT721AImplementation;
@@ -79,7 +75,6 @@ contract DCNTSDK is Ownable {
     DCNTStakingImplementation = _DCNTStakingImplementation;
     metadataRenderer = _metadataRenderer;
     contractRegistry = _contractRegistry;
-    SplitMain = _SplitMain;
     ZKEditionImplementation = _ZKEditionImplementation;
   }
 
@@ -99,15 +94,13 @@ contract DCNTSDK is Ownable {
           "(string,string,bool,bool,uint32,uint32,uint32,uint32,uint32,uint32,uint16,uint96,address,bytes32),"
           "(string,string,bytes,address),"
           "(address,uint88,uint8),"
-          "address,"
           "address"
         ")",
         msg.sender,
         _editionConfig,
         _metadataConfig,
         _tokenGateConfig,
-        metadataRenderer,
-        SplitMain
+        metadataRenderer
       )
     );
     require(success);
@@ -131,7 +124,6 @@ contract DCNTSDK is Ownable {
           "(string,string,bytes,address),"
           "(address,uint88,uint8),"
           "address,"
-          "address,"
           "address"
         ")",
         msg.sender,
@@ -139,7 +131,6 @@ contract DCNTSDK is Ownable {
         _metadataConfig,
         _tokenGateConfig,
         metadataRenderer,
-        SplitMain,
         zkVerifier
       )
     );
@@ -162,15 +153,13 @@ contract DCNTSDK is Ownable {
           "(string,string,bool,bool,uint32,uint32,uint32,uint32,uint32,uint32,uint16,uint96,address,bytes32),"
           "(string,string,bytes,address),"
           "(address,uint88,uint8),"
-          "address,"
           "address"
         ")",
         msg.sender,
         _editionConfig,
         _metadataConfig,
         _tokenGateConfig,
-        metadataRenderer,
-        SplitMain
+        metadataRenderer
       )
     );
     require(success);
@@ -189,13 +178,11 @@ contract DCNTSDK is Ownable {
         "initialize("
           "address,"
           "(string,string,string,string,uint16,address,address,address,bool,bool),"
-          "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[],"
-          "address"
+          "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[]"
         ")",
         msg.sender,
         _config,
-        _drops,
-        SplitMain
+        _drops
       )
     );
     require(success);
@@ -219,14 +206,12 @@ contract DCNTSDK is Ownable {
           "address,"
           "(string,string,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),"
           "(string,string,bytes,address),"
-          "address,"
           "address"
         ")",
         msg.sender,
         _config,
         _metadataConfig,
-        metadataRenderer,
-        SplitMain
+        metadataRenderer
       )
     );
     require(success);

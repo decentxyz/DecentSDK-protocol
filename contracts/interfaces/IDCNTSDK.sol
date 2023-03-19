@@ -17,8 +17,6 @@ interface IDCNTSDK {
 
   function contractRegistry() external returns (address);
 
-  function SplitMain() external returns (address);
-
   /// ============ Functions ============
 
   // deploy and initialize an erc721a clone

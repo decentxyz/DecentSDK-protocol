@@ -63,10 +63,6 @@ contract DCNTCrescendo is
 
   uint256 public unlockDate;
 
-  // addresses for splits contract and wallet
-  address public splitMain;
-  address public splitWallet;
-
   uint256 constant bps = 100_00;
 
   /// @notice DCNTMetadataRenderer address
@@ -82,8 +78,7 @@ contract DCNTCrescendo is
     // string memory uri_,
     CrescendoConfig memory _config,
     MetadataConfig memory _metadataConfig,
-    address _metadataRenderer,
-    address _splitMain
+    address _metadataRenderer
   ) public initializer {
     _transferOwnership(_owner);
     _currentPrice[0] = _config.initialPrice;
@@ -96,7 +91,6 @@ contract DCNTCrescendo is
     _symbol = _config.symbol;
     saleStart = _config.saleStart;
     royaltyBPS = _config.royaltyBPS;
-    splitMain = _splitMain;
     parentIP = _metadataConfig.parentIP;
 
     if (
@@ -203,7 +197,7 @@ contract DCNTCrescendo is
 
   function withdrawFund() external onlyOwner onlyUnlocked {
     require(
-      _getSplitWallet() == address(0),
+      splitWallet == address(0),
       "Cannot withdraw with an active split"
     );
     (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
@@ -227,8 +221,8 @@ contract DCNTCrescendo is
   ) public virtual requireSplit onlyUnlocked {
     if (withdrawETH != 0) {
       super._transferETHToSplit();
-      ISplitMain(_getSplitMain()).distributeETH(
-        _getSplitWallet(),
+      ISplitMain(splitMain).distributeETH(
+        splitWallet,
         accounts,
         percentAllocations,
         distributorFee,
@@ -251,7 +245,7 @@ contract DCNTCrescendo is
 
   function withdraw() external onlyOwner {
     require(
-      _getSplitWallet() == address(0),
+      splitWallet == address(0),
       "Cannot withdraw with an active split"
     );
     uint256 toWithdraw = liquidity() - totalWithdrawn;
@@ -278,7 +272,7 @@ contract DCNTCrescendo is
   function _transferETHToSplit() internal override {
     uint256 toWithdraw = liquidity() - totalWithdrawn;
     totalWithdrawn += toWithdraw;
-    (bool success, ) = _getSplitWallet().call{value: toWithdraw}("");
+    (bool success, ) = splitWallet.call{value: toWithdraw}("");
     require(success, "Could not transfer ETH to split");
   }
 
@@ -357,17 +351,5 @@ contract DCNTCrescendo is
     return
       interfaceId == 0x2a55205a || // ERC2981 interface ID for ERC2981.
       super.supportsInterface(interfaceId);
-  }
-
-  function _getSplitMain() internal virtual override returns (address) {
-    return splitMain;
-  }
-
-  function _getSplitWallet() internal virtual override returns (address) {
-    return splitWallet;
-  }
-
-  function _setSplitWallet(address _splitWallet) internal virtual override {
-    splitWallet = _splitWallet;
   }
 }

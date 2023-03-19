@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT4907A, theFuture, deployMockERC20, sortByAddress } from "../core";
+import { deployDCNTSDK, deployDCNT4907A, deployContract, theFuture, deployMockERC20, sortByAddress } from "../core";
 
 const name = 'Decent';
 const symbol = 'DCNT';
@@ -41,7 +41,7 @@ describe("Splits", async () => {
   before(async () => {
     [addr1, addr2, addr3, addr4] = await ethers.getSigners();
     sdk = await deployDCNTSDK();
-    splitMain = await ethers.getContractAt('SplitMain', sdk.SplitMain());
+    splitMain = await deployContract('SplitMain');
     nft = await deployDCNT4907A(
       sdk,
       name,
@@ -84,12 +84,12 @@ describe("Splits", async () => {
   describe("createSplit()", async () => {
     it("should create a split", async () => {
       expect(await nft.splitWallet()).to.equal(ethers.constants.AddressZero);
-      await nft.createSplit(...split);
+      await nft.createSplit(splitMain.address, ...split);
       expect(await nft.splitWallet()).to.not.equal(ethers.constants.AddressZero);
     });
 
     it("should revert if a split has already been created", async () => {
-      await expect(nft.createSplit(...split)).to.be.revertedWith('Split already created');
+      await expect(nft.createSplit(splitMain.address, ...split)).to.be.revertedWith('Split already created');
     });
 
     it("should revert if called by an account which is not the owner", async () => {
@@ -210,7 +210,7 @@ describe("Splits", async () => {
   describe("distributeAndWithdraw()", async () => {
     before(async () => {
       sdk = await deployDCNTSDK();
-      splitMain = await ethers.getContractAt('SplitMain', sdk.SplitMain());
+      splitMain = await deployContract('SplitMain');
       nft = await deployDCNT4907A(
         sdk,
         name,
@@ -235,7 +235,7 @@ describe("Splits", async () => {
     });
 
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
-      nft.createSplit(...split);
+      nft.createSplit(splitMain.address, ...split);
 
       await nft.mint(addr1.address, 1, { value: tokenPrice });
       expect(await ethers.provider.getBalance(nft.address)).to.equal(tokenPrice);

@@ -41,6 +41,7 @@ describe("DCNT1155", async () => {
       clone: Contract,
       nft: Contract,
       presaleNFT: Contract,
+      splitMain: Contract,
       split: any[],
       parentIP: Contract,
       tree: MerkleTree,
@@ -838,7 +839,8 @@ describe("DCNT1155", async () => {
       const distributorFee = 0;
       split = [addresses, percents, distributorFee];
 
-      await nft.createSplit(...split);
+      splitMain = await deployContract('SplitMain');
+      await nft.createSplit(splitMain.address, ...split);
       await expect(nft.withdraw()).to.be.revertedWithCustomError(nft, 'SplitsAreActive');
     });
   });
@@ -871,7 +873,7 @@ describe("DCNT1155", async () => {
     });
 
     it("should transfer ETH to the split, distribute to receipients, and withdraw", async () => {
-      await nft.createSplit(...split);
+      await nft.createSplit(splitMain.address, ...split);
       const before2 = await ethers.provider.getBalance(addr2.address);
       const before3 = await ethers.provider.getBalance(addr3.address);
 
@@ -959,7 +961,7 @@ describe("DCNT1155", async () => {
       const ownerRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
       expect(ownerRoyalty.receiver).to.eq(owner.address);
 
-      await freshNFT.createSplit(...split);
+      await freshNFT.createSplit(splitMain.address, ...split);
       const splitRoyalty = await freshNFT.royaltyInfo(0, tokenPrice);
       expect(splitRoyalty.receiver).to.eq(await freshNFT.splitWallet());
     });

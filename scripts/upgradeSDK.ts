@@ -79,7 +79,6 @@ async function main() {
     DCNTStaking.address,
     DCNTMetadataRenderer.address,
     DCNTRegistry.address,
-    addresses.SplitMain,
     ZKEdition.address,
   ]);
 
@@ -99,7 +98,6 @@ async function main() {
     DCNTRegistry: DCNTRegistry.address,
     DCNTVaultNFT: DCNTVaultNFT.address,
     DCNTRentalMarket: DCNTRentalMarket.address,
-    SplitMain: addresses.SplitMain,
     ZKEdition: ZKEdition.address,
   }
 

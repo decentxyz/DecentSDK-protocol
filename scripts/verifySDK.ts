@@ -40,7 +40,6 @@ async function main() {
   const DCNTRegistry = await ethers.getContractAt('DCNTRegistry', addresses.DCNTRegistry);
   const DCNTVaultNFT = await ethers.getContractAt('DCNTVaultNFT', addresses.DCNTVaultNFT);
   const DCNTRentalMarket = await ethers.getContractAt('DCNTRentalMarket', addresses.DCNTRentalMarket);
-  const SplitMain = await ethers.getContractAt('SplitMain', addresses.SplitMain);
   const ZKEdition = await ethers.getContractAt('ZKEdition', addresses.ZKEdition);
 
   console.log('\nVerifying DCNTSDK...\n');
@@ -53,7 +52,6 @@ async function main() {
     +`${DCNTStaking.address} `
     +`${DCNTMetadataRenderer.address} `
     +`${DCNTRegistry.address} `
-    +`${SplitMain.address} `
     +`${ZKEdition.address}`
   );
 

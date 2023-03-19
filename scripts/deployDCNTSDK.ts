@@ -2,16 +2,10 @@ import { ethers, network } from "hardhat";
 import { deployDCNTSDK, deployContract, deployDCNTVaultNFT } from "../core";
 
 async function main() {
-  // get split main contract or deploy our own for local testing
-  const splitMain = ['localhost', 'hardhat'].includes(network.name)
-    ? await deployContract('SplitMain')
-    : await ethers.getContractAt('SplitMain', '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE');
-
   const sdk = await deployDCNTSDK(
     null, // proxy implementations
     null, // metadata renderer
     null, // contract registry
-    splitMain, // split main
   );
 
   const metadataRenderer = await ethers.getContractAt('DCNTMetadataRenderer', await sdk.metadataRenderer());
@@ -31,7 +25,6 @@ async function main() {
     DCNTRegistry: registry.address,
     DCNTVaultNFT: vaultNFT.address,
     DCNTRentalMarket: rentalMarket.address,
-    SplitMain: await sdk.SplitMain(),
     ZKEdition: await sdk.ZKEditionImplementation(),
   }
 

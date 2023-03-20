@@ -3,6 +3,10 @@ pragma solidity ^0.8.0;
 
 interface IFeeManager {
 
+  error SplitsAreActive();
+
+  error WithdrawFailed();
+
   function setFees(uint256 _fee, uint256 _commissionBPS) external;
 
   function calculateFee(uint256 amount) external view returns (uint256);

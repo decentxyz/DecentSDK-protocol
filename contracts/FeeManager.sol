@@ -37,5 +37,15 @@ contract FeeManager is IFeeManager, Ownable, Splits, Version(1) {
     return address(this);
   }
 
+  function withdraw() external onlyOwner {
+    if ( splitWallet != address(0) ) {
+      revert SplitsAreActive();
+    }
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    if ( ! success ) {
+      revert  WithdrawFailed();
+    }
+  }
+
   receive() external payable { }
 }

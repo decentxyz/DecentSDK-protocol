@@ -7,7 +7,29 @@ import { deployDCNTSDK, deployDCNT1155, deployMockERC721, deployContract, theFut
 import { MerkleTree } from "merkletreejs";
 const keccak256 = require("keccak256");
 
+const name = 'Decent';
+const symbol = 'DCNT';
+const hasAdjustableCap = true;
+const isSoulbound = false;
+const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
+const maxTokensPerOwner = 2;
+const presaleMerkleRoot = null;
+const presaleStart = theFuture.time();
+const presaleEnd = theFuture.time();
+let saleStart = theFuture.time();
+const saleEnd = theFuture.time() + theFuture.oneYear;
+const royaltyBPS = 10_00;
+const feeManager = ethers.constants.AddressZero;
+const payoutAddress = ethers.constants.AddressZero;
+const currencyOracle = ethers.constants.AddressZero;
+const contractURI = "http://localhost/contract/";
+const metadataURI = "http://localhost/metadata/";
+const tokenGateConfig = {
+  tokenAddress: ethers.constants.AddressZero,
+  minBalance: 0,
+  saleType: 0,
+}
 
 describe("FeeManager", async () => {
   let owner: SignerWithAddress,
@@ -17,10 +39,16 @@ describe("FeeManager", async () => {
       addr4: SignerWithAddress,
       sdk: Contract,
       feeManager: Contract,
+      splitMain: Contract,
       nft: Contract,
       fixedFee: BigNumber,
       commissionBPS: BigNumber,
       split: any[];
+
+  before(async () => {
+    sdk = await deployDCNTSDK();
+    [addr1, addr2, addr3, addr4] = await ethers.getSigners();
+  });
 
   describe("constructor()", async () => {
     it("should set the initial parameters for a fee manager", async () => {
@@ -56,4 +84,80 @@ describe("FeeManager", async () => {
       ).to.equal(tokenPrice.mul(commissionBPS).div(100_00));
     });
   });
+
+  describe("withdraw()", async () => {
+    it("should allow withdrawals by owner", async () => {
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager',[fixedFee, commissionBPS]);
+
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokensPerOwner,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        tokenGateConfig
+      );
+
+      await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice.add(fixedFee) });
+      const commission = tokenPrice.mul(commissionBPS).div(100_00);
+      const totalFees = commission.add(fixedFee);
+      const before = await addr1.getBalance();
+      const tx = await feeManager.withdraw();
+      const receipt = await tx.wait();
+      const gas = receipt.cumulativeGasUsed * receipt.effectiveGasPrice;
+      const after = await addr1.getBalance();
+      const withdrawn = after.sub(before).add(gas);
+      expect(withdrawn).to.equal(totalFees);
+    });
+
+    it("should revert if called by an account which is not the owner", async () => {
+      await expect(
+        feeManager.connect(addr2).withdraw()
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+  });
+
+  describe("createSplit()", async () => {
+    before(async () => {
+      const payouts = sortByAddress([
+        {
+          address: addr2.address,
+          percent: (1_000_000 / 100) * 90
+        },
+        {
+          address: addr3.address,
+          percent: (1_000_000 / 100) * 10
+        },
+      ]);
+
+      const addresses = payouts.map(payout => payout.address);
+      const percents = payouts.map(payout => payout.percent);
+      const distributorFee = 0;
+      split = [addresses, percents, distributorFee];
+      splitMain = await deployContract('SplitMain');
+    });
+
+    it("should create a split", async () => {
+      expect(await feeManager.splitWallet()).to.equal(ethers.constants.AddressZero);
+      await feeManager.createSplit(splitMain.address, ...split);
+      expect(await feeManager.splitWallet()).to.not.equal(ethers.constants.AddressZero);
+    });
+  });
+
 });

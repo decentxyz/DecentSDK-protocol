@@ -251,12 +251,7 @@ export const deployDCNT4907A = async (
   return ethers.getContractAt("DCNT4907A", address);
 }
 
-export const deployDCNT1155 = async (
-  decentSDK: Contract,
-  name: string,
-  symbol: string,
-  hasAdjustableCaps: boolean,
-  isSoulbound: boolean,
+export type DropConfig = {
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokensPerOwner: number,
@@ -265,13 +260,26 @@ export const deployDCNT1155 = async (
   presaleEnd: number,
   saleStart: number,
   saleEnd: number | BigNumber,
+  tokenGateConfig: TokenGateConfig | null
+}
+
+export const deployDCNT1155 = async (
+  decentSDK: Contract,
+  name: string,
+  symbol: string,
+  hasAdjustableCaps: boolean,
+  isSoulbound: boolean,
+  startTokenId: number,
+  endTokenId: number,
   royaltyBPS: number,
   feeManager: string | null,
   payoutAddress: string | null,
   currencyOracle: string | null,
   contractURI: string,
   metadataURI: string,
-  tokenGateConfig: TokenGateConfig | null
+  defaultDrop: DropConfig,
+  customDrops: DropConfig[] = [],
+  customDropIds: number[] = []
 ) => {
   const deployTx = await decentSDK.deployDCNT1155(
     {
@@ -279,6 +287,8 @@ export const deployDCNT1155 = async (
       symbol,
       contractURI,
       metadataURI,
+      startTokenId,
+      endTokenId,
       royaltyBPS,
       feeManager: feeManager || ethers.constants.AddressZero,
       payoutAddress: payoutAddress || ethers.constants.AddressZero,
@@ -286,21 +296,27 @@ export const deployDCNT1155 = async (
       isSoulbound,
       hasAdjustableCaps,
     },
-    [{
-      maxTokens,
-      tokenPrice,
-      maxTokensPerOwner,
-      presaleMerkleRoot: presaleMerkleRoot || ethers.constants.HashZero,
-      presaleStart,
-      presaleEnd,
-      saleStart,
-      saleEnd,
-      tokenGate: tokenGateConfig || {
+    {
+      ...defaultDrop,
+      presaleMerkleRoot: defaultDrop.presaleMerkleRoot || ethers.constants.HashZero,
+      tokenGate: defaultDrop.tokenGateConfig || {
         tokenAddress: ethers.constants.AddressZero,
         minBalance: 0,
         saleType: 0,
       }
-    }],
+    },
+    customDrops.map(customDrop => {
+      return {
+        ...customDrop,
+        presaleMerkleRoot: customDrop.presaleMerkleRoot || ethers.constants.HashZero,
+        tokenGate: customDrop.tokenGateConfig || {
+          tokenAddress: ethers.constants.AddressZero,
+          minBalance: 0,
+          saleType: 0,
+        }
+      }
+    }), // custom drops
+    customDropIds // custom drop ids
   );
 
   const receipt = await deployTx.wait();

@@ -54,6 +54,11 @@ contract DCNT1155 is
   string private _symbol;
 
   /*
+   * @dev The packed range of valid token IDs.
+   */
+  uint256 public packedTokenRange;
+
+  /*
    * @dev The base URI used to generate the URI for individual tokens.
    */
   string private _uri;
@@ -88,7 +93,13 @@ contract DCNT1155 is
    * @dev An array of drop configurations defining each token with the series.
    * Adding a drop creates a new token with a token ID equal to its index in this array.
    */
-  Drop[] public drops;
+  // Drop[] public drops;
+
+  // mapping(tokenId => dropId)
+  mapping(uint256 => uint256) public tokenIdToDropId;
+
+  // mapping(dropId => drop)
+  mapping(uint256 => Drop) public drops;
 
   /*
    * @dev Mapping of token ID to the total number of tokens in circulation for that ID.
@@ -111,7 +122,8 @@ contract DCNT1155 is
    * @param isPresale A boolean indicating whether the sale type for is presale or primary sale.
    */
   modifier verifyTokenGate(uint256 tokenId, bool isPresale) {
-    TokenGateConfig memory tokenGate = drops[tokenId].tokenGate;
+    uint256 dropId = tokenIdToDropId[tokenId];
+    TokenGateConfig memory tokenGate = drops[dropId].tokenGate;
     if (
         tokenGate.tokenAddress != address(0)
         && (
@@ -139,14 +151,16 @@ contract DCNT1155 is
 
   /**
    * @dev Initializes the contract with the specified parameters.
-   * @param _owner The owner of the contract.
-   * @param _config The configuration for the contract.
-   * @param _drops The drop configurations for the initial tokens.
+   * param _owner The owner of the contract.
+   * param _config The configuration for the contract.
+   * param _drops The drop configurations for the initial tokens.
    */
   function initialize(
     address _owner,
-    SeriesConfig memory _config,
-    Drop[] memory _drops
+    SeriesConfig calldata _config,
+    Drop calldata _defaultDrop,
+    Drop[] calldata _customDrops,
+    uint256[] calldata _customDropIds
   ) public initializer {
     _transferOwnership(_owner);
     _grantRole(DEFAULT_ADMIN_ROLE, _owner);
@@ -161,9 +175,33 @@ contract DCNT1155 is
     feeManager = _config.feeManager;
     currencyOracle = AggregatorV3Interface(_config.currencyOracle);
 
-    uint256 length = _drops.length;
-    for (uint i = 0; i < length; i++) {
-      _addDrop(_drops[i]);
+    drops[0] = _defaultDrop;
+    setPackedTokenRange(_config.startTokenId, _config.endTokenId);
+
+    uint256 numberOfCustomDrops = _customDrops.length;
+    if ( numberOfCustomDrops != _customDropIds.length ) {
+      revert ArrayLengthMismatch();
+    }
+
+    for (uint256 i = 0; i < numberOfCustomDrops; i++) {
+      drops[_customDropIds[i]] = _customDrops[i];
+    }
+  }
+
+  function setPackedTokenRange(uint128 startTokenId, uint128 endTokenId) public {
+    packedTokenRange = uint256(startTokenId) << 128 | uint256(endTokenId);
+  }
+
+  function getUnpackedTokenRange() public view returns (uint128, uint128) {
+    uint128 endTokenId = uint128(packedTokenRange & type(uint128).max);
+    uint128 startTokenId = uint128(packedTokenRange >> 128);
+    return (startTokenId, endTokenId);
+  }
+
+  function _checkValidTokenId(uint256 tokenId) internal view {
+    (uint128 startTokenId, uint128 endTokenId) = getUnpackedTokenRange();
+    if ( startTokenId > tokenId || tokenId > endTokenId ) {
+      revert NonexistentToken();
     }
   }
 
@@ -206,8 +244,8 @@ contract DCNT1155 is
   function setURI(string memory uri_) external onlyAdmin {
     _uri = uri_;
 
-    uint256 numberOfDrops = drops.length;
-    for (uint256 i = 0; i < numberOfDrops; i++) {
+    (uint128 startTokenId, uint128 endTokenId) = getUnpackedTokenRange();
+    for (uint256 i = startTokenId; i <= endTokenId; i++) {
       emit URI(_uri, i);
     }
   }
@@ -228,61 +266,48 @@ contract DCNT1155 is
   }
 
   /**
-   * @dev Adds a single drop to the drop.
-   * @param drop The drop configuration to add.
-   */
-  function _addDrop(Drop memory drop) internal {
-    drops.push(Drop({
-      maxTokens: drop.maxTokens,
-      tokenPrice: drop.tokenPrice,
-      maxTokensPerOwner: drop.maxTokensPerOwner,
-      presaleMerkleRoot: drop.presaleMerkleRoot,
-      presaleStart: drop.presaleStart,
-      presaleEnd: drop.presaleEnd,
-      saleStart: drop.saleStart,
-      saleEnd: drop.saleEnd,
-      tokenGate: drop.tokenGate
-    }));
-  }
-
-  /**
-   * @dev Adds the specified drops to the drop series, creating new token IDs.
-   * @param _drops The drop configurations to add.
-   */
-  function addDrops(Drop[] memory _drops) external onlyAdmin {
-    uint256 length = _drops.length;
-    for (uint i = 0; i < length; i++) {
-      _addDrop(_drops[i]);
-    }
-  }
-
-  /**
    * @dev Updates the drop configuration for the specified token IDs.
-   * @param _tokenIds The IDs of the tokens to update.
-   * @param _drops The updated drop configurations for the specified token IDs.
+   * @param _tokenIds The IDs of the tokens to update drop IDs for.
+   * @param _tokenIdDropIds The IDs of the drops which will be mapped by the specified token IDs.
+   * @param _dropIds The IDs of the drops to update, use 0 to update the default drop configuration.
+   * @param _drops The updated drop configurations for the specified drop IDs.
    */
-  function setDrops(uint256[] calldata _tokenIds, Drop[] calldata _drops) external onlyAdmin {
-    uint256 length = _drops.length;
-
-    if ( length != _tokenIds.length ) {
+  function setDrops(
+    uint256[] calldata _tokenIds,
+    uint256[] calldata _tokenIdDropIds,
+    uint256[] calldata _dropIds,
+    Drop[] calldata _drops
+  ) external onlyAdmin {
+    if ( _tokenIds.length != _tokenIdDropIds.length || _dropIds.length != _drops.length ) {
       revert ArrayLengthMismatch();
     }
 
-    for (uint i = 0; i < length; i++) {
+    for (uint i = 0; i < _tokenIds.length; i++) {
       uint256 tokenId = _tokenIds[i];
+      uint256 dropId = _tokenIdDropIds[i];
 
-      if ( tokenId >= drops.length ) {
-        revert NonexistentToken();
+      if ( totalSupply[tokenId] > drops[dropId].maxTokens ) {
+        revert CannotDecreaseCap();
+      }
+
+      tokenIdToDropId[tokenId] = dropId;
+    }
+
+    for (uint i = 0; i < _dropIds.length; i++) {
+      uint256 dropId = _dropIds[i];
+
+      if ( dropId != 0 ) {
+        _checkValidTokenId(dropId);
       }
 
       Drop memory _drop = _drops[i];
-      Drop storage drop = drops[tokenId];
+      Drop storage drop = drops[dropId];
 
       if ( drop.maxTokens != _drop.maxTokens ) {
         if ( ! hasAdjustableCaps ) {
           revert CapsAreLocked();
         }
-        if ( totalSupply[tokenId] > _drop.maxTokens ) {
+        if ( _drop.maxTokens < drop.maxTokens ) {
           revert CannotDecreaseCap();
         }
       }
@@ -319,10 +344,10 @@ contract DCNT1155 is
         ? uint256(price) * (10 ** (18 - decimals))
         : uint256(price) / (10 ** (decimals - 18));
 
-      return uint256(drops[tokenId].tokenPrice) * (10 ** 18) / exchangeRate;
+      return uint256(drops[tokenIdToDropId[tokenId]].tokenPrice) * (10 ** 18) / exchangeRate;
     }
 
-    return drops[tokenId].tokenPrice;
+    return drops[tokenIdToDropId[tokenId]].tokenPrice;
   }
 
   /**
@@ -349,8 +374,7 @@ contract DCNT1155 is
     verifyTokenGate(tokenId, false)
     whenNotPaused
   {
-    Drop memory drop = drops[tokenId];
-    uint256 supply = totalSupply[tokenId];
+    Drop memory drop = drops[tokenIdToDropId[tokenId]];
     uint256 price = tokenPrice(tokenId);
     uint256 fee;
     uint256 commission;
@@ -366,7 +390,7 @@ contract DCNT1155 is
       revert SaleNotActive();
     }
 
-    if ( supply + quantity > drop.maxTokens ) {
+    if ( totalSupply[tokenId] + quantity > drop.maxTokens ) {
       revert MintExceedsMaxSupply();
     }
 
@@ -374,7 +398,8 @@ contract DCNT1155 is
       revert InsufficientFunds();
     }
 
-    if ( balanceOf[to][tokenId] + quantity > drop.maxTokensPerOwner ) {
+    uint256 ownerBalance = balanceOf[to][tokenId];
+    if ( ownerBalance + quantity > drop.maxTokensPerOwner ) {
       revert MintExceedsMaxTokensPerOwner();
     }
 
@@ -417,7 +442,7 @@ contract DCNT1155 is
   function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin {
     uint256 airdrops = recipients.length;
 
-    if ( totalSupply[tokenId] + airdrops > drops[tokenId].maxTokens ) {
+    if ( totalSupply[tokenId] + airdrops > drops[tokenIdToDropId[tokenId]].maxTokens ) {
       revert AirdropExceedsMaxSupply();
     }
 
@@ -450,7 +475,7 @@ contract DCNT1155 is
     verifyTokenGate(tokenId, true)
     whenNotPaused
   {
-    Drop memory drop = drops[tokenId];
+    Drop memory drop = drops[tokenIdToDropId[tokenId]];
     if ( block.timestamp < drop.presaleStart || block.timestamp > drop.presaleEnd ) {
       revert PresaleNotActive();
     }
@@ -481,7 +506,8 @@ contract DCNT1155 is
       revert InsufficientFunds();
     }
 
-    if ( balanceOf[msg.sender][tokenId] + quantity > maxQuantity ) {
+    uint256 ownerBalance = balanceOf[msg.sender][tokenId];
+    if ( ownerBalance + quantity > maxQuantity ) {
       revert MintExceedsMaxTokensPerOwner();
     }
 
@@ -548,9 +574,7 @@ contract DCNT1155 is
     view
     returns (address receiver, uint256 royaltyAmount)
   {
-    if ( tokenId >= drops.length ) {
-      revert NonexistentToken();
-    }
+    _checkValidTokenId(tokenId);
 
     if ( splitWallet != address(0) ) {
       receiver = splitWallet;

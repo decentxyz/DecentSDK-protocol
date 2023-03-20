@@ -11,6 +11,8 @@ const name = 'Decent';
 const symbol = 'DCNT';
 const hasAdjustableCap = true;
 const isSoulbound = false;
+const startTokenId = 0;
+const endTokenId = 0;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokensPerOwner = 2;
@@ -103,21 +105,25 @@ describe("FeeManager", async () => {
         symbol,
         hasAdjustableCap,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager.address,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice.add(fixedFee) });

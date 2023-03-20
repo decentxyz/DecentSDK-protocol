@@ -82,9 +82,9 @@ contract DCNTSDK is Ownable {
 
   /// @notice deploy and initialize an erc721a clone
   function deployDCNT721A(
-    EditionConfig memory _editionConfig,
-    MetadataConfig memory _metadataConfig,
-    TokenGateConfig memory _tokenGateConfig
+    EditionConfig calldata _editionConfig,
+    MetadataConfig calldata _metadataConfig,
+    TokenGateConfig calldata _tokenGateConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNT721AImplementation);
     (bool success, ) = clone.call(
@@ -110,9 +110,9 @@ contract DCNTSDK is Ownable {
 
   /// @notice deploy and initialize a ZKEdition clone
   function deployZKEdition(
-    EditionConfig memory _editionConfig,
-    MetadataConfig memory _metadataConfig,
-    TokenGateConfig memory _tokenGateConfig,
+    EditionConfig calldata _editionConfig,
+    MetadataConfig calldata _metadataConfig,
+    TokenGateConfig calldata _tokenGateConfig,
     address zkVerifier
   ) external returns (address clone) {
     clone = Clones.clone(ZKEditionImplementation); //zkedition implementation
@@ -141,9 +141,9 @@ contract DCNTSDK is Ownable {
 
   /// @notice deploy and initialize an erc4907a clone
   function deployDCNT4907A(
-    EditionConfig memory _editionConfig,
-    MetadataConfig memory _metadataConfig,
-    TokenGateConfig memory _tokenGateConfig
+    EditionConfig calldata _editionConfig,
+    MetadataConfig calldata _metadataConfig,
+    TokenGateConfig calldata _tokenGateConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNT4907AImplementation);
     (bool success, ) = clone.call(
@@ -169,20 +169,26 @@ contract DCNTSDK is Ownable {
 
   // deploy and initialize an erc1155 clone
   function deployDCNT1155(
-    IDCNT1155.SeriesConfig memory _config,
-    IDCNT1155.Drop[] memory _drops
+    IDCNT1155.SeriesConfig calldata _config,
+    IDCNT1155.Drop calldata _defaultDrop,
+    IDCNT1155.Drop[] calldata _customDrops,
+    uint256[] calldata _customDropIds
   ) external returns (address clone) {
     clone = Clones.clone(DCNT1155Implementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize("
           "address,"
-          "(string,string,string,string,uint16,address,address,address,bool,bool),"
-          "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[]"
+          "(string,string,string,string,uint128,uint128,uint16,address,address,address,bool,bool),"
+          "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8)),"
+          "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[],"
+          "uint256[]"
         ")",
         msg.sender,
         _config,
-        _drops
+        _defaultDrop,
+        _customDrops,
+        _customDropIds
       )
     );
     require(success);
@@ -196,8 +202,8 @@ contract DCNTSDK is Ownable {
 
   // deploy and initialize a Crescendo clone
   function deployDCNTCrescendo(
-    CrescendoConfig memory _config,
-    MetadataConfig memory _metadataConfig
+    CrescendoConfig calldata _config,
+    MetadataConfig calldata _metadataConfig
   ) external returns (address clone) {
     clone = Clones.clone(DCNTCrescendoImplementation);
     (bool success, ) = clone.call(

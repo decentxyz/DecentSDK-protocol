@@ -9,7 +9,7 @@ const keccak256 = require("keccak256");
 
 const name = 'Decent';
 const symbol = 'DCNT';
-const hasAdjustableCap = true;
+const hasAdjustableCaps = true;
 const isSoulbound = false;
 const maxTokens = 4;
 const tokenPrice = ethers.utils.parseEther('0.01');
@@ -19,6 +19,8 @@ const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
+const startTokenId = 0;
+const endTokenId = 1;
 const royaltyBPS = 10_00;
 const feeManager = ethers.constants.AddressZero;
 const payoutAddress = ethers.constants.AddressZero;
@@ -59,24 +61,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig,
-        parentIP.address
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig,
+        }
       );
     });
 
@@ -94,6 +99,10 @@ describe("DCNT1155", async () => {
       expect(drop.presaleStart).to.equal(presaleStart);
       expect(drop.presaleEnd).to.equal(presaleEnd);
       expect(drop.saleStart).to.equal(saleStart);
+
+      const [start, end] = await clone.getUnpackedTokenRange();
+      expect(start).to.equal(startTokenId);
+      expect(end).to.equal(endTokenId);
     });
 
     it("should optionally set configuration for a token gate", async () => {
@@ -102,16 +111,10 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
@@ -119,9 +122,19 @@ describe("DCNT1155", async () => {
         contractURI,
         metadataURI,
         {
-          tokenAddress: gateNFT.address,
-          minBalance: 1337,
-          saleType: 2,
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig: {
+            tokenAddress: gateNFT.address,
+            minBalance: 1337,
+            saleType: 2,
+          }
         }
       );
 
@@ -145,23 +158,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        ethers.utils.parseEther('13.37'), // $13.37 USD
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         oracle.address,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice: ethers.utils.parseEther('13.37'), // $13.37 USD
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       expect(await freshNFT.tokenPrice(0)).to.equal(
@@ -182,23 +199,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager.address,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       expect(await freshNFT.mintFee(0, 1)).to.equal(tokenPrice.div(10));
@@ -213,23 +234,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
     });
 
@@ -281,23 +306,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager.address,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       expect(await freshNFT.mintFee(0, 1)).to.equal(fixedFee);
@@ -321,23 +350,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        ethers.utils.parseEther('13.37'), // $13.37 USD
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         oracle.address,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice: ethers.utils.parseEther('13.37'), // $13.37 USD
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       // simulate pricing fluctuation on the oracle
@@ -371,16 +404,10 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
@@ -388,9 +415,19 @@ describe("DCNT1155", async () => {
         contractURI,
         metadataURI,
         {
-          tokenAddress: gateNFT.address,
-          minBalance: 1,
-          saleType: 0,
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig: {
+            tokenAddress: gateNFT.address,
+            minBalance: 1,
+            saleType: 0,
+          }
         }
       );
 
@@ -430,23 +467,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
@@ -500,23 +541,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        20,
-        tokenPrice,
-        maxTokensPerOwner,
-        tree.getHexRoot(),
-        theFuture.time(),
-        theFuture.time() + theFuture.oneDay,
-        theFuture.time() + theFuture.oneMonth,
-        theFuture.time() + theFuture.oneYear,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens: 20,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot: tree.getHexRoot(),
+          presaleStart: theFuture.time(),
+          presaleEnd: theFuture.time() + theFuture.oneDay,
+          saleStart: theFuture.time() + theFuture.oneMonth,
+          saleEnd: theFuture.time() + theFuture.oneYear,
+          tokenGateConfig
+        }
       );
 
       expect(await presaleNFT.balanceOf(owner.address, 0)).to.equal(0);
@@ -626,23 +671,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
@@ -668,23 +717,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
-        true,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        hasAdjustableCaps,
+        true, // isSoulbound
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });
@@ -694,56 +747,16 @@ describe("DCNT1155", async () => {
     });
   });
 
-  describe("setDrop()", async () => {
+  describe("setDrops()", async () => {
     it("should adjust the cap on nfts with an adjustable cap", async () => {
       let drop = await nft.drops(0);
       expect(drop.maxTokens).to.equal(maxTokens);
 
-      await nft.setDrops([0], [{
-        maxTokens: maxTokens*2,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot: ethers.constants.HashZero,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
-        tokenGate: tokenGateConfig
-      }]);
-
-      drop = await nft.drops(0);
-      expect(drop.maxTokens).to.equal(maxTokens*2);
-    });
-
-    it("should prevent adjusting the cap on nfts without an adjustable cap", async () => {
-      const freshNFT = await deployDCNT1155(
-        sdk,
-        name,
-        symbol,
-        false, // hasAdjustableCap
-        isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
-        royaltyBPS,
-        feeManager,
-        payoutAddress,
-        currencyOracle,
-        contractURI,
-        metadataURI,
-        tokenGateConfig
-      );
-
-      let drop = await freshNFT.drops(0);
-      expect(drop.maxTokens).to.equal(maxTokens);
-
-      await expect(
-        freshNFT.setDrops([0], [{
+      await nft.setDrops(
+        [], // tokenIds
+        [], // tokenIdDropIds
+        [0], // dropIds
+        [{
           maxTokens: maxTokens*2,
           tokenPrice,
           maxTokensPerOwner,
@@ -753,7 +766,61 @@ describe("DCNT1155", async () => {
           saleStart,
           saleEnd,
           tokenGate: tokenGateConfig
-        }])
+        }]
+      );
+
+      drop = await nft.drops(0);
+      expect(drop.maxTokens).to.equal(maxTokens*2);
+    });
+
+    it("should prevent adjusting the caps on nfts without adjustable caps", async () => {
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        false, // hasAdjustableCaps
+        isSoulbound,
+        startTokenId,
+        endTokenId,
+        royaltyBPS,
+        feeManager,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
+      );
+
+      let drop = await freshNFT.drops(0);
+      expect(drop.maxTokens).to.equal(maxTokens);
+
+      await expect(
+        freshNFT.setDrops(
+          [], // tokenIds
+          [], // tokenIdDropIds
+          [0], // dropIds
+          [{
+            maxTokens: maxTokens*2,
+            tokenPrice,
+            maxTokensPerOwner,
+            presaleMerkleRoot: ethers.constants.HashZero,
+            presaleStart,
+            presaleEnd,
+            saleStart,
+            saleEnd,
+            tokenGate: tokenGateConfig
+          }]
+        )
       ).to.be.revertedWithCustomError(
         freshNFT,
         'CapsAreLocked'
@@ -763,36 +830,46 @@ describe("DCNT1155", async () => {
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
-        freshNFT.setDrops([0], [{
-          maxTokens: maxTokens*2,
-          tokenPrice,
-          maxTokensPerOwner,
-          presaleMerkleRoot: ethers.constants.HashZero,
-          presaleStart,
-          presaleEnd,
-          saleStart,
-          saleEnd,
-          tokenGate: tokenGateConfig
-        }])
+        freshNFT.setDrops(
+          [], // tokenIds
+          [], // tokenIdDropIds
+          [0], // dropIds
+          [{
+            maxTokens: maxTokens*2,
+            tokenPrice,
+            maxTokensPerOwner,
+            presaleMerkleRoot: ethers.constants.HashZero,
+            presaleStart,
+            presaleEnd,
+            saleStart,
+            saleEnd,
+            tokenGate: tokenGateConfig
+          }]
+        )
       ).to.be.revertedWithCustomError(
         freshNFT,
         'CapsAreLocked'
       );
     });
 
-    it("should prevent non-admin from setting drop", async () => {
+    it("should prevent non-admin from setting drops", async () => {
       await expect(
-        nft.connect(addr2).setDrops([0], [{
-          maxTokens,
-          tokenPrice,
-          maxTokensPerOwner,
-          presaleMerkleRoot: ethers.constants.HashZero,
-          presaleStart,
-          presaleEnd,
-          saleStart,
-          saleEnd,
-          tokenGate: tokenGateConfig
-        }])
+        nft.connect(addr2).setDrops(
+          [], // tokenIds
+          [], // tokenIdDropIds
+          [0], // dropIds
+          [{
+            maxTokens,
+            tokenPrice,
+            maxTokensPerOwner,
+            presaleMerkleRoot: ethers.constants.HashZero,
+            presaleStart,
+            presaleEnd,
+            saleStart,
+            saleEnd,
+            tokenGate: tokenGateConfig
+          }]
+        )
       ).to.be.revertedWithCustomError(
         nft,
         'OnlyAdmin'
@@ -851,23 +928,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
       await nft.mint(0, addr1.address, 1, { value: tokenPrice });
     });
@@ -891,23 +972,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       await expect(
@@ -937,23 +1022,27 @@ describe("DCNT1155", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokensPerOwner,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        tokenGateConfig
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
 
       await freshNFT.mint(0, addr1.address, 1, { value: tokenPrice });

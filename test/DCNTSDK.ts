@@ -177,12 +177,14 @@ describe("DCNTSDK", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
-      const hasAdjustableCap = false;
+      const hasAdjustableCaps = false;
       const isSoulbound = false;
+      const startTokenId = 0;
+      const endTokenId = 100;
       const maxTokens = 4;
       const tokenPrice = ethers.utils.parseEther('0.01');
-      const maxTokenPurchase = 2;
-      const presaleMerkleRoot = '';
+      const maxTokensPerOwner = 2;
+      const presaleMerkleRoot = null;
       const presaleStart = theFuture.time();
       const presaleEnd = theFuture.time();
       const saleStart = theFuture.time();
@@ -200,25 +202,27 @@ describe("DCNTSDK", async () => {
         sdk,
         name,
         symbol,
-        hasAdjustableCap,
+        hasAdjustableCaps,
         isSoulbound,
-        maxTokens,
-        tokenPrice,
-        maxTokenPurchase,
-        presaleMerkleRoot,
-        presaleStart,
-        presaleEnd,
-        saleStart,
-        saleEnd,
+        startTokenId,
+        endTokenId,
         royaltyBPS,
         feeManager.address,
         payoutAddress,
         currencyOracle,
         contractURI,
         metadataURI,
-        metadataRendererInit,
-        tokenGateConfig,
-        parentIP.address
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
       );
     });
 

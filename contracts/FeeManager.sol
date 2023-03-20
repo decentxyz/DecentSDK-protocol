@@ -7,8 +7,6 @@ import './interfaces/IFeeManager.sol';
 import './utils/Splits.sol';
 import './utils/Version.sol';
 
-import 'hardhat/console.sol';
-
 /// @title template NFT contract
 contract FeeManager is IFeeManager, Ownable, Splits, Version(1) {
 

@@ -29,6 +29,8 @@ interface IDCNT1155 {
     string symbol;
     string contractURI;
     string metadataURI;
+    uint128 startTokenId;
+    uint128 endTokenId;
     uint16 royaltyBPS;
     address feeManager;
     address payoutAddress;
@@ -47,9 +49,9 @@ interface IDCNT1155 {
     uint32 presaleEnd;                 // Slot 1: ------------XXXX---------------- 4  bytes (max: Feburary 7th, 2106)
     uint32 saleStart;                  // Slot 1: ----------------XXXX------------ 4  bytes (max: Feburary 7th, 2106)
     uint32 saleEnd;                    // Slot 1: --------------------XXXX-------- 4  bytes (max: Feburary 7th, 2106)
-    uint96 tokenPrice;                 // Slot 1: ------------------------XXXX---- 4  bytes (max: 79,228,162,514 ETH)
-    bytes32 presaleMerkleRoot;         // Slot 2: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 32 bytes
-    TokenGateConfig tokenGate;         // Slot 3: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 32 bytes
+    uint96 tokenPrice;                 // Slot 2: XXXXXXXXXXXX-------------------- 12  bytes (max: 79,228,162,514 ETH)
+    bytes32 presaleMerkleRoot;         // Slot 3: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 32 bytes
+    TokenGateConfig tokenGate;         // Slot 4: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 32 bytes
   }
 
   /*
@@ -154,14 +156,16 @@ interface IDCNT1155 {
 
   /**
    * @dev Initializes the contract with the specified parameters.
-   * @param _owner The owner of the contract.
-   * @param _config The configuration for the contract.
-   * @param _drops The drop configurations for the initial tokens.
+   * param _owner The owner of the contract.
+   * param _config The configuration for the contract.
+   * param _drops The drop configurations for the initial tokens.
    */
   function initialize(
     address _owner,
     SeriesConfig memory _config,
-    Drop[] memory _drops
+    Drop calldata _defaultDrop,
+    Drop[] calldata _customDrops,
+    uint256[] calldata _customDropIds
   ) external;
 
   /**
@@ -200,17 +204,18 @@ interface IDCNT1155 {
   function setContractURI(string memory contractURI_) external;
 
   /**
-   * @dev Adds the specified drops to the drop series, creating new token IDs.
-   * @param _drops The drop configurations to add.
-   */
-  function addDrops(Drop[] memory _drops) external;
-
-  /**
    * @dev Updates the drop configuration for the specified token IDs.
-   * @param _tokenIds The IDs of the tokens to update.
-   * @param _drops The updated drop configurations for the specified token IDs.
+   * @param _tokenIds The IDs of the tokens to update drop IDs for.
+   * @param _tokenIdDropIds The IDs of the drops to associate with the specified token IDs.
+   * @param _dropIds The IDs of the drops to update, use 0 to update the default drop configuration.
+   * @param _drops The updated drop configurations for the specified drop IDs.
    */
-  function setDrops(uint256[] calldata _tokenIds, Drop[] calldata _drops) external;
+  function setDrops(
+    uint256[] calldata _tokenIds,
+    uint256[] calldata _tokenIdDropIds,
+    uint256[] calldata _dropIds,
+    Drop[] calldata _drops
+  ) external;
 
   /**
    * @dev Gets the current price for the specified token. If a currency oracle is set,

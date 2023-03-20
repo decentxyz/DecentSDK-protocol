@@ -221,6 +221,14 @@ interface IDCNT1155 {
   function tokenPrice(uint256 tokenId) external view returns (uint256);
 
   /**
+   * @dev Gets the current minting fee for the specified token.
+   * @param tokenId The ID of the token to get the minting fee for.
+   * @param quantity The quantity of tokens used to calculate the minting fee.
+   * @return The current fee for minting the specified token.
+   */
+  function mintFee(uint256 tokenId, uint256 quantity) external view returns (uint256);
+
+  /**
    * @dev Mints a specified number of tokens to a specified address.
    * @param tokenId The ID of the token to mint.
    * @param to The address to which the minted tokens will be sent.

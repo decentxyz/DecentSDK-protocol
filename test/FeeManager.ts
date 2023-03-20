@@ -18,7 +18,7 @@ const presaleMerkleRoot = null;
 const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
-const saleEnd = theFuture.time() + theFuture.oneYear;
+let saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
 const feeManager = ethers.constants.AddressZero;
 const payoutAddress = ethers.constants.AddressZero;
@@ -48,6 +48,9 @@ describe("FeeManager", async () => {
   before(async () => {
     sdk = await deployDCNTSDK();
     [addr1, addr2, addr3, addr4] = await ethers.getSigners();
+    await theFuture.reset();
+    saleStart = theFuture.time();
+    saleEnd = saleStart + theFuture.oneYear;
   });
 
   describe("constructor()", async () => {
@@ -71,17 +74,20 @@ describe("FeeManager", async () => {
   });
 
   describe("calculateFee()", async () => {
-    it("should return the caluclated fee, which is presently fixed", async () => {
-      // currently fixed rate fee
-      expect(await feeManager.calculateFee(tokenPrice)).to.equal(fixedFee);
+    it("should return the caluclated fee for the specified price and quantity", async () => {
+      expect(await feeManager.calculateFee(tokenPrice, 1)).to.equal(fixedFee);
+      expect(await feeManager.calculateFee(tokenPrice, 5)).to.equal(fixedFee.mul(5));
     });
   });
 
   describe("calculateCommission()", async () => {
-    it("should return the calculated commission", async () => {
+    it("should return the calculated commission for the specified price and quantity", async () => {
       expect(
-        await feeManager.calculateCommission(tokenPrice)
+        await feeManager.calculateCommission(tokenPrice, 1)
       ).to.equal(tokenPrice.mul(commissionBPS).div(100_00));
+      expect(
+        await feeManager.calculateCommission(tokenPrice, 5)
+      ).to.equal(tokenPrice.mul(commissionBPS).div(100_00).mul(5));
     });
   });
 

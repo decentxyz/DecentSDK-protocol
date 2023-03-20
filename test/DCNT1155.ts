@@ -201,7 +201,7 @@ describe("DCNT1155", async () => {
         tokenGateConfig
       );
 
-      expect(await freshNFT.mintFee(0)).to.equal(tokenPrice.div(10));
+      expect(await freshNFT.mintFee(0, 1)).to.equal(tokenPrice.div(10));
     });
   });
 
@@ -300,7 +300,7 @@ describe("DCNT1155", async () => {
         tokenGateConfig
       );
 
-      expect(await freshNFT.mintFee(0)).to.equal(fixedFee);
+      expect(await freshNFT.mintFee(0, 1)).to.equal(fixedFee);
       expect(await feeManager.fee()).to.equal(fixedFee);
 
       const initialBalance = await ethers.provider.getBalance(feeManager.address);

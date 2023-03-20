@@ -95,6 +95,9 @@ contract DCNT1155 is
    */
   mapping(uint256 => uint256) public totalSupply;
 
+  /*
+   * @dev The address of the fee manager used to calculate minting fees and commissions.
+   */
   address public feeManager;
 
   /*
@@ -322,9 +325,15 @@ contract DCNT1155 is
     return drops[tokenId].tokenPrice;
   }
 
-  function mintFee(uint256 tokenId) external view returns (uint256) {
+  /**
+   * @dev Gets the current minting fee for the specified token.
+   * @param tokenId The ID of the token to get the minting fee for.
+   * @param quantity The quantity of tokens used to calculate the minting fee.
+   * @return The current fee for minting the specified token.
+   */
+  function mintFee(uint256 tokenId, uint256 quantity) external view returns (uint256) {
     return feeManager != address(0)
-      ? IFeeManager(feeManager).calculateFee(tokenPrice(tokenId))
+      ? IFeeManager(feeManager).calculateFee(tokenPrice(tokenId), quantity)
       : 0;
   }
 
@@ -347,11 +356,11 @@ contract DCNT1155 is
     uint256 commission;
 
     if ( feeManager != address(0) ) {
-      fee = IFeeManager(feeManager).calculateFee(price);
-      commission = IFeeManager(feeManager).calculateCommission(price);
+      fee = IFeeManager(feeManager).calculateFee(price, quantity);
+      commission = IFeeManager(feeManager).calculateCommission(price, quantity);
     }
 
-    uint256 totalPrice = (price + fee) * quantity;
+    uint256 totalPrice = (price * quantity) + fee;
 
     if ( block.timestamp < drop.saleStart || block.timestamp > drop.saleEnd ) {
       revert SaleNotActive();

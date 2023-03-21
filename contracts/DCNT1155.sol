@@ -120,6 +120,16 @@ contract DCNT1155 is
    * @param isPresale A boolean indicating whether the sale type for is presale or primary sale.
    */
   modifier verifyTokenGate(uint256 tokenId, bool isPresale) {
+    _verifyTokenGate(tokenId, isPresale);
+    _;
+  }
+
+  /**
+   * @dev Checks whether the caller has the required minimum balance to pass through token gate.
+   * @param tokenId The ID of the token to check.
+   * @param isPresale A boolean indicating whether the sale type for is presale or primary sale.
+   */
+  function _verifyTokenGate(uint tokenId, bool isPresale) internal {
     uint256 dropId = tokenDrops[tokenId];
     TokenGateConfig memory tokenGate = drops[dropId].tokenGate;
     if (
@@ -134,7 +144,6 @@ contract DCNT1155 is
         revert TokenGateDenied();
       }
     }
-    _;
   }
 
   /**
@@ -385,7 +394,7 @@ contract DCNT1155 is
     verifyTokenGate(tokenId, false)
     whenNotPaused
   {
-    Drop memory drop = drops[tokenDrops[tokenId]];
+    _checkMintable(to, tokenId, quantity);
     uint256 price = tokenPrice(tokenId);
     uint256 fee;
     uint256 commission;
@@ -397,35 +406,114 @@ contract DCNT1155 is
 
     uint256 totalPrice = (price * quantity) + fee;
 
-    if ( block.timestamp < drop.saleStart || block.timestamp > drop.saleEnd ) {
-      revert SaleNotActive();
+    if ( msg.value < totalPrice ) {
+      revert InsufficientFunds();
     }
 
-    if ( totalSupply[tokenId] + quantity > drop.maxTokens ) {
-      revert MintExceedsMaxSupply();
+    _mint(to, tokenId, quantity, '');
+    totalSupply[tokenId] += quantity;
+    _transferFees(fee + commission);
+    _transferRefund(msg.value - totalPrice);
+  }
+
+  /**
+   * @dev Mints a batch of tokens to a specified address.
+   * @param tokenIds The IDs of the tokens to mint.
+   * @param to The address to which the minted tokens will be sent.
+   * @param quantities The quantities to mint of each token.
+   */
+  function mintBatch(
+    address to,
+    uint256[] calldata tokenIds,
+    uint256[] calldata quantities
+  )
+    external
+    payable
+    whenNotPaused
+  {
+    uint256 totalPrice;
+    uint256 totalQuantity;
+    uint256 numberOfTokens = tokenIds.length;
+
+    for (uint256 i = 0; i < numberOfTokens; i++) {
+      uint256 tokenId = tokenIds[i];
+      uint256 quantity = quantities[i];
+      _verifyTokenGate(tokenId, false);
+      _checkMintable(to, tokenId, quantity);
+      totalPrice += drops[tokenId].tokenPrice * quantity;
+      totalQuantity += quantity;
+      totalSupply[tokenId] += quantity;
+    }
+
+    uint256 fee;
+    uint256 commission;
+
+    if ( feeManager != address(0) ) {
+      fee = IFeeManager(feeManager).calculateFee(totalPrice, totalQuantity);
+      commission = IFeeManager(feeManager).calculateCommission(totalPrice, totalQuantity);
+      totalPrice += fee;
     }
 
     if ( msg.value < totalPrice ) {
       revert InsufficientFunds();
     }
 
-    uint256 ownerBalance = balanceOf[to][tokenId];
-    if ( ownerBalance + quantity > drop.maxTokensPerOwner ) {
-      revert MintExceedsMaxTokensPerOwner();
+    _batchMint(to, tokenIds, quantities, '');
+    _transferFees(fee + commission);
+    _transferRefund(msg.value - totalPrice);
+  }
+
+  /**
+   * @dev Internal function to check if a drop can be minted.
+   * @param to The address to which the minted tokens will be sent.
+   * @param tokenId The ID of the token to mint.
+   * @param quantity The quantity of tokens to mint.
+   */
+  function _checkMintable(
+    address to,
+    uint256 tokenId,
+    uint256 quantity
+  )
+    internal
+    view
+  {
+    uint256 dropId = tokenDrops[tokenId];
+    Drop memory drop = drops[dropId];
+    uint256 supply = totalSupply[tokenId];
+
+    if ( block.timestamp < drop.saleStart || block.timestamp > drop.saleEnd ) {
+      revert SaleNotActive();
     }
 
-    _mint(to, tokenId, quantity, '');
-    totalSupply[tokenId] += quantity;
+    if ( supply + quantity > drop.maxTokens ) {
+      revert MintExceedsMaxSupply();
+    }
 
-    if ( fee != 0 || commission != 0 ) {
-      (bool success, ) = payable(IFeeManager(feeManager).recipient()).call{value: fee + commission}("");
+    if ( balanceOf[to][tokenId] + quantity > drop.maxTokensPerOwner ) {
+      revert MintExceedsMaxTokensPerOwner();
+    }
+  }
+
+  /**
+   * @dev Internal function to transfer fees to the fee manager.
+   * @param fees The amount of funds to transfer.
+   */
+  function _transferFees(uint256 fees) internal {
+    if ( fees > 0 ) {
+      (bool success, ) = payable(IFeeManager(feeManager).recipient()).call{value: fees}("");
       if ( ! success ) {
         revert FeeTransferFailed();
       }
     }
+  }
 
-    if ( msg.value > totalPrice ) {
-      (bool success, ) = payable(msg.sender).call{value: msg.value - totalPrice}("");
+  /**
+   * @dev Internal function to transfer excess funds to the caller.
+   * @param refund The amount of funds to transfer.
+   */
+  function _transferRefund(uint256 refund) internal {
+    if ( refund > 0 ) {
+      (bool success, ) = payable(msg.sender).call{value: refund}("");
       if ( ! success ) {
         revert RefundFailed();
       }

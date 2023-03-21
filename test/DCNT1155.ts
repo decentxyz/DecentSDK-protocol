@@ -443,6 +443,52 @@ describe("DCNT1155", async () => {
     });
   });
 
+  describe("mintBatch()", async () => {
+    it("should allow minting a batch of tokens", async () => {
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCaps,
+        isSoulbound,
+        startTokenId,
+        endTokenId,
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
+      );
+
+      const numDrops = 10;
+      const owners = Array(numDrops).fill(addr1.address);
+      const tokenIds = Array.from(Array(numDrops).keys());
+      const quantities = Array(numDrops).fill(ethers.BigNumber.from(1));
+
+      await freshNFT.mintBatch(
+        addr1.address,
+        tokenIds,
+        quantities,
+        { value: tokenPrice.mul(numDrops) }
+      );
+
+      const balances = await freshNFT.balanceOfBatch(owners,tokenIds);
+      expect(balances).to.eql(quantities);
+    });
+  });
+
   describe("burn()", async () => {
     it("should reduce owner balance and total supply for a given tokenId", async () => {
       expect(await nft.balanceOf(addr2.address, 0)).to.equal(2);

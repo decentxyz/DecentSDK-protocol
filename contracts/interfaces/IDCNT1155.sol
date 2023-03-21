@@ -54,6 +54,16 @@ interface IDCNT1155 {
     TokenGateConfig tokenGate;         // Slot 4: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX 32 bytes
   }
 
+  /**
+   * @dev A parameter object mapping token IDs, drop IDs, and drops.
+   */
+  struct DropMap {
+    uint256[] tokenIds;
+    uint256[] tokenIdDropIds;
+    uint256[] dropIds;
+    Drop[] drops;
+  }
+
   /*
    * @dev Only admins can perform this action.
    */
@@ -162,10 +172,9 @@ interface IDCNT1155 {
    */
   function initialize(
     address _owner,
-    SeriesConfig memory _config,
+    SeriesConfig calldata _config,
     Drop calldata _defaultDrop,
-    Drop[] calldata _customDrops,
-    uint256[] calldata _customDropIds
+    DropMap calldata _dropOverrides
   ) external;
 
   /**
@@ -205,17 +214,9 @@ interface IDCNT1155 {
 
   /**
    * @dev Updates the drop configuration for the specified token IDs.
-   * @param _tokenIds The IDs of the tokens to update drop IDs for.
-   * @param _tokenIdDropIds The IDs of the drops to associate with the specified token IDs.
-   * @param _dropIds The IDs of the drops to update, use 0 to update the default drop configuration.
-   * @param _drops The updated drop configurations for the specified drop IDs.
+   * @param dropMap A parameter object mapping token IDs, drop IDs, and drops.
    */
-  function setDrops(
-    uint256[] calldata _tokenIds,
-    uint256[] calldata _tokenIdDropIds,
-    uint256[] calldata _dropIds,
-    Drop[] calldata _drops
-  ) external;
+  function setDrops(DropMap calldata dropMap) external;
 
   /**
    * @dev Gets the current price for the specified token. If a currency oracle is set,

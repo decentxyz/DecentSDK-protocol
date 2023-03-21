@@ -752,11 +752,11 @@ describe("DCNT1155", async () => {
       let drop = await nft.drops(0);
       expect(drop.maxTokens).to.equal(maxTokens);
 
-      await nft.setDrops(
-        [], // tokenIds
-        [], // tokenIdDropIds
-        [0], // dropIds
-        [{
+      await nft.setDrops({
+        tokenIds: [],
+        tokenIdDropIds: [],
+        dropIds: [0],
+        drops: [{
           maxTokens: maxTokens*2,
           tokenPrice,
           maxTokensPerOwner,
@@ -767,7 +767,7 @@ describe("DCNT1155", async () => {
           saleEnd,
           tokenGate: tokenGateConfig
         }]
-      );
+      });
 
       drop = await nft.drops(0);
       expect(drop.maxTokens).to.equal(maxTokens*2);
@@ -805,11 +805,11 @@ describe("DCNT1155", async () => {
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
-        freshNFT.setDrops(
-          [], // tokenIds
-          [], // tokenIdDropIds
-          [0], // dropIds
-          [{
+        freshNFT.setDrops({
+          tokenIds: [],
+          tokenIdDropIds: [],
+          dropIds: [0],
+          drops: [{
             maxTokens: maxTokens*2,
             tokenPrice,
             maxTokensPerOwner,
@@ -820,7 +820,7 @@ describe("DCNT1155", async () => {
             saleEnd,
             tokenGate: tokenGateConfig
           }]
-        )
+        })
       ).to.be.revertedWithCustomError(
         freshNFT,
         'CapsAreLocked'
@@ -830,11 +830,11 @@ describe("DCNT1155", async () => {
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
-        freshNFT.setDrops(
-          [], // tokenIds
-          [], // tokenIdDropIds
-          [0], // dropIds
-          [{
+        freshNFT.setDrops({
+          tokenIds: [],
+          tokenIdDropIds: [],
+          dropIds: [0],
+          drops: [{
             maxTokens: maxTokens*2,
             tokenPrice,
             maxTokensPerOwner,
@@ -845,7 +845,7 @@ describe("DCNT1155", async () => {
             saleEnd,
             tokenGate: tokenGateConfig
           }]
-        )
+        })
       ).to.be.revertedWithCustomError(
         freshNFT,
         'CapsAreLocked'
@@ -854,11 +854,11 @@ describe("DCNT1155", async () => {
 
     it("should prevent non-admin from setting drops", async () => {
       await expect(
-        nft.connect(addr2).setDrops(
-          [], // tokenIds
-          [], // tokenIdDropIds
-          [0], // dropIds
-          [{
+        nft.connect(addr2).setDrops({
+          tokenIds: [],
+          tokenIdDropIds: [],
+          dropIds: [0],
+          drops: [{
             maxTokens,
             tokenPrice,
             maxTokensPerOwner,
@@ -869,7 +869,7 @@ describe("DCNT1155", async () => {
             saleEnd,
             tokenGate: tokenGateConfig
           }]
-        )
+        })
       ).to.be.revertedWithCustomError(
         nft,
         'OnlyAdmin'

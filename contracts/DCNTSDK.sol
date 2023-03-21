@@ -171,8 +171,7 @@ contract DCNTSDK is Ownable {
   function deployDCNT1155(
     IDCNT1155.SeriesConfig calldata _config,
     IDCNT1155.Drop calldata _defaultDrop,
-    IDCNT1155.Drop[] calldata _customDrops,
-    uint256[] calldata _customDropIds
+    IDCNT1155.DropMap calldata _dropOverrides
   ) external returns (address clone) {
     clone = Clones.clone(DCNT1155Implementation);
     (bool success, ) = clone.call(
@@ -181,14 +180,17 @@ contract DCNTSDK is Ownable {
           "address,"
           "(string,string,string,string,uint128,uint128,uint16,address,address,address,bool,bool),"
           "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8)),"
-          "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[],"
-          "uint256[]"
+          "("
+            "uint256[],"
+            "uint256[],"
+            "uint256[],"
+            "(uint32,uint32,uint32,uint32,uint32,uint32,uint96,bytes32,(address,uint88,uint8))[]"
+          ")"
         ")",
         msg.sender,
         _config,
         _defaultDrop,
-        _customDrops,
-        _customDropIds
+        _dropOverrides
       )
     );
     require(success);

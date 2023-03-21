@@ -255,12 +255,19 @@ export type DropConfig = {
   maxTokens: number,
   tokenPrice: BigNumber,
   maxTokensPerOwner: number,
-  presaleMerkleRoot: string | null,
+  presaleMerkleRoot: string,
   presaleStart: number,
   presaleEnd: number,
   saleStart: number,
   saleEnd: number | BigNumber,
-  tokenGateConfig: TokenGateConfig | null
+  tokenGateConfig: TokenGateConfig
+}
+
+export type DropMap = {
+  tokenIds: number[];
+  tokenIdDropIds: number[];
+  dropIds: number[];
+  drops: DropConfig[];
 }
 
 export const deployDCNT1155 = async (
@@ -278,8 +285,7 @@ export const deployDCNT1155 = async (
   contractURI: string,
   metadataURI: string,
   defaultDrop: DropConfig,
-  customDrops: DropConfig[] = [],
-  customDropIds: number[] = []
+  dropOverrides: DropMap | null,
 ) => {
   const deployTx = await decentSDK.deployDCNT1155(
     {
@@ -305,18 +311,12 @@ export const deployDCNT1155 = async (
         saleType: 0,
       }
     },
-    customDrops.map(customDrop => {
-      return {
-        ...customDrop,
-        presaleMerkleRoot: customDrop.presaleMerkleRoot || ethers.constants.HashZero,
-        tokenGate: customDrop.tokenGateConfig || {
-          tokenAddress: ethers.constants.AddressZero,
-          minBalance: 0,
-          saleType: 0,
-        }
-      }
-    }), // custom drops
-    customDropIds // custom drop ids
+    dropOverrides || {
+      tokenIds: [],
+      tokenIdDropIds: [],
+      dropIds: [],
+      drops: [],
+    }
   );
 
   const receipt = await deployTx.wait();

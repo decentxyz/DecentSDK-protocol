@@ -90,15 +90,13 @@ contract DCNT1155 is
   bool public hasAdjustableCaps;
 
   /**
-   * @dev An array of drop configurations defining each token with the series.
-   * Adding a drop creates a new token with a token ID equal to its index in this array.
+   * @dev Mapping of token IDs to drop IDs.
    */
-  // Drop[] public drops;
+  mapping(uint256 => uint256) public tokenDrops;
 
-  // mapping(tokenId => dropId)
-  mapping(uint256 => uint256) public tokenIdToDropId;
-
-  // mapping(dropId => drop)
+  /**
+   * @dev Mapping of drop IDs to drop configurations.
+   */
   mapping(uint256 => Drop) public drops;
 
   /*
@@ -122,7 +120,7 @@ contract DCNT1155 is
    * @param isPresale A boolean indicating whether the sale type for is presale or primary sale.
    */
   modifier verifyTokenGate(uint256 tokenId, bool isPresale) {
-    uint256 dropId = tokenIdToDropId[tokenId];
+    uint256 dropId = tokenDrops[tokenId];
     TokenGateConfig memory tokenGate = drops[dropId].tokenGate;
     if (
         tokenGate.tokenAddress != address(0)
@@ -151,16 +149,16 @@ contract DCNT1155 is
 
   /**
    * @dev Initializes the contract with the specified parameters.
-   * param _owner The owner of the contract.
-   * param _config The configuration for the contract.
-   * param _drops The drop configurations for the initial tokens.
+   * @param _owner The owner of the contract.
+   * @param _config The configuration for the contract.
+   * @param _defaultDrop The default drop configuration for all tokens.
+   * @param _dropOverrides Optional mapping of custom drop configurations.
    */
   function initialize(
     address _owner,
     SeriesConfig calldata _config,
     Drop calldata _defaultDrop,
-    Drop[] calldata _customDrops,
-    uint256[] calldata _customDropIds
+    DropMap calldata _dropOverrides
   ) public initializer {
     _transferOwnership(_owner);
     _grantRole(DEFAULT_ADMIN_ROLE, _owner);
@@ -174,35 +172,9 @@ contract DCNT1155 is
     isSoulbound = _config.isSoulbound;
     feeManager = _config.feeManager;
     currencyOracle = AggregatorV3Interface(_config.currencyOracle);
-
-    drops[0] = _defaultDrop;
     setPackedTokenRange(_config.startTokenId, _config.endTokenId);
-
-    uint256 numberOfCustomDrops = _customDrops.length;
-    if ( numberOfCustomDrops != _customDropIds.length ) {
-      revert ArrayLengthMismatch();
-    }
-
-    for (uint256 i = 0; i < numberOfCustomDrops; i++) {
-      drops[_customDropIds[i]] = _customDrops[i];
-    }
-  }
-
-  function setPackedTokenRange(uint128 startTokenId, uint128 endTokenId) public {
-    packedTokenRange = uint256(startTokenId) << 128 | uint256(endTokenId);
-  }
-
-  function getUnpackedTokenRange() public view returns (uint128, uint128) {
-    uint128 endTokenId = uint128(packedTokenRange & type(uint128).max);
-    uint128 startTokenId = uint128(packedTokenRange >> 128);
-    return (startTokenId, endTokenId);
-  }
-
-  function _checkValidTokenId(uint256 tokenId) internal view {
-    (uint128 startTokenId, uint128 endTokenId) = getUnpackedTokenRange();
-    if ( startTokenId > tokenId || tokenId > endTokenId ) {
-      revert NonexistentToken();
-    }
+    drops[0] = _defaultDrop;
+    _setDropMap(_dropOverrides);
   }
 
   /**
@@ -265,42 +237,81 @@ contract DCNT1155 is
     _contractURI = contractURI_;
   }
 
-  /**
-   * @dev Updates the drop configuration for the specified token IDs.
-   * @param _tokenIds The IDs of the tokens to update drop IDs for.
-   * @param _tokenIdDropIds The IDs of the drops which will be mapped by the specified token IDs.
-   * @param _dropIds The IDs of the drops to update, use 0 to update the default drop configuration.
-   * @param _drops The updated drop configurations for the specified drop IDs.
-   */
-  function setDrops(
-    uint256[] calldata _tokenIds,
-    uint256[] calldata _tokenIdDropIds,
-    uint256[] calldata _dropIds,
-    Drop[] calldata _drops
-  ) external onlyAdmin {
-    if ( _tokenIds.length != _tokenIdDropIds.length || _dropIds.length != _drops.length ) {
+  function setPackedTokenRange(uint128 startTokenId, uint128 endTokenId) public {
+    packedTokenRange = uint256(startTokenId) << 128 | uint256(endTokenId);
+  }
+
+  function getUnpackedTokenRange() public view returns (uint128, uint128) {
+    uint128 endTokenId = uint128(packedTokenRange & type(uint128).max);
+    uint128 startTokenId = uint128(packedTokenRange >> 128);
+    return (startTokenId, endTokenId);
+  }
+
+  function _checkValidTokenId(uint256 tokenId) internal view {
+    (uint128 startTokenId, uint128 endTokenId) = getUnpackedTokenRange();
+    if ( startTokenId > tokenId || tokenId > endTokenId ) {
+      revert NonexistentToken();
+    }
+  }
+
+  function _setDropMap(DropMap calldata dropMap) internal {
+    uint256 numberOfTokens = dropMap.tokenIds.length;
+    uint256 numberOfDrops = dropMap.dropIds.length;
+
+    if (
+        numberOfTokens != dropMap.tokenIdDropIds.length
+        || numberOfDrops != dropMap.drops.length
+    ) {
       revert ArrayLengthMismatch();
     }
 
-    for (uint i = 0; i < _tokenIds.length; i++) {
-      uint256 tokenId = _tokenIds[i];
-      uint256 dropId = _tokenIdDropIds[i];
+    for (uint256 i = 0; i < numberOfTokens; i++) {
+      uint256 tokenId = dropMap.tokenIds[i];
+      uint256 dropId = dropMap.tokenIdDropIds[i];
+      tokenDrops[tokenId] = dropId;
+    }
+
+    for (uint256 i = 0; i < numberOfDrops; i++) {
+      uint256 dropId = dropMap.dropIds[i];
+      Drop calldata drop = dropMap.drops[i];
+      drops[dropId] = drop;
+    }
+  }
+
+  /**
+   * @dev Updates the drop configurations for the specified token IDs.
+   * @param dropMap A parameter object mapping token IDs, drop IDs, and drops.
+   */
+  function setDrops(DropMap calldata dropMap) external onlyAdmin {
+    uint256 numberOfTokens = dropMap.tokenIds.length;
+    uint256 numberOfDrops = dropMap.dropIds.length;
+
+    if (
+        numberOfTokens != dropMap.tokenIdDropIds.length
+        || numberOfDrops != dropMap.drops.length
+    ) {
+      revert ArrayLengthMismatch();
+    }
+
+    for (uint256 i = 0; i < numberOfTokens; i++) {
+      uint256 tokenId = dropMap.tokenIds[i];
+      uint256 dropId = dropMap.tokenIdDropIds[i];
 
       if ( totalSupply[tokenId] > drops[dropId].maxTokens ) {
         revert CannotDecreaseCap();
       }
 
-      tokenIdToDropId[tokenId] = dropId;
+      tokenDrops[tokenId] = dropId;
     }
 
-    for (uint i = 0; i < _dropIds.length; i++) {
-      uint256 dropId = _dropIds[i];
+    for (uint256 i = 0; i < numberOfDrops; i++) {
+      uint256 dropId = dropMap.dropIds[i];
 
       if ( dropId != 0 ) {
         _checkValidTokenId(dropId);
       }
 
-      Drop memory _drop = _drops[i];
+      Drop calldata _drop = dropMap.drops[i];
       Drop storage drop = drops[dropId];
 
       if ( drop.maxTokens != _drop.maxTokens ) {
@@ -344,10 +355,10 @@ contract DCNT1155 is
         ? uint256(price) * (10 ** (18 - decimals))
         : uint256(price) / (10 ** (decimals - 18));
 
-      return uint256(drops[tokenIdToDropId[tokenId]].tokenPrice) * (10 ** 18) / exchangeRate;
+      return uint256(drops[tokenDrops[tokenId]].tokenPrice) * (10 ** 18) / exchangeRate;
     }
 
-    return drops[tokenIdToDropId[tokenId]].tokenPrice;
+    return drops[tokenDrops[tokenId]].tokenPrice;
   }
 
   /**
@@ -374,7 +385,7 @@ contract DCNT1155 is
     verifyTokenGate(tokenId, false)
     whenNotPaused
   {
-    Drop memory drop = drops[tokenIdToDropId[tokenId]];
+    Drop memory drop = drops[tokenDrops[tokenId]];
     uint256 price = tokenPrice(tokenId);
     uint256 fee;
     uint256 commission;
@@ -442,7 +453,7 @@ contract DCNT1155 is
   function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin {
     uint256 airdrops = recipients.length;
 
-    if ( totalSupply[tokenId] + airdrops > drops[tokenIdToDropId[tokenId]].maxTokens ) {
+    if ( totalSupply[tokenId] + airdrops > drops[tokenDrops[tokenId]].maxTokens ) {
       revert AirdropExceedsMaxSupply();
     }
 
@@ -475,7 +486,7 @@ contract DCNT1155 is
     verifyTokenGate(tokenId, true)
     whenNotPaused
   {
-    Drop memory drop = drops[tokenIdToDropId[tokenId]];
+    Drop memory drop = drops[tokenDrops[tokenId]];
     if ( block.timestamp < drop.presaleStart || block.timestamp > drop.presaleEnd ) {
       revert PresaleNotActive();
     }

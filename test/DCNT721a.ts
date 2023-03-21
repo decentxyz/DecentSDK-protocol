@@ -546,6 +546,91 @@ describe("DCNT721A", async () => {
     });
   });
 
+  describe("setTokenGate()", async() => {
+    it("should update the configuration for a token gate", async () => {
+      const gate1NFT = await deployMockERC721();
+      const gate2NFT = await deployMockERC721();
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        payoutAddress,
+        contractURI,
+        metadataURI,
+        null,
+        {
+          tokenAddress: gate1NFT.address,
+          minBalance: 1,
+          saleType: 0,
+        }
+      );
+
+      await freshNFT.setTokenGate({
+        tokenAddress: gate2NFT.address,
+        minBalance: 3,
+        saleType: 2,
+      });
+
+      const config = await freshNFT.tokenGateConfig();
+      expect(config.tokenAddress).to.equal(gate2NFT.address);
+      expect(config.minBalance).to.equal(3);
+      expect(config.saleType).to.equal(2);
+    });
+
+    it("should remove a token gate", async () => {
+      const gateNFT = await deployMockERC721();
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        payoutAddress,
+        contractURI,
+        metadataURI,
+        null,
+        {
+          tokenAddress: gateNFT.address,
+          minBalance: 1,
+          saleType: 0,
+        }
+      );
+
+      await expect(freshNFT.mint(addr1.address, 1, { value: tokenPrice })).to.be.revertedWith(
+        'do not own required token'
+      );
+
+      await freshNFT.setTokenGate({
+        tokenAddress: ethers.constants.AddressZero,
+        minBalance: 0,
+        saleType: 0,
+      });
+
+      await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
+      expect(await freshNFT.balanceOf(addr1.address)).to.equal(1);
+    });
+  });
+
   describe("flipSaleState()", async () => {
     it("should prevent non-admin from flipping state", async () => {
       await expect(nft.connect(addr2).flipSaleState()).to.be.revertedWith(

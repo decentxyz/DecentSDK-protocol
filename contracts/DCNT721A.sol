@@ -283,6 +283,10 @@ contract DCNT721A is
     return edition.saleEnd;
   }
 
+  function setTokenGate(TokenGateConfig calldata _tokenGateConfig) external onlyAdmin {
+    tokenGateConfig = _tokenGateConfig;
+  }
+
   ///change maximum number of tokens available to mint
   function adjustCap(uint32 newCap) external onlyAdmin {
     require(edition.hasAdjustableCap, 'cannot adjust size of this collection');

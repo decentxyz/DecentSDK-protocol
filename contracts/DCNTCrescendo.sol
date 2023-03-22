@@ -25,6 +25,7 @@ import "./interfaces/IMetadataRenderer.sol";
 import "./storage/CrescendoConfig.sol";
 import "./storage/MetadataConfig.sol";
 import "./utils/Splits.sol";
+import './utils/Version.sol';
 
 /// ========= Bonding Token =========
 
@@ -33,7 +34,8 @@ contract DCNTCrescendo is
   ERC1155,
   Initializable,
   Ownable,
-  Splits
+  Splits,
+  Version(3)
 {
   // Token name
   string private _name;

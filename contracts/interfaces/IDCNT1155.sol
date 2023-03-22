@@ -80,6 +80,11 @@ interface IDCNT1155 {
   error NonexistentToken();
 
   /*
+   * @dev The provided token range is invalid.
+   */
+  error InvalidTokenRange();
+
+  /*
    * @dev The token supply caps are locked and cannot be adjusted.
    */
   error CapsAreLocked();
@@ -212,11 +217,20 @@ interface IDCNT1155 {
    */
   function setContractURI(string memory contractURI_) external;
 
+
   /**
-   * @dev Updates the drop configuration for the specified token IDs.
-   * @param dropMap A parameter object mapping token IDs, drop IDs, and drops.
+   * @dev Returns the range of token IDs that are valid for this contract.
+   * @return startTokenId The starting token ID for this contract.
+   * @return endTokenId The ending token ID for this contract.
    */
-  function setDrops(DropMap calldata dropMap) external;
+  function tokenRange() external view returns (uint128 startTokenId, uint128 endTokenId);
+
+  /**
+   * @dev Creates new tokens and updates drop configurations for specified token IDs.
+   * @param newTokens Optional number of new token IDs to add to the existing token range.
+   * @param dropMap Optional parameter object mapping token IDs, drop IDs, and drops.
+   */
+  function setTokenDrops(uint128 newTokens, DropMap calldata dropMap) external;
 
   /**
    * @dev Gets the current price for the specified token. If a currency oracle is set,
@@ -241,6 +255,18 @@ interface IDCNT1155 {
    * @param quantity The quantity of tokens to mint.
    */
   function mint(uint256 tokenId, address to, uint256 quantity) external payable;
+
+  /**
+   * @dev Mints a batch of tokens to a specified address.
+   * @param tokenIds The IDs of the tokens to mint.
+   * @param to The address to which the minted tokens will be sent.
+   * @param quantities The quantities to mint of each token.
+   */
+  function mintBatch(
+    address to,
+    uint256[] calldata tokenIds,
+    uint256[] calldata quantities
+  ) external payable;
 
   /**
    * @dev Burns a specified quantity of tokens from the caller's account.

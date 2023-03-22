@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+require('hardhat-contract-sizer');
 require("dotenv").config();
 import './tasks'
 
@@ -83,6 +84,13 @@ const config: HardhatUserConfig = {
     enabled: true,
     gasPrice: 15
   },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+    only: [':DCNT'],
+  }
 };
 
 export default config;

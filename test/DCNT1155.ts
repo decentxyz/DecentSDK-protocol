@@ -100,7 +100,7 @@ describe("DCNT1155", async () => {
       expect(drop.presaleEnd).to.equal(presaleEnd);
       expect(drop.saleStart).to.equal(saleStart);
 
-      const [start, end] = await clone.getUnpackedTokenRange();
+      const [start, end] = await clone.tokenRange();
       expect(start).to.equal(startTokenId);
       expect(end).to.equal(endTokenId);
     });
@@ -187,13 +187,11 @@ describe("DCNT1155", async () => {
     });
   });
 
-
   describe("mintFee()", async () => {
     it("should return the mint fee", async () => {
-      const feeManager = await deployContract('FeeManager',[
-        tokenPrice.div(10), // 10% in wei
-        10_00 // 10% in BPS
-      ]);
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
 
       const freshNFT: Contract = await deployDCNT1155(
         sdk,
@@ -222,7 +220,7 @@ describe("DCNT1155", async () => {
         }
       );
 
-      expect(await freshNFT.mintFee(0, 1)).to.equal(tokenPrice.div(10));
+      expect(await freshNFT.mintFee(0, 1)).to.equal(fixedFee);
     });
   });
 
@@ -300,7 +298,7 @@ describe("DCNT1155", async () => {
     it("should payout fees and commission to the optional fee manager", async () => {
       const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
       const commissionBPS = 10_00; // 10% in BPS
-      const feeManager = await deployContract('FeeManager',[fixedFee, commissionBPS]);
+      const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
 
       const freshNFT = await deployDCNT1155(
         sdk,
@@ -445,14 +443,18 @@ describe("DCNT1155", async () => {
 
   describe("mintBatch()", async () => {
     it("should allow minting a batch of tokens", async () => {
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
+
       const freshNFT = await deployDCNT1155(
         sdk,
         name,
         symbol,
         hasAdjustableCaps,
         isSoulbound,
-        startTokenId,
-        endTokenId,
+        1,  // startTokenId
+        10, // endTokenId
         royaltyBPS,
         feeManager.address,
         payoutAddress,
@@ -474,14 +476,16 @@ describe("DCNT1155", async () => {
 
       const numDrops = 10;
       const owners = Array(numDrops).fill(addr1.address);
-      const tokenIds = Array.from(Array(numDrops).keys());
+      const tokenIds = Array.from(Array(numDrops), (e, i) => i + 1);
       const quantities = Array(numDrops).fill(ethers.BigNumber.from(1));
+      const mintFee = await freshNFT.mintFee(1, 10);
+      const totalCost = tokenPrice.mul(10).add(mintFee)
 
       await freshNFT.mintBatch(
         addr1.address,
         tokenIds,
         quantities,
-        { value: tokenPrice.mul(numDrops) }
+        { value: totalCost }
       );
 
       const balances = await freshNFT.balanceOfBatch(owners,tokenIds);
@@ -793,12 +797,78 @@ describe("DCNT1155", async () => {
     });
   });
 
-  describe("setDrops()", async () => {
+  describe("setTokenDrops()", async () => {
+    it("should increase the token range", async () => {
+      let start, endBefore, endAfter;
+      [start, endBefore] = await nft.tokenRange();
+      await nft.setTokenDrops(10, {
+          tokenIds: [],
+          tokenIdDropIds: [],
+          dropIds: [],
+          drops: [],
+      });
+      [start, endAfter] = await nft.tokenRange();
+      expect(endAfter).to.equal(endBefore.add(10))
+    });
+
+
+    it("should override drop configurations for specified tokens", async () => {
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCaps,
+        isSoulbound,
+        startTokenId,
+        1337,
+        royaltyBPS,
+        feeManager,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
+      );
+
+      const defaultDrop = await freshNFT.drops(0);
+      expect(defaultDrop.maxTokens).to.equal(maxTokens);
+
+      await freshNFT.setTokenDrops(0, {
+        tokenIds: [1337],
+        tokenIdDropIds: [1337],
+        dropIds: [1337],
+        drops: [{
+          maxTokens: maxTokens*2,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot: ethers.constants.HashZero,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGate: tokenGateConfig
+        }]
+      });
+
+      const drop = await freshNFT.drops(1337);
+      expect(drop.maxTokens).to.equal(maxTokens*2);
+    });
+
     it("should adjust the cap on nfts with an adjustable cap", async () => {
       let drop = await nft.drops(0);
       expect(drop.maxTokens).to.equal(maxTokens);
 
-      await nft.setDrops({
+      await nft.setTokenDrops(0, {
         tokenIds: [],
         tokenIdDropIds: [],
         dropIds: [0],
@@ -851,7 +921,7 @@ describe("DCNT1155", async () => {
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
-        freshNFT.setDrops({
+        freshNFT.setTokenDrops(0, {
           tokenIds: [],
           tokenIdDropIds: [],
           dropIds: [0],
@@ -876,7 +946,7 @@ describe("DCNT1155", async () => {
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
-        freshNFT.setDrops({
+        freshNFT.setTokenDrops(0, {
           tokenIds: [],
           tokenIdDropIds: [],
           dropIds: [0],
@@ -900,7 +970,7 @@ describe("DCNT1155", async () => {
 
     it("should prevent non-admin from setting drops", async () => {
       await expect(
-        nft.connect(addr2).setDrops({
+        nft.connect(addr2).setTokenDrops(0, {
           tokenIds: [],
           tokenIdDropIds: [],
           dropIds: [0],

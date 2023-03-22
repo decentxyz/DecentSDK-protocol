@@ -56,7 +56,7 @@ contract DCNT1155 is
   /*
    * @dev The packed range of valid token IDs.
    */
-  uint256 public packedTokenRange;
+  uint256 private _packedTokenRange;
 
   /*
    * @dev The base URI used to generate the URI for individual tokens.
@@ -147,6 +147,26 @@ contract DCNT1155 is
   }
 
   /**
+   * @dev Checks if a given token ID is within the valid range for this contract.
+   * @param tokenId The token ID to check.
+  */
+  modifier validTokenId(uint256 tokenId) {
+    _checkValidTokenId(tokenId);
+    _;
+  }
+
+  /**
+   * @dev Checks if a given token ID is within the valid range for this contract.
+   * @param tokenId The token ID to check.
+  */
+  function _checkValidTokenId(uint256 tokenId) internal view {
+    (uint128 startTokenId, uint128 endTokenId) = _getUnpackedTokenRange();
+    if ( startTokenId > tokenId || tokenId > endTokenId ) {
+      revert NonexistentToken();
+    }
+  }
+
+  /**
    * @dev Restricts access to only addresses with the DEFAULT_ADMIN_ROLE.
    */
   modifier onlyAdmin() {
@@ -181,7 +201,7 @@ contract DCNT1155 is
     isSoulbound = _config.isSoulbound;
     feeManager = _config.feeManager;
     currencyOracle = AggregatorV3Interface(_config.currencyOracle);
-    setPackedTokenRange(_config.startTokenId, _config.endTokenId);
+    _setPackedTokenRange(_config.startTokenId, _config.endTokenId);
     drops[0] = _defaultDrop;
     _setDropMap(_dropOverrides);
   }
@@ -225,7 +245,7 @@ contract DCNT1155 is
   function setURI(string memory uri_) external onlyAdmin {
     _uri = uri_;
 
-    (uint128 startTokenId, uint128 endTokenId) = getUnpackedTokenRange();
+    (uint128 startTokenId, uint128 endTokenId) = _getUnpackedTokenRange();
     for (uint256 i = startTokenId; i <= endTokenId; i++) {
       emit URI(_uri, i);
     }
@@ -246,23 +266,43 @@ contract DCNT1155 is
     _contractURI = contractURI_;
   }
 
-  function setPackedTokenRange(uint128 startTokenId, uint128 endTokenId) public {
-    packedTokenRange = uint256(startTokenId) << 128 | uint256(endTokenId);
+  /**
+   * @dev Returns the range of token IDs that are valid for this contract.
+   * @return startTokenId The starting token ID for this contract.
+   * @return endTokenId The ending token ID for this contract.
+   */
+  function tokenRange() external view returns (uint128 startTokenId, uint128 endTokenId) {
+    return _getUnpackedTokenRange();
   }
 
-  function getUnpackedTokenRange() public view returns (uint128, uint128) {
-    uint128 endTokenId = uint128(packedTokenRange & type(uint128).max);
-    uint128 startTokenId = uint128(packedTokenRange >> 128);
+  /**
+   * @dev Sets the packed range of token IDs that are valid for this contract.
+   * @param startTokenId The starting token ID for this contract.
+   * @param endTokenId The ending token ID for this contract.
+  */
+  function _setPackedTokenRange(uint128 startTokenId, uint128 endTokenId) internal {
+    if ( startTokenId > endTokenId ) {
+      revert InvalidTokenRange();
+    }
+
+    _packedTokenRange = uint256(startTokenId) << 128 | uint256(endTokenId);
+  }
+
+  /**
+   * @dev Returns the unpacked range of token IDs that are valid for this contract.
+   * @return startTokenId The starting token ID for this contract.
+   * @return endTokenId The ending token ID for this contract.
+  */
+  function _getUnpackedTokenRange() internal view returns (uint128, uint128) {
+    uint128 endTokenId = uint128(_packedTokenRange & type(uint128).max);
+    uint128 startTokenId = uint128(_packedTokenRange >> 128);
     return (startTokenId, endTokenId);
   }
 
-  function _checkValidTokenId(uint256 tokenId) internal view {
-    (uint128 startTokenId, uint128 endTokenId) = getUnpackedTokenRange();
-    if ( startTokenId > tokenId || tokenId > endTokenId ) {
-      revert NonexistentToken();
-    }
-  }
-
+  /**
+   * @dev Sets the drop configurations for the specified token IDs.
+   * @param dropMap A parameter object mapping token IDs, drop IDs, and drops.
+   */
   function _setDropMap(DropMap calldata dropMap) internal {
     uint256 numberOfTokens = dropMap.tokenIds.length;
     uint256 numberOfDrops = dropMap.dropIds.length;
@@ -277,21 +317,30 @@ contract DCNT1155 is
     for (uint256 i = 0; i < numberOfTokens; i++) {
       uint256 tokenId = dropMap.tokenIds[i];
       uint256 dropId = dropMap.tokenIdDropIds[i];
+      _checkValidTokenId(tokenId);
+      _checkValidTokenId(dropId);
       tokenDrops[tokenId] = dropId;
     }
 
     for (uint256 i = 0; i < numberOfDrops; i++) {
       uint256 dropId = dropMap.dropIds[i];
       Drop calldata drop = dropMap.drops[i];
+      _checkValidTokenId(dropId);
       drops[dropId] = drop;
     }
   }
 
   /**
-   * @dev Updates the drop configurations for the specified token IDs.
-   * @param dropMap A parameter object mapping token IDs, drop IDs, and drops.
+   * @dev Creates new tokens and updates drop configurations for specified token IDs.
+   * @param newTokens Optional number of new token IDs to add to the existing token range.
+   * @param dropMap Optional parameter object mapping token IDs, drop IDs, and drops.
    */
-  function setDrops(DropMap calldata dropMap) external onlyAdmin {
+  function setTokenDrops(uint128 newTokens, DropMap calldata dropMap) external onlyAdmin {
+    if ( newTokens > 0 ) {
+      (uint128 startTokenId, uint128 endTokenId) = _getUnpackedTokenRange();
+      _setPackedTokenRange(startTokenId, endTokenId + newTokens);
+    }
+
     uint256 numberOfTokens = dropMap.tokenIds.length;
     uint256 numberOfDrops = dropMap.dropIds.length;
 
@@ -305,6 +354,7 @@ contract DCNT1155 is
     for (uint256 i = 0; i < numberOfTokens; i++) {
       uint256 tokenId = dropMap.tokenIds[i];
       uint256 dropId = dropMap.tokenIdDropIds[i];
+      _checkValidTokenId(tokenId);
 
       if ( totalSupply[tokenId] > drops[dropId].maxTokens ) {
         revert CannotDecreaseCap();
@@ -349,7 +399,7 @@ contract DCNT1155 is
    * @param tokenId The ID of the token to get the price for.
    * @return The current price of the specified token.
    */
-  function tokenPrice(uint256 tokenId) public view returns (uint256) {
+  function tokenPrice(uint256 tokenId) public view validTokenId(tokenId) returns (uint256) {
     if ( address(currencyOracle) != address(0) ) {
       uint256 decimals = currencyOracle.decimals();
       (
@@ -376,7 +426,7 @@ contract DCNT1155 is
    * @param quantity The quantity of tokens used to calculate the minting fee.
    * @return The current fee for minting the specified token.
    */
-  function mintFee(uint256 tokenId, uint256 quantity) external view returns (uint256) {
+  function mintFee(uint256 tokenId, uint256 quantity) external view validTokenId(tokenId) returns (uint256) {
     return feeManager != address(0)
       ? IFeeManager(feeManager).calculateFee(tokenPrice(tokenId), quantity)
       : 0;
@@ -440,7 +490,7 @@ contract DCNT1155 is
       uint256 quantity = quantities[i];
       _verifyTokenGate(tokenId, false);
       _checkMintable(to, tokenId, quantity);
-      totalPrice += drops[tokenId].tokenPrice * quantity;
+      totalPrice += drops[tokenDrops[tokenId]].tokenPrice * quantity;
       totalQuantity += quantity;
       totalSupply[tokenId] += quantity;
     }
@@ -477,6 +527,7 @@ contract DCNT1155 is
     internal
     view
   {
+    _checkValidTokenId(tokenId);
     uint256 dropId = tokenDrops[tokenId];
     Drop memory drop = drops[dropId];
     uint256 supply = totalSupply[tokenId];

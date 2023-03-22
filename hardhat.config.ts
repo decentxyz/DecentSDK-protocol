@@ -81,13 +81,13 @@ const config: HardhatUserConfig = {
   gasReporter: {
     currency: 'USD',
     coinmarketcap: process.env.COINMARKETCAP_KEY,
-    enabled: true,
+    enabled: false,
     gasPrice: 15
   },
   contractSizer: {
     alphaSort: true,
     disambiguatePaths: false,
-    runOnCompile: true,
+    runOnCompile: false,
     strict: true,
     only: [':DCNT'],
   }

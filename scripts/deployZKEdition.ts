@@ -9,6 +9,7 @@ const DCNTSDK_ENDPOINT = '';
 const name = 'Token Name';
 const symbol = 'TOKEN';
 const hasAdjustableCap = false;
+const isSoulbound = false;
 const maxTokens = 25;
 const tokenPrice = ethers.utils.parseEther('0.01');
 const maxTokenPurchase = 2;
@@ -18,6 +19,7 @@ const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneMonth;
 const royaltyBPS = 10_00;
+const payoutAddress = ethers.constants.AddressZero;
 const contractURI = 'http://localhost/contract/';
 const metadataURI = "http://localhost/metadata/";
 const metadataRendererInit = {
@@ -45,6 +47,7 @@ async function main() {
     name,
     symbol,
     hasAdjustableCap,
+    isSoulbound,
     maxTokens,
     tokenPrice,
     maxTokenPurchase,
@@ -54,6 +57,7 @@ async function main() {
     saleStart,
     saleEnd,
     royaltyBPS,
+    payoutAddress,
     contractURI,
     metadataURI,
     metadataRendererInit,

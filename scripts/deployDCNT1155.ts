@@ -7,7 +7,7 @@ const DCNTSDK_ENDPOINT = '';
 // set up DCNT721A
 const name = 'Token Name';
 const symbol = 'TOKEN';
-const hasAdjustableCap = false;
+const hasAdjustableCaps = false;
 const isSoulbound = false;
 const maxTokens = 25;
 const tokenPrice = 1;
@@ -17,8 +17,11 @@ const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneMonth;
+const startTokenId = 0;
+const endTokenId = 1;
 const royaltyBPS = 10_00;
 const payoutAddress = ethers.constants.AddressZero;
+const feeManager = ethers.constants.AddressZero;
 const currencyOracle = ethers.constants.AddressZero;
 const contractURI = 'http://localhost/contract/';
 const metadataURI = "http://localhost/metadata/";
@@ -34,22 +37,27 @@ async function main() {
     DCNTSDK,
     name,
     symbol,
-    hasAdjustableCap,
+    hasAdjustableCaps,
     isSoulbound,
-    maxTokens,
-    tokenPrice,
-    maxTokensPerOwner,
-    presaleMerkleRoot,
-    presaleStart,
-    presaleEnd,
-    saleStart,
-    saleEnd,
+    startTokenId,
+    endTokenId,
     royaltyBPS,
+    feeManager,
     payoutAddress,
     currencyOracle,
     contractURI,
     metadataURI,
-    tokenGateConfig
+    {
+      maxTokens,
+      tokenPrice,
+      maxTokensPerOwner,
+      presaleMerkleRoot,
+      presaleStart,
+      presaleEnd,
+      saleStart,
+      saleEnd,
+      tokenGateConfig,
+    }
   );
   console.log("DCNT1155 deployed to: ", DCNT1155.address);
 }

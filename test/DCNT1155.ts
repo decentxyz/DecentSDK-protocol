@@ -92,7 +92,7 @@ describe("DCNT1155", async () => {
     it("should initialize state which would otherwise be set in constructor", async () => {
       expect(await clone.name()).to.equal(name);
       expect(await clone.symbol()).to.equal(symbol);
-      const drop = await clone.drops(0);
+      const drop = await clone.tokenDrop(0);
       expect(drop.maxTokens).to.equal(maxTokens);
       expect(drop.tokenPrice).to.equal(tokenPrice);
       expect(drop.maxTokensPerOwner).to.equal(maxTokensPerOwner);
@@ -138,7 +138,7 @@ describe("DCNT1155", async () => {
         }
       );
 
-      const { tokenGate } = await freshNFT.drops(0);
+      const { tokenGate } = await freshNFT.tokenDrop(0);
       expect(tokenGate.tokenAddress).to.equal(gateNFT.address);
       expect(tokenGate.minBalance).to.equal(1337);
       expect(tokenGate.saleType).to.equal(2);
@@ -811,6 +811,73 @@ describe("DCNT1155", async () => {
       expect(endAfter).to.equal(endBefore.add(10))
     });
 
+    it("should handle setting drops with a rolling release schedule", async () => {
+      const freshNFT = await deployDCNT1155(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCaps,
+        isSoulbound,
+        0,
+        4,
+        royaltyBPS,
+        feeManager,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart: theFuture.time(),
+          saleEnd: theFuture.time() + theFuture.oneDay,
+          tokenGateConfig
+        },
+        {
+          tokenIds: [1,2,3,4],
+          tokenIdDropIds: [1,2,3,4],
+          dropIds: [1,2,3,4],
+          drops: Array(4).fill(0).map((e, i) => {
+            const saleStart = theFuture.time() + (theFuture.oneDay*(i+1));
+            const saleEnd = theFuture.time() + (theFuture.oneDay*(i+2));
+            return {
+              maxTokens,
+              tokenPrice,
+              maxTokensPerOwner,
+              presaleMerkleRoot: presaleMerkleRoot || ethers.constants.HashZero,
+              presaleStart,
+              presaleEnd,
+              saleStart,
+              saleEnd,
+              tokenGate: tokenGateConfig
+            }
+          }),
+        }
+      );
+
+      for ( let i = 1; i <= 4; i++ ) {
+        const drop = await freshNFT.tokenDrop(i);
+
+        await expect(
+          freshNFT.mint(i, addr1.address, 1, { value: tokenPrice })
+        ).to.be.revertedWithCustomError(freshNFT, 'SaleNotActive');
+
+        await theFuture.travel(theFuture.oneDay);
+        await theFuture.arrive();
+        await freshNFT.mint(i, addr1.address, 1, { value: tokenPrice });
+      }
+
+      const numDrops = 4;
+      const owners = Array(numDrops).fill(addr1.address);
+      const tokenIds = Array.from(Array(numDrops), (e, i) => i + 1);
+      const quantities = Array(numDrops).fill(ethers.BigNumber.from(1));
+      const balances = await freshNFT.balanceOfBatch(owners,tokenIds);
+      expect(balances).to.eql(quantities);
+    });
 
     it("should override drop configurations for specified tokens", async () => {
       const freshNFT = await deployDCNT1155(
@@ -840,7 +907,7 @@ describe("DCNT1155", async () => {
         }
       );
 
-      const defaultDrop = await freshNFT.drops(0);
+      const defaultDrop = await freshNFT.tokenDrop(0);
       expect(defaultDrop.maxTokens).to.equal(maxTokens);
 
       await freshNFT.setTokenDrops(0, {
@@ -860,12 +927,12 @@ describe("DCNT1155", async () => {
         }]
       });
 
-      const drop = await freshNFT.drops(1337);
+      const drop = await freshNFT.tokenDrop(1337);
       expect(drop.maxTokens).to.equal(maxTokens*2);
     });
 
     it("should adjust the cap on nfts with an adjustable cap", async () => {
-      let drop = await nft.drops(0);
+      let drop = await nft.tokenDrop(0);
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await nft.setTokenDrops(0, {
@@ -885,7 +952,7 @@ describe("DCNT1155", async () => {
         }]
       });
 
-      drop = await nft.drops(0);
+      drop = await nft.tokenDrop(0);
       expect(drop.maxTokens).to.equal(maxTokens*2);
     });
 
@@ -917,7 +984,7 @@ describe("DCNT1155", async () => {
         }
       );
 
-      let drop = await freshNFT.drops(0);
+      let drop = await freshNFT.tokenDrop(0);
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(
@@ -942,7 +1009,7 @@ describe("DCNT1155", async () => {
         'CapsAreLocked'
       );
 
-      drop = await freshNFT.drops(0);
+      drop = await freshNFT.tokenDrop(0);
       expect(drop.maxTokens).to.equal(maxTokens);
 
       await expect(

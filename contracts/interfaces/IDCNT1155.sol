@@ -226,6 +226,13 @@ interface IDCNT1155 {
   function tokenRange() external view returns (uint128 startTokenId, uint128 endTokenId);
 
   /**
+   * @dev Returns the drop configuration for the specified token ID.
+   * @param tokenId The ID of the token to retrieve the drop configuration for.
+   * @return drop The drop configuration mapped to the specified token ID.
+   */
+  function tokenDrop(uint128 tokenId) external view returns (Drop memory);
+
+  /**
    * @dev Creates new tokens and updates drop configurations for specified token IDs.
    * @param newTokens Optional number of new token IDs to add to the existing token range.
    * @param dropMap Optional parameter object mapping token IDs, drop IDs, and drops.

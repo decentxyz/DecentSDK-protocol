@@ -23,12 +23,19 @@ contract FeeManager is IFeeManager, Ownable, Splits, Version(1) {
     commissionBPS = _commissionBPS;
   }
 
-  function calculateFee(uint256 /* salePrice */, uint256 quantity) external view returns (uint256) {
+  function _calculateFee(uint256 /* salePrice */, uint256 quantity) private view returns (uint256) {
     return fee == 0 ? 0 : fee * quantity;
   }
 
-  function calculateCommission(uint256 salePrice, uint256 quantity) external view returns (uint256) {
+  function _calculateCommission(uint256 salePrice, uint256 quantity) private view returns (uint256) {
     return commissionBPS == 0 ? 0 : (salePrice * commissionBPS / 100_00) * quantity;
+  }
+
+  function calculateFees(uint256 salePrice, uint256 quantity) external view returns (uint256 fees, uint256 commission) {
+    return (
+      _calculateFee(salePrice, quantity),
+      _calculateCommission(salePrice, quantity)
+    );
   }
 
   function recipient() external view returns (address) {

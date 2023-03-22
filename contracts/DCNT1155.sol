@@ -92,12 +92,12 @@ contract DCNT1155 is
   /**
    * @dev Mapping of token IDs to drop IDs.
    */
-  mapping(uint256 => uint256) public tokenDrops;
+  mapping(uint256 => uint256) public tokenDropIds;
 
   /**
    * @dev Mapping of drop IDs to drop configurations.
    */
-  mapping(uint256 => Drop) public drops;
+  mapping(uint256 => Drop) private _drops;
 
   /*
    * @dev Mapping of token ID to the total number of tokens in circulation for that ID.
@@ -130,8 +130,8 @@ contract DCNT1155 is
    * @param isPresale A boolean indicating whether the sale type for is presale or primary sale.
    */
   function _verifyTokenGate(uint tokenId, bool isPresale) internal {
-    uint256 dropId = tokenDrops[tokenId];
-    TokenGateConfig memory tokenGate = drops[dropId].tokenGate;
+    uint256 dropId = tokenDropIds[tokenId];
+    TokenGateConfig memory tokenGate = _drops[dropId].tokenGate;
     if (
         tokenGate.tokenAddress != address(0)
         && (
@@ -202,7 +202,7 @@ contract DCNT1155 is
     feeManager = _config.feeManager;
     currencyOracle = AggregatorV3Interface(_config.currencyOracle);
     _setPackedTokenRange(_config.startTokenId, _config.endTokenId);
-    drops[0] = _defaultDrop;
+    _drops[0] = _defaultDrop;
     _setDropMap(_dropOverrides);
   }
 
@@ -246,8 +246,10 @@ contract DCNT1155 is
     _uri = uri_;
 
     (uint128 startTokenId, uint128 endTokenId) = _getUnpackedTokenRange();
-    for (uint256 i = startTokenId; i <= endTokenId; i++) {
-      emit URI(_uri, i);
+    unchecked {
+      for (uint256 i = startTokenId; i <= endTokenId; i++) {
+        emit URI(_uri, i);
+      }
     }
   }
 
@@ -314,20 +316,31 @@ contract DCNT1155 is
       revert ArrayLengthMismatch();
     }
 
-    for (uint256 i = 0; i < numberOfTokens; i++) {
-      uint256 tokenId = dropMap.tokenIds[i];
-      uint256 dropId = dropMap.tokenIdDropIds[i];
-      _checkValidTokenId(tokenId);
-      _checkValidTokenId(dropId);
-      tokenDrops[tokenId] = dropId;
-    }
+    unchecked {
+      for (uint256 i = 0; i < numberOfTokens; i++) {
+        uint256 tokenId = dropMap.tokenIds[i];
+        uint256 dropId = dropMap.tokenIdDropIds[i];
+        _checkValidTokenId(tokenId);
+        _checkValidTokenId(dropId);
+        tokenDropIds[tokenId] = dropId;
+      }
 
-    for (uint256 i = 0; i < numberOfDrops; i++) {
-      uint256 dropId = dropMap.dropIds[i];
-      Drop calldata drop = dropMap.drops[i];
-      _checkValidTokenId(dropId);
-      drops[dropId] = drop;
+      for (uint256 i = 0; i < numberOfDrops; i++) {
+        uint256 dropId = dropMap.dropIds[i];
+        Drop calldata drop = dropMap.drops[i];
+        _checkValidTokenId(dropId);
+        _drops[dropId] = drop;
+      }
     }
+  }
+
+  /**
+   * @dev Returns the drop configuration for the specified token ID.
+   * @param tokenId The ID of the token to retrieve the drop configuration for.
+   * @return drop The drop configuration mapped to the specified token ID.
+   */
+  function tokenDrop(uint128 tokenId) external view returns (Drop memory) {
+    return _drops[tokenDropIds[tokenId]];
   }
 
   /**
@@ -351,45 +364,47 @@ contract DCNT1155 is
       revert ArrayLengthMismatch();
     }
 
-    for (uint256 i = 0; i < numberOfTokens; i++) {
-      uint256 tokenId = dropMap.tokenIds[i];
-      uint256 dropId = dropMap.tokenIdDropIds[i];
-      _checkValidTokenId(tokenId);
+    unchecked {
+      for (uint256 i = 0; i < numberOfTokens; i++) {
+        uint256 tokenId = dropMap.tokenIds[i];
+        uint256 dropId = dropMap.tokenIdDropIds[i];
+        _checkValidTokenId(tokenId);
 
-      if ( totalSupply[tokenId] > drops[dropId].maxTokens ) {
-        revert CannotDecreaseCap();
-      }
-
-      tokenDrops[tokenId] = dropId;
-    }
-
-    for (uint256 i = 0; i < numberOfDrops; i++) {
-      uint256 dropId = dropMap.dropIds[i];
-
-      if ( dropId != 0 ) {
-        _checkValidTokenId(dropId);
-      }
-
-      Drop calldata _drop = dropMap.drops[i];
-      Drop storage drop = drops[dropId];
-
-      if ( drop.maxTokens != _drop.maxTokens ) {
-        if ( ! hasAdjustableCaps ) {
-          revert CapsAreLocked();
-        }
-        if ( _drop.maxTokens < drop.maxTokens ) {
+        if ( totalSupply[tokenId] > _drops[dropId].maxTokens ) {
           revert CannotDecreaseCap();
         }
+
+        tokenDropIds[tokenId] = dropId;
       }
 
-      drop.maxTokens = _drop.maxTokens;
-      drop.tokenPrice = _drop.tokenPrice;
-      drop.maxTokensPerOwner = _drop.maxTokensPerOwner;
-      drop.presaleMerkleRoot = _drop.presaleMerkleRoot;
-      drop.presaleStart = _drop.presaleStart;
-      drop.presaleEnd = _drop.presaleEnd;
-      drop.saleStart = _drop.saleStart;
-      drop.saleEnd = _drop.saleEnd;
+      for (uint256 i = 0; i < numberOfDrops; i++) {
+        uint256 dropId = dropMap.dropIds[i];
+
+        if ( dropId != 0 ) {
+          _checkValidTokenId(dropId);
+        }
+
+        Drop calldata _drop = dropMap.drops[i];
+        Drop storage drop = _drops[dropId];
+
+        if ( drop.maxTokens != _drop.maxTokens ) {
+          if ( ! hasAdjustableCaps ) {
+            revert CapsAreLocked();
+          }
+          if ( _drop.maxTokens < drop.maxTokens ) {
+            revert CannotDecreaseCap();
+          }
+        }
+
+        drop.maxTokens = _drop.maxTokens;
+        drop.tokenPrice = _drop.tokenPrice;
+        drop.maxTokensPerOwner = _drop.maxTokensPerOwner;
+        drop.presaleMerkleRoot = _drop.presaleMerkleRoot;
+        drop.presaleStart = _drop.presaleStart;
+        drop.presaleEnd = _drop.presaleEnd;
+        drop.saleStart = _drop.saleStart;
+        drop.saleEnd = _drop.saleEnd;
+      }
     }
   }
 
@@ -414,22 +429,22 @@ contract DCNT1155 is
         ? uint256(price) * (10 ** (18 - decimals))
         : uint256(price) / (10 ** (decimals - 18));
 
-      return uint256(drops[tokenDrops[tokenId]].tokenPrice) * (10 ** 18) / exchangeRate;
+      return uint256(_drops[tokenDropIds[tokenId]].tokenPrice) * (10 ** 18) / exchangeRate;
     }
 
-    return drops[tokenDrops[tokenId]].tokenPrice;
+    return _drops[tokenDropIds[tokenId]].tokenPrice;
   }
 
   /**
    * @dev Gets the current minting fee for the specified token.
    * @param tokenId The ID of the token to get the minting fee for.
    * @param quantity The quantity of tokens used to calculate the minting fee.
-   * @return The current fee for minting the specified token.
+   * @return fee The current fee for minting the specified token.
    */
-  function mintFee(uint256 tokenId, uint256 quantity) external view validTokenId(tokenId) returns (uint256) {
-    return feeManager != address(0)
-      ? IFeeManager(feeManager).calculateFee(tokenPrice(tokenId), quantity)
-      : 0;
+  function mintFee(uint256 tokenId, uint256 quantity) external view validTokenId(tokenId) returns (uint256 fee) {
+    if ( feeManager != address(0) ) {
+      (fee, ) = IFeeManager(feeManager).calculateFees(tokenPrice(tokenId), quantity);
+    }
   }
 
   /**
@@ -450,8 +465,7 @@ contract DCNT1155 is
     uint256 commission;
 
     if ( feeManager != address(0) ) {
-      fee = IFeeManager(feeManager).calculateFee(price, quantity);
-      commission = IFeeManager(feeManager).calculateCommission(price, quantity);
+      (fee, commission) = IFeeManager(feeManager).calculateFees(price, quantity);
     }
 
     uint256 totalPrice = (price * quantity) + fee;
@@ -485,22 +499,23 @@ contract DCNT1155 is
     uint256 totalQuantity;
     uint256 numberOfTokens = tokenIds.length;
 
-    for (uint256 i = 0; i < numberOfTokens; i++) {
-      uint256 tokenId = tokenIds[i];
-      uint256 quantity = quantities[i];
-      _verifyTokenGate(tokenId, false);
-      _checkMintable(to, tokenId, quantity);
-      totalPrice += drops[tokenDrops[tokenId]].tokenPrice * quantity;
-      totalQuantity += quantity;
-      totalSupply[tokenId] += quantity;
+    unchecked {
+      for (uint256 i = 0; i < numberOfTokens; i++) {
+        uint256 tokenId = tokenIds[i];
+        uint256 quantity = quantities[i];
+        _verifyTokenGate(tokenId, false);
+        _checkMintable(to, tokenId, quantity);
+        totalPrice += _drops[tokenDropIds[tokenId]].tokenPrice * quantity;
+        totalQuantity += quantity;
+        totalSupply[tokenId] += quantity;
+      }
     }
 
     uint256 fee;
     uint256 commission;
 
     if ( feeManager != address(0) ) {
-      fee = IFeeManager(feeManager).calculateFee(totalPrice, totalQuantity);
-      commission = IFeeManager(feeManager).calculateCommission(totalPrice, totalQuantity);
+      (fee, commission) = IFeeManager(feeManager).calculateFees(totalPrice, totalQuantity);
       totalPrice += fee;
     }
 
@@ -528,8 +543,8 @@ contract DCNT1155 is
     view
   {
     _checkValidTokenId(tokenId);
-    uint256 dropId = tokenDrops[tokenId];
-    Drop memory drop = drops[dropId];
+    uint256 dropId = tokenDropIds[tokenId];
+    Drop memory drop = _drops[dropId];
     uint256 supply = totalSupply[tokenId];
 
     if ( block.timestamp < drop.saleStart || block.timestamp > drop.saleEnd ) {
@@ -592,7 +607,7 @@ contract DCNT1155 is
   function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin {
     uint256 airdrops = recipients.length;
 
-    if ( totalSupply[tokenId] + airdrops > drops[tokenDrops[tokenId]].maxTokens ) {
+    if ( totalSupply[tokenId] + airdrops > _drops[tokenDropIds[tokenId]].maxTokens ) {
       revert AirdropExceedsMaxSupply();
     }
 
@@ -625,14 +640,12 @@ contract DCNT1155 is
     verifyTokenGate(tokenId, true)
     whenNotPaused
   {
-    Drop memory drop = drops[tokenDrops[tokenId]];
+    Drop memory drop = _drops[tokenDropIds[tokenId]];
     if ( block.timestamp < drop.presaleStart || block.timestamp > drop.presaleEnd ) {
       revert PresaleNotActive();
     }
 
-    uint256 supply = totalSupply[tokenId];
-
-    if ( supply + quantity > drop.maxTokens ) {
+    if ( totalSupply[tokenId] + quantity > drop.maxTokens ) {
       revert MintExceedsMaxSupply();
     }
 
@@ -652,7 +665,16 @@ contract DCNT1155 is
       revert PresaleVerificationFailed();
     }
 
-    if ( msg.value < pricePerToken * quantity ) {
+    uint256 fee;
+    uint256 commission;
+
+    if ( feeManager != address(0) ) {
+      (fee, commission) = IFeeManager(feeManager).calculateFees(pricePerToken, quantity);
+    }
+
+    uint256 totalPrice = (pricePerToken * quantity) + fee;
+
+    if ( msg.value < totalPrice ) {
       revert InsufficientFunds();
     }
 
@@ -662,6 +684,8 @@ contract DCNT1155 is
     }
 
     _mint(msg.sender, tokenId, quantity, '');
+    _transferFees(fee + commission);
+    _transferRefund(msg.value - totalPrice);
   }
 
   /**

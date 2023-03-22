@@ -9,9 +9,7 @@ interface IFeeManager {
 
   function setFees(uint256 _fee, uint256 _commissionBPS) external;
 
-  function calculateFee(uint256 salePrice, uint256 quantity) external view returns (uint256);
-
-  function calculateCommission(uint256 salePrice, uint256 quantity) external view returns (uint256);
+  function calculateFees(uint256 salePrice, uint256 quantity) external view returns (uint256 fee, uint256 commission);
 
   function recipient() external view returns (address);
 

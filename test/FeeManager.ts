@@ -77,19 +77,19 @@ describe("FeeManager", async () => {
 
   describe("calculateFee()", async () => {
     it("should return the caluclated fee for the specified price and quantity", async () => {
-      expect(await feeManager.calculateFee(tokenPrice, 1)).to.equal(fixedFee);
-      expect(await feeManager.calculateFee(tokenPrice, 5)).to.equal(fixedFee.mul(5));
+      let [fee] = await feeManager.calculateFees(tokenPrice, 1);
+      expect(fee).to.equal(fixedFee);
+      [fee] = await feeManager.calculateFees(tokenPrice, 5);
+      expect(fee).to.equal(fixedFee.mul(5));
     });
   });
 
   describe("calculateCommission()", async () => {
     it("should return the calculated commission for the specified price and quantity", async () => {
-      expect(
-        await feeManager.calculateCommission(tokenPrice, 1)
-      ).to.equal(tokenPrice.mul(commissionBPS).div(100_00));
-      expect(
-        await feeManager.calculateCommission(tokenPrice, 5)
-      ).to.equal(tokenPrice.mul(commissionBPS).div(100_00).mul(5));
+      let [, commission] = await feeManager.calculateFees(tokenPrice, 1)
+      expect(commission).to.equal(tokenPrice.mul(commissionBPS).div(100_00));
+      [, commission] = await feeManager.calculateFees(tokenPrice, 5)
+      expect(commission).to.equal(tokenPrice.mul(commissionBPS).div(100_00).mul(5));
     });
   });
 

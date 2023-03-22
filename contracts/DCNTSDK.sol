@@ -19,7 +19,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/proxy/Clones.sol";
 
 import "./interfaces/IDCNTRegistry.sol";
-import "./interfaces/IDCNT1155.sol";
+import "./interfaces/IDCNTSeries.sol";
 import "./storage/EditionConfig.sol";
 import "./storage/MetadataConfig.sol";
 import "./storage/TokenGateConfig.sol";
@@ -30,7 +30,7 @@ contract DCNTSDK is Ownable {
   /// @notice implementation addresses for base contracts
   address public DCNT721AImplementation;
   address public DCNT4907AImplementation;
-  address public DCNT1155Implementation;
+  address public DCNTSeriesImplementation;
   address public DCNTCrescendoImplementation;
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;
@@ -47,7 +47,7 @@ contract DCNTSDK is Ownable {
   /// @notice Emitted after successfully deploying a contract
   event DeployDCNT721A(address DCNT721A);
   event DeployDCNT4907A(address DCNT4907A);
-  event DeployDCNT1155(address DCNT1155);
+  event DeployDCNTSeries(address DCNTSeries);
   event DeployDCNTCrescendo(address DCNTCrescendo);
   event DeployDCNTVault(address DCNTVault);
   event DeployDCNTStaking(address DCNTStaking);
@@ -59,7 +59,7 @@ contract DCNTSDK is Ownable {
   constructor(
     address _DCNT721AImplementation,
     address _DCNT4907AImplementation,
-    address _DCNT1155Implementation,
+    address _DCNTSeriesImplementation,
     address _DCNTCrescendoImplementation,
     address _DCNTVaultImplementation,
     address _DCNTStakingImplementation,
@@ -69,7 +69,7 @@ contract DCNTSDK is Ownable {
   ) {
     DCNT721AImplementation = _DCNT721AImplementation;
     DCNT4907AImplementation = _DCNT4907AImplementation;
-    DCNT1155Implementation = _DCNT1155Implementation;
+    DCNTSeriesImplementation = _DCNTSeriesImplementation;
     DCNTCrescendoImplementation = _DCNTCrescendoImplementation;
     DCNTVaultImplementation = _DCNTVaultImplementation;
     DCNTStakingImplementation = _DCNTStakingImplementation;
@@ -168,12 +168,12 @@ contract DCNTSDK is Ownable {
   }
 
   // deploy and initialize an erc1155 clone
-  function deployDCNT1155(
-    IDCNT1155.SeriesConfig calldata _config,
-    IDCNT1155.Drop calldata _defaultDrop,
-    IDCNT1155.DropMap calldata _dropOverrides
+  function deployDCNTSeries(
+    IDCNTSeries.SeriesConfig calldata _config,
+    IDCNTSeries.Drop calldata _defaultDrop,
+    IDCNTSeries.DropMap calldata _dropOverrides
   ) external returns (address clone) {
-    clone = Clones.clone(DCNT1155Implementation);
+    clone = Clones.clone(DCNTSeriesImplementation);
     (bool success, ) = clone.call(
       abi.encodeWithSignature(
         "initialize("
@@ -197,9 +197,9 @@ contract DCNTSDK is Ownable {
     IDCNTRegistry(contractRegistry).register(
       msg.sender,
       clone,
-      "DCNT1155"
+      "DCNTSeries"
     );
-    emit DeployDCNT1155(clone);
+    emit DeployDCNTSeries(clone);
   }
 
   // deploy and initialize a Crescendo clone

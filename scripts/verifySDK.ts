@@ -31,7 +31,7 @@ async function main() {
   const DCNTSDK = await ethers.getContractAt('DCNTSDK', addresses.DCNTSDK);
   const DCNT721A = await ethers.getContractAt('DCNT721A', addresses.DCNT721A);
   const DCNT4907A = await ethers.getContractAt('DCNT4907A', addresses.DCNT4907A);
-  const DCNT1155 = await ethers.getContractAt('DCNT1155', addresses.DCNT1155);
+  const DCNTSeries = await ethers.getContractAt('DCNTSeries', addresses.DCNTSeries);
   const DCNTCrescendo = await ethers.getContractAt('DCNTCrescendo', addresses.DCNTCrescendo);
   const DCNTVault = await ethers.getContractAt('DCNTVault', addresses.DCNTVault);
   const DCNTStaking = await ethers.getContractAt('DCNTStaking', addresses.DCNTStaking);
@@ -61,8 +61,8 @@ async function main() {
   console.log('\nVerifying DCNT4907A...');
   await run(`npx hardhat verify --network ${network.name} ${DCNT4907A.address}`);
 
-  console.log('\nVerifying DCNT1155...');
-  await run(`npx hardhat verify --network ${network.name} ${DCNT1155.address}`);
+  console.log('\nVerifying DCNTSeries...');
+  await run(`npx hardhat verify --network ${network.name} ${DCNTSeries.address}`);
 
   console.log('\nVerify DCNTCrescendo...\n');
   await run(`npx hardhat verify --network ${network.name} ${DCNTCrescendo.address}`);

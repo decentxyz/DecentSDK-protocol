@@ -1,17 +1,5 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.0;
-
-/*
- ______   _______  _______  _______  _       _________
-(  __  \ (  ____ \(  ____ \(  ____ \( (    /|\__   __/
-| (  \  )| (    \/| (    \/| (    \/|  \  ( |   ) (
-| |   ) || (__    | |      | (__    |   \ | |   | |
-| |   | ||  __)   | |      |  __)   | (\ \) |   | |
-| |   ) || (      | |      | (      | | \   |   | |
-| (__/  )| (____/\| (____/\| (____/\| )  \  |   | |
-(______/ (_______/(_______/(_______/|/    )_)   )_(
-
-*/
 
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
@@ -20,7 +8,7 @@ import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import './interfaces/IDCNT1155.sol';
+import './interfaces/IDCNTSeries.sol';
 import './interfaces/IFeeManager.sol';
 import './extensions/ERC1155Hooks.sol';
 import './utils/Splits.sol';
@@ -29,11 +17,12 @@ import './interfaces/ITokenWithBalance.sol';
 import './utils/Version.sol';
 
 /**
- * @title DCNT1155
+ * @title DCNTSeries
+ * @author Zev Nevo. Will Kantaros.
  * @dev An implementation of the ERC1155 multi-token standard.
  */
-contract DCNT1155 is
-  IDCNT1155,
+contract DCNTSeries is
+  IDCNTSeries,
   ERC1155Hooks,
   Initializable,
   Ownable,
@@ -226,7 +215,7 @@ contract DCNT1155 is
    * Clients should replace `{id}` with the actual token type ID when calling the function.
    * @dev unused @param tokenId ID of the token to retrieve the URI for.
    */
-  function uri(uint256) public view override(IDCNT1155, ERC1155) returns (string memory) {
+  function uri(uint256) public view override(IDCNTSeries, ERC1155) returns (string memory) {
     return _uri;
   }
 
@@ -773,7 +762,7 @@ contract DCNT1155 is
     public
     view
     virtual
-    override(IDCNT1155, ERC1155, AccessControl)
+    override(IDCNTSeries, ERC1155, AccessControl)
     returns (bool)
   {
     return
@@ -826,7 +815,7 @@ contract DCNT1155 is
   function setApprovalForAll(
     address operator,
     bool approved
-  ) public virtual override(IDCNT1155, ERC1155) onlyAllowedOperatorApproval(operator) {
+  ) public virtual override(IDCNTSeries, ERC1155) onlyAllowedOperatorApproval(operator) {
     super.setApprovalForAll(operator, approved);
   }
 }

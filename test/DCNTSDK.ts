@@ -8,7 +8,7 @@ import {
   deployImplementations,
   deployDCNT721A,
   deployDCNT4907A,
-  deployDCNT1155,
+  deployDCNTSeries,
   deployDCNTCrescendo,
   deployDCNTVault,
   deployDCNTStaking,
@@ -173,7 +173,7 @@ describe("DCNTSDK", async () => {
     });
   });
 
-  describe("deployDCNT1155()", async () => {
+  describe("deployDCNTSeries()", async () => {
     before(async () => {
       const name = 'Decent';
       const symbol = 'DCNT';
@@ -198,7 +198,7 @@ describe("DCNTSDK", async () => {
       const metadataRendererInit = null;
       const tokenGateConfig = null;
 
-      clone = await deployDCNT1155(
+      clone = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -226,11 +226,11 @@ describe("DCNTSDK", async () => {
       );
     });
 
-    it("should deploy and initialize a DCNT1155 contract", async () => {
+    it("should deploy and initialize a DCNTSeries contract", async () => {
       expect(clone.address).to.be.properAddress;
     });
 
-    it("should register the deployed DCNT1155 with the contract registry", async () => {
+    it("should register the deployed DCNTSeries with the contract registry", async () => {
       const deployments = await contractRegistry.query(owner.address);
       expect(deployments[2]).to.equal(clone.address);
     });

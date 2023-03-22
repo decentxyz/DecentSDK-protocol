@@ -28,7 +28,7 @@ contract DCNTVaultNFT is Ownable {
   /// @notice implementation addresses for base contracts
   address public DCNT721AImplementation;
   address public DCNT4907AImplementation;
-  address public DCNT1155Implementation;
+  address public DCNTSeriesImplementation;
   address public DCNTCrescendoImplementation;
   address public DCNTVaultImplementation;
   address public DCNTStakingImplementation;

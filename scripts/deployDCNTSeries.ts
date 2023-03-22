@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployDCNT1155, theFuture } from "../core";
+import { deployDCNTSeries, theFuture } from "../core";
 
 // set up DCNTSDK
 const DCNTSDK_ENDPOINT = '';
@@ -33,7 +33,7 @@ const tokenGateConfig = {
 
 async function main() {
   const DCNTSDK = await ethers.getContractAt("DCNTSDK", DCNTSDK_ENDPOINT);
-  const DCNT1155 = await deployDCNT1155(
+  const DCNTSeries = await deployDCNTSeries(
     DCNTSDK,
     name,
     symbol,
@@ -59,7 +59,7 @@ async function main() {
       tokenGateConfig,
     }
   );
-  console.log("DCNT1155 deployed to: ", DCNT1155.address);
+  console.log("DCNTSeries deployed to: ", DCNTSeries.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT1155, deployMockERC721, deployContract, theFuture, sortByAddress, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNTSeries, deployMockERC721, deployContract, theFuture, sortByAddress, base64decode } from "../core";
 import { MerkleTree } from "merkletreejs";
 const keccak256 = require("keccak256");
 
@@ -99,7 +99,7 @@ describe("FeeManager", async () => {
       const commissionBPS = 10_00; // 10% in BPS
       const feeManager = await deployContract('FeeManager',[fixedFee, commissionBPS]);
 
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,

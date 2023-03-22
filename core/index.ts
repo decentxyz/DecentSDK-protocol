@@ -33,7 +33,7 @@ export const theFuture = (() => {
 export type Implementations = {
   DCNT721A: Contract;
   DCNT4907A: Contract;
-  DCNT1155: Contract;
+  DCNTSeries: Contract;
   DCNTCrescendo: Contract;
   DCNTVault: Contract;
   DCNTStaking: Contract;
@@ -64,7 +64,7 @@ export const deployDCNTSDK = async (
   const decentSDK = await decentSDKFactory.deploy(
     implementations.DCNT721A.address,
     implementations.DCNT4907A.address,
-    implementations.DCNT1155.address,
+    implementations.DCNTSeries.address,
     implementations.DCNTCrescendo.address,
     implementations.DCNTVault.address,
     implementations.DCNTStaking.address,
@@ -87,7 +87,7 @@ export const deployDCNTMetadataRenderer = async (
 export const deployImplementations = async () => {
   const DCNT721A = await deployContract('DCNT721A');
   const DCNT4907A = await deployContract('DCNT4907A');
-  const DCNT1155 = await deployContract('DCNT1155');
+  const DCNTSeries = await deployContract('DCNTSeries');
   const DCNTCrescendo = await deployContract('DCNTCrescendo');
   const DCNTVault = await deployContract('DCNTVault');
   const DCNTStaking = await deployContract('DCNTStaking');
@@ -95,7 +95,7 @@ export const deployImplementations = async () => {
   return {
     DCNT721A,
     DCNT4907A,
-    DCNT1155,
+    DCNTSeries,
     DCNTCrescendo,
     DCNTVault,
     DCNTStaking,
@@ -270,7 +270,7 @@ export type DropMap = {
   drops: DropConfig[];
 }
 
-export const deployDCNT1155 = async (
+export const deployDCNTSeries = async (
   decentSDK: Contract,
   name: string,
   symbol: string,
@@ -287,7 +287,7 @@ export const deployDCNT1155 = async (
   defaultDrop: DropConfig,
   dropOverrides: DropMap | null,
 ) => {
-  const deployTx = await decentSDK.deployDCNT1155(
+  const deployTx = await decentSDK.deployDCNTSeries(
     {
       name,
       symbol,
@@ -320,8 +320,8 @@ export const deployDCNT1155 = async (
   );
 
   const receipt = await deployTx.wait();
-  const address = receipt.events.find((x: any) => x.event === 'DeployDCNT1155').args.DCNT1155;
-  return ethers.getContractAt("DCNT1155", address);
+  const address = receipt.events.find((x: any) => x.event === 'DeployDCNTSeries').args.DCNTSeries;
+  return ethers.getContractAt("DCNTSeries", address);
 }
 
 export const deployDCNTCrescendo = async (

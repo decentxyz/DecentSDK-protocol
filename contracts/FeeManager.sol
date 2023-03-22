@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.0;
 
 import '@openzeppelin/contracts/access/Ownable.sol';
@@ -18,7 +18,7 @@ contract FeeManager is IFeeManager, Ownable, Splits, Version(1) {
     commissionBPS = _commissionBPS;
   }
 
-  function setFees(uint256 _fee, uint256 _commissionBPS) external {
+  function setFees(uint256 _fee, uint256 _commissionBPS) external onlyOwner {
     fee = _fee;
     commissionBPS = _commissionBPS;
   }

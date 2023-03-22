@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { before, beforeEach } from "mocha";
 import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { deployDCNTSDK, deployDCNT1155, deployMockERC721, deployContract, theFuture, sortByAddress, base64decode } from "../core";
+import { deployDCNTSDK, deployDCNTSeries, deployMockERC721, deployContract, theFuture, sortByAddress, base64decode } from "../core";
 import { MerkleTree } from "merkletreejs";
 const keccak256 = require("keccak256");
 
@@ -18,7 +18,7 @@ const presaleMerkleRoot = null;
 const presaleStart = theFuture.time();
 const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
-const saleEnd = theFuture.time() + theFuture.oneYear;
+let saleEnd = theFuture.time() + theFuture.oneYear;
 const startTokenId = 0;
 const endTokenId = 1;
 const royaltyBPS = 10_00;
@@ -33,7 +33,7 @@ const tokenGateConfig = {
   saleType: 0,
 }
 
-describe("DCNT1155", async () => {
+describe("DCNTSeries", async () => {
   let owner: SignerWithAddress,
       addr1: SignerWithAddress,
       addr2: SignerWithAddress,
@@ -56,8 +56,9 @@ describe("DCNT1155", async () => {
       sdk = await deployDCNTSDK();
       parentIP = await deployMockERC721();
       await theFuture.reset();
-      saleStart = theFuture.time() + theFuture.oneDay
-      clone = await deployDCNT1155(
+      saleStart = theFuture.time() + theFuture.oneDay;
+      saleEnd = theFuture.time() + theFuture.oneYear;
+      clone = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -107,7 +108,7 @@ describe("DCNT1155", async () => {
 
     it("should optionally set configuration for a token gate", async () => {
       const gateNFT = await deployMockERC721();
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -154,7 +155,7 @@ describe("DCNT1155", async () => {
       const decimals = 2 + Math.floor(Math.random() * (35)) // random precision 10^2 through 10^36
       const ethPrice = ethers.BigNumber.from('1500' + '0'.repeat(decimals)); // ETH @ $1500.00 USD
       const oracle = await deployContract('MockV3Aggregator', [decimals, ethPrice]);
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -193,7 +194,7 @@ describe("DCNT1155", async () => {
       const commissionBPS = 10_00; // 10% in BPS
       const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
 
-      const freshNFT: Contract = await deployDCNT1155(
+      const freshNFT: Contract = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -228,7 +229,7 @@ describe("DCNT1155", async () => {
     before(async () => {
       [addr1, addr2, addr3, addr4] = await ethers.getSigners();
       const sdk = await deployDCNTSDK();
-      nft = await deployDCNT1155(
+      nft = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -300,7 +301,7 @@ describe("DCNT1155", async () => {
       const commissionBPS = 10_00; // 10% in BPS
       const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
 
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -344,7 +345,7 @@ describe("DCNT1155", async () => {
       const decimals = 2 + Math.floor(Math.random() * (35)) // random precision 10^2 through 10^36
       const ethPrice = ethers.BigNumber.from('1500' + '0'.repeat(decimals)); // ETH @ $1500.00 USD
       const oracle = await deployContract('MockV3Aggregator', [decimals, ethPrice]);
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -398,7 +399,7 @@ describe("DCNT1155", async () => {
 
     it("should optionally use a token gate to restrict mints for all sales", async () => {
       const gateNFT = await deployMockERC721();
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -447,7 +448,7 @@ describe("DCNT1155", async () => {
       const commissionBPS = 10_00; // 10% in BPS
       const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
 
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -513,7 +514,7 @@ describe("DCNT1155", async () => {
 
   describe("mintAirdrop()", async () => {
     it("should mint tokens to the specified recipients", async () => {
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -587,7 +588,7 @@ describe("DCNT1155", async () => {
 
       tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
 
-      presaleNFT = await deployDCNT1155(
+      presaleNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -717,7 +718,7 @@ describe("DCNT1155", async () => {
 
   describe("safeTransferFrom()", async () => {
     it('should allow transfers by the owner or approved operator', async function () {
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -763,7 +764,7 @@ describe("DCNT1155", async () => {
     });
 
     it('should revert for soulbound tokens', async function () {
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -812,7 +813,7 @@ describe("DCNT1155", async () => {
     });
 
     it("should handle setting drops with a rolling release schedule", async () => {
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -880,7 +881,7 @@ describe("DCNT1155", async () => {
     });
 
     it("should override drop configurations for specified tokens", async () => {
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -957,7 +958,7 @@ describe("DCNT1155", async () => {
     });
 
     it("should prevent adjusting the caps on nfts without adjustable caps", async () => {
-      const freshNFT = await deployDCNT1155(
+      const freshNFT = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -1107,7 +1108,7 @@ describe("DCNT1155", async () => {
 
   describe("distributeAndWithdraw()", async () => {
     before(async () => {
-      nft = await deployDCNT1155(
+      nft = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -1151,7 +1152,7 @@ describe("DCNT1155", async () => {
     });
 
     it("should revert if a split has not yet been created", async () => {
-      const freshNFT: Contract = await deployDCNT1155(
+      const freshNFT: Contract = await deployDCNTSeries(
         sdk,
         name,
         symbol,
@@ -1201,7 +1202,7 @@ describe("DCNT1155", async () => {
     });
 
     it('should set owner as the receiver, unless there is a split', async function () {
-      const freshNFT: Contract = await deployDCNT1155(
+      const freshNFT: Contract = await deployDCNTSeries(
         sdk,
         name,
         symbol,

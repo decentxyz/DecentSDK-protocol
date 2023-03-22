@@ -1,26 +1,15 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.0;
-
-/*
- ______   _______  _______  _______  _       _________
-(  __  \ (  ____ \(  ____ \(  ____ \( (    /|\__   __/
-| (  \  )| (    \/| (    \/| (    \/|  \  ( |   ) (
-| |   ) || (__    | |      | (__    |   \ | |   | |
-| |   | ||  __)   | |      |  __)   | (\ \) |   | |
-| |   ) || (      | |      | (      | | \   |   | |
-| (__/  )| (____/\| (____/\| (____/\| )  \  |   | |
-(______/ (_______/(_______/(_______/|/    )_)   )_(
-
-*/
 
 import '../extensions/ERC1155Hooks.sol';
 import '../storage/TokenGateConfig.sol';
 
 /**
- * @title IDCNT1155
+ * @title IDCNTSeries
+ * @author Zev Nevo. Will Kantaros.
  * @dev An implementation of the ERC1155 multi-token standard.
  */
-interface IDCNT1155 {
+interface IDCNTSeries {
   /*
    * @dev A parameter object used to set the initial configuration of a token series.
    */

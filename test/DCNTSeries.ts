@@ -709,8 +709,9 @@ describe("DCNTSeries", async () => {
 
     it("should prevent a user from minting", async () => {
       await nft.pause();
-      await expect(nft.connect(addr1).mint(0, addr1.address, 1)).to.be.revertedWith(
-        'Pausable: paused'
+      await expect(nft.connect(addr1).mint(0, addr1.address, 1)).to.be.revertedWithCustomError(
+        nft,
+        'Paused'
       );
       await nft.unpause();
     });

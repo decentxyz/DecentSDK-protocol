@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
-import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
@@ -13,6 +12,7 @@ import './interfaces/IFeeManager.sol';
 import './extensions/ERC1155Hooks.sol';
 import './utils/Splits.sol';
 import './utils/OperatorFilterer.sol';
+import './utils/Pausable.sol';
 import './interfaces/ITokenWithBalance.sol';
 import './utils/Version.sol';
 
@@ -184,7 +184,7 @@ contract DCNTSeries is
     _symbol = _config.symbol;
     _uri = _config.metadataURI;
     _contractURI = _config.contractURI;
-    setRoyaltyBPS(_config.royaltyBPS);
+    _setRoyaltyBPS(_config.royaltyBPS);
     payoutAddress = _config.payoutAddress;
     hasAdjustableCaps = _config.hasAdjustableCaps;
     isSoulbound = _config.isSoulbound;
@@ -358,6 +358,7 @@ contract DCNTSeries is
         uint256 tokenId = dropMap.tokenIds[i];
         uint256 dropId = dropMap.tokenIdDropIds[i];
         _checkValidTokenId(tokenId);
+        _checkValidTokenId(dropId);
 
         if ( totalSupply[tokenId] > _drops[dropId].maxTokens ) {
           revert CannotDecreaseCap();
@@ -593,7 +594,7 @@ contract DCNTSeries is
    * @param tokenId The ID of the token to mint.
    * @param recipients The list of addresses to receive the minted tokens.
    */
-  function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin {
+  function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin validTokenId(tokenId) {
     uint256 airdrops = recipients.length;
 
     if ( totalSupply[tokenId] + airdrops > _drops[tokenDropIds[tokenId]].maxTokens ) {
@@ -605,8 +606,8 @@ contract DCNTSeries is
         address to = recipients[i];
         _mint(to, tokenId, 1, '');
       }
+      totalSupply[tokenId] += airdrops;
     }
-    totalSupply[tokenId] += airdrops;
   }
 
   /**
@@ -627,9 +628,61 @@ contract DCNTSeries is
     external
     payable
     verifyTokenGate(tokenId, true)
+    validTokenId(tokenId)
     whenNotPaused
   {
+    _checkPresaleMintable(
+      tokenId,
+      quantity,
+      maxQuantity,
+      pricePerToken,
+      merkleProof
+    );
+
+    uint256 fee;
+    uint256 commission;
+
+    if ( feeManager != address(0) ) {
+      (fee, commission) = IFeeManager(feeManager).calculateFees(pricePerToken, quantity);
+    }
+
+    uint256 totalPrice = (pricePerToken * quantity) + fee;
+
+    if ( msg.value < totalPrice ) {
+      revert InsufficientFunds();
+    }
+
+    uint256 ownerBalance = balanceOf[msg.sender][tokenId];
+
+    if ( ownerBalance + quantity > maxQuantity ) {
+      revert MintExceedsMaxTokensPerOwner();
+    }
+
+    _mint(msg.sender, tokenId, quantity, '');
+    _transferFees(fee + commission);
+    _transferRefund(msg.value - totalPrice);
+  }
+
+  /**
+   * @dev Internal function to check if a drop can be presale minted.
+   * @param tokenId The ID of the token to mint.
+   * @param quantity The quantity of tokens to mint.
+   * @param maxQuantity The maximum quantity of tokens that can be minted.
+   * @param pricePerToken The price per token in wei.
+   * @param merkleProof The Merkle proof verifying that the presale buyer is eligible to mint tokens.
+   */
+  function _checkPresaleMintable(
+    uint256 tokenId,
+    uint256 quantity,
+    uint256 maxQuantity,
+    uint256 pricePerToken,
+    bytes32[] calldata merkleProof
+  )
+    internal
+    view
+  {
     Drop memory drop = _drops[tokenDropIds[tokenId]];
+
     if ( block.timestamp < drop.presaleStart || block.timestamp > drop.presaleEnd ) {
       revert PresaleNotActive();
     }
@@ -653,41 +706,19 @@ contract DCNTSeries is
     if ( ! presaleVerification ) {
       revert PresaleVerificationFailed();
     }
-
-    uint256 fee;
-    uint256 commission;
-
-    if ( feeManager != address(0) ) {
-      (fee, commission) = IFeeManager(feeManager).calculateFees(pricePerToken, quantity);
-    }
-
-    uint256 totalPrice = (pricePerToken * quantity) + fee;
-
-    if ( msg.value < totalPrice ) {
-      revert InsufficientFunds();
-    }
-
-    uint256 ownerBalance = balanceOf[msg.sender][tokenId];
-    if ( ownerBalance + quantity > maxQuantity ) {
-      revert MintExceedsMaxTokensPerOwner();
-    }
-
-    _mint(msg.sender, tokenId, quantity, '');
-    _transferFees(fee + commission);
-    _transferRefund(msg.value - totalPrice);
   }
 
   /**
    * @dev Pauses public minting.
    */
-  function pause() external onlyAdmin {
+  function pause() external whenNotPaused onlyAdmin {
     _pause();
   }
 
   /**
    * @dev Unpauses public minting.
    */
-  function unpause() external onlyAdmin {
+  function unpause() external whenPaused onlyAdmin {
     _unpause();
   }
 
@@ -715,14 +746,22 @@ contract DCNTSeries is
   }
 
   /**
-   * @dev Sets the royalty fee (ERC-2981: NFT Royalty Standard).
+   * @dev Internal function to set the royalty fee.
    * @param _royaltyBPS The royalty fee in basis points. (1/100th of a percent)
    */
-  function setRoyaltyBPS(uint16 _royaltyBPS) public {
+  function _setRoyaltyBPS(uint16 _royaltyBPS) internal {
     if ( _royaltyBPS > 100_00 ) {
       revert InvalidBPS();
     }
     royaltyBPS = _royaltyBPS;
+  }
+
+  /**
+   * @dev Sets the royalty fee (ERC-2981: NFT Royalty Standard).
+   * @param _royaltyBPS The royalty fee in basis points. (1/100th of a percent)
+   */
+  function setRoyaltyBPS(uint16 _royaltyBPS) external onlyAdmin {
+    _setRoyaltyBPS(_royaltyBPS);
   }
 
   /**

@@ -492,6 +492,60 @@ describe("DCNTSeries", async () => {
       const balances = await freshNFT.balanceOfBatch(owners,tokenIds);
       expect(balances).to.eql(quantities);
     });
+
+    it("should allow minting batches with dynamic pricing using price feed oracles", async () => {
+      const decimals = 2 + Math.floor(Math.random() * (35)) // random precision 10^2 through 10^36
+      const ethPrice = ethers.BigNumber.from('1500' + '0'.repeat(decimals)); // ETH @ $1500.00 USD
+      const oracle = await deployContract('MockV3Aggregator', [decimals, ethPrice]);
+      const freshNFT = await deployDCNTSeries(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCaps,
+        isSoulbound,
+        1,  // startTokenId
+        10, // endTokenId
+        royaltyBPS,
+        feeManager,
+        payoutAddress,
+        oracle.address,
+        contractURI,
+        metadataURI,
+        {
+          maxTokens,
+          tokenPrice: ethers.utils.parseEther('13.37'), // $13.37 USD
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
+      );
+
+      const currentPrice = await freshNFT.tokenPrice(1);
+      expect(currentPrice).to.equal(
+        ethers.utils.parseEther('13.37').div(1500) // $13.37 USD / ETH @ $1500.00 USD
+      );
+
+      const numDrops = 10;
+      const owners = Array(numDrops).fill(addr1.address);
+      const tokenIds = Array.from(Array(numDrops), (e, i) => i + 1);
+      const quantities = Array(numDrops).fill(ethers.BigNumber.from(1));
+      const mintFee = await freshNFT.mintFee(1, 10);
+      const totalCost = currentPrice.mul(10).add(mintFee);
+
+      await freshNFT.mintBatch(
+        addr1.address,
+        tokenIds,
+        quantities,
+        { value: totalCost }
+      );
+
+      const balances = await freshNFT.balanceOfBatch(owners,tokenIds);
+      expect(balances).to.eql(quantities);
+    });
   });
 
   describe("burn()", async () => {

@@ -405,6 +405,16 @@ contract DCNTSeries is
    * @return The current price of the specified token.
    */
   function tokenPrice(uint256 tokenId) public view validTokenId(tokenId) returns (uint256) {
+    return _tokenPrice(tokenId);
+  }
+
+  /**
+   * @dev Internal function to get the current price for the specified token. If a currency oracle is set,
+   * the price is calculated in native currency using the oracle exchange rate.
+   * @param tokenId The ID of the token to get the price for.
+   * @return The current price of the specified token.
+   */
+  function _tokenPrice(uint256 tokenId) internal view returns (uint256) {
     if ( address(currencyOracle) != address(0) ) {
       uint256 decimals = currencyOracle.decimals();
       (
@@ -495,7 +505,7 @@ contract DCNTSeries is
         uint256 quantity = quantities[i];
         _verifyTokenGate(tokenId, false);
         _checkMintable(to, tokenId, quantity);
-        totalPrice += _drops[tokenDropIds[tokenId]].tokenPrice * quantity;
+        totalPrice += _tokenPrice(tokenId) * quantity;
         totalQuantity += quantity;
         totalSupply[tokenId] += quantity;
       }

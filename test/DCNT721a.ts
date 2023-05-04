@@ -40,6 +40,7 @@ describe("DCNT721A", async () => {
       addr2: SignerWithAddress,
       addr3: SignerWithAddress,
       addr4: SignerWithAddress,
+      addr5: SignerWithAddress,
       sdk: Contract,
       clone: Contract,
       nft: Contract,
@@ -350,7 +351,7 @@ describe("DCNT721A", async () => {
         tokenGateConfig
       );
 
-      [addr1, addr2, addr3, addr4] = await ethers.getSigners();
+      [addr1, addr2, addr3, addr4, addr5] = await ethers.getSigners();
       expect(await freshNFT.balanceOf(addr1.address)).to.equal(0);
       expect(await freshNFT.balanceOf(addr2.address)).to.equal(0);
       expect(await freshNFT.balanceOf(addr3.address)).to.equal(0);
@@ -423,12 +424,13 @@ describe("DCNT721A", async () => {
 
       await presaleNFT.setPresaleMerkleRoot(tree.getHexRoot());
 
-      for ( let i = 0; i < snapshot.length; i++ ) {
+      for ( let i = 0; i < snapshot.length - 1; i++ ) {
         let quantity, maxQuantity;
         quantity = maxQuantity = snapshot[i][1];
         const merkleProof = tree.getHexProof(leaves[i]);
         const allowlist = [addr1, addr2, addr3, addr4];
         await presaleNFT.connect(allowlist[i]).mintPresale(
+          allowlist[i].address,
           quantity,
           maxQuantity,
           tokenPrice,
@@ -440,8 +442,20 @@ describe("DCNT721A", async () => {
       expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
       expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
       expect(await presaleNFT.balanceOf(addr3.address)).to.equal(3);
-      expect(await presaleNFT.balanceOf(addr4.address)).to.equal(4);
+      expect(await presaleNFT.balanceOf(addr4.address)).to.equal(0);
     });
+
+    it("should allow a user to presale mint on another's behalf", async () => {
+      await presaleNFT.connect(addr5).mintPresale(
+        addr4.address,
+        4,
+        4,
+        tokenPrice,
+        tree.getHexProof(leaves[3]),
+        { value: tokenPrice.mul(4) }
+      );
+      expect(await presaleNFT.balanceOf(addr4.address)).to.equal(4);
+    })
 
     it("should prevent minting without a valid merkle proof", async () => {
       expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
@@ -465,6 +479,7 @@ describe("DCNT721A", async () => {
         const allowlist = [addr1, addr2, addr3, addr4];
         await expect(
           presaleNFT.connect(allowlist[i]).mintPresale(
+            allowlist[i].address,
             quantity,
             maxQuantity,
             tokenPrice,
@@ -488,6 +503,7 @@ describe("DCNT721A", async () => {
         const allowlist = [addr1, addr2, addr3, addr4];
         await expect(
           presaleNFT.connect(allowlist[i]).mintPresale(
+            allowlist[i].address,
             1,
             maxQuantity,
             tokenPrice,

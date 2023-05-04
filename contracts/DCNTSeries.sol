@@ -30,7 +30,7 @@ contract DCNTSeries is
   Pausable,
   Splits,
   OperatorFilterer,
-  Version(1)
+  Version(2)
 {
   /*
    * @dev The name of the ERC-1155 contract.
@@ -629,6 +629,7 @@ contract DCNTSeries is
    * @param merkleProof The Merkle proof verifying that the presale buyer is eligible to mint tokens.
    */
   function mintPresale(
+    address to,
     uint256 tokenId,
     uint256 quantity,
     uint256 maxQuantity,
@@ -642,6 +643,7 @@ contract DCNTSeries is
     whenNotPaused
   {
     _checkPresaleMintable(
+      to,
       tokenId,
       quantity,
       maxQuantity,
@@ -662,13 +664,13 @@ contract DCNTSeries is
       revert InsufficientFunds();
     }
 
-    uint256 ownerBalance = balanceOf[msg.sender][tokenId];
+    uint256 ownerBalance = balanceOf[to][tokenId];
 
     if ( ownerBalance + quantity > maxQuantity ) {
       revert MintExceedsMaxTokensPerOwner();
     }
 
-    _mint(msg.sender, tokenId, quantity, '');
+    _mint(to, tokenId, quantity, '');
     _transferFees(fee + commission);
     _transferRefund(msg.value - totalPrice);
   }
@@ -682,6 +684,7 @@ contract DCNTSeries is
    * @param merkleProof The Merkle proof verifying that the presale buyer is eligible to mint tokens.
    */
   function _checkPresaleMintable(
+    address to,
     uint256 tokenId,
     uint256 quantity,
     uint256 maxQuantity,
@@ -706,7 +709,7 @@ contract DCNTSeries is
       drop.presaleMerkleRoot,
       keccak256(
         abi.encodePacked(
-          msg.sender,
+          to,
           maxQuantity,
           pricePerToken
         )

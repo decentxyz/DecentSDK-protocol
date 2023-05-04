@@ -287,6 +287,7 @@ interface IDCNTSeries {
    * @param merkleProof The Merkle proof verifying that the presale buyer is eligible to mint tokens.
    */
   function mintPresale(
+    address to,
     uint256 tokenId,
     uint256 quantity,
     uint256 maxQuantity,

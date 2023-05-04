@@ -37,7 +37,7 @@ contract DCNT721A is
   DCNT721AStorage,
   Initializable,
   Ownable,
-  Version(7),
+  Version(8),
   Splits
 {
   struct Edition {
@@ -186,6 +186,7 @@ contract DCNT721A is
 
   /// @notice presale mint function
   function mintPresale(
+    address to,
     uint256 quantity,
     uint256 maxQuantity,
     uint256 pricePerToken,
@@ -207,16 +208,16 @@ contract DCNT721A is
         edition.presaleMerkleRoot,
         keccak256(
           // address, uint256, uint256
-          abi.encodePacked(msg.sender,maxQuantity,pricePerToken)
+          abi.encodePacked(to,maxQuantity,pricePerToken)
         )
       ), 'not approved');
 
     require(msg.value >= (pricePerToken * quantity), "Insufficient funds");
-    require(balanceOf(msg.sender) + quantity <= maxQuantity, 'minted too many');
-    _safeMint(msg.sender, quantity);
+    require(balanceOf(to) + quantity <= maxQuantity, 'minted too many');
+    _safeMint(to, quantity);
     unchecked {
       for (uint256 i = 0; i < quantity; i++) {
-        emit Minted(msg.sender, mintIndex++);
+        emit Minted(to, mintIndex++);
       }
     }
   }

@@ -671,12 +671,13 @@ describe("DCNTSeries", async () => {
 
       expect(await presaleNFT.balanceOf(owner.address, 0)).to.equal(0);
 
-      for ( let i = 0; i < snapshot.length; i++ ) {
+      for ( let i = 0; i < snapshot.length - 1; i++ ) {
         let quantity, maxQuantity;
         quantity = maxQuantity = snapshot[i][1];
         const merkleProof = tree.getHexProof(leaves[i]);
         const allowlist = [addr1, addr2, addr3, addr4];
         await presaleNFT.connect(allowlist[i]).mintPresale(
+          allowlist[i].address,
           0,
           quantity,
           maxQuantity,
@@ -689,6 +690,23 @@ describe("DCNTSeries", async () => {
       expect(await presaleNFT.balanceOf(addr1.address, 0)).to.equal(1);
       expect(await presaleNFT.balanceOf(addr2.address, 0)).to.equal(2);
       expect(await presaleNFT.balanceOf(addr3.address, 0)).to.equal(3);
+      expect(await presaleNFT.balanceOf(addr4.address, 0)).to.equal(0);
+    });
+
+    it("should allow a user to presale mint on another's behalf", async () => {
+      let quantity, maxQuantity;
+      quantity = maxQuantity = snapshot[3][1];
+      const merkleProof = tree.getHexProof(leaves[3]);
+      await presaleNFT.connect(addr1).mintPresale(
+        addr4.address,
+        0, 
+        quantity,
+        maxQuantity,
+        tokenPrice,
+        merkleProof,
+        { value: tokenPrice.mul(quantity) }
+      );
+
       expect(await presaleNFT.balanceOf(addr4.address, 0)).to.equal(4);
     });
 
@@ -714,6 +732,7 @@ describe("DCNTSeries", async () => {
         const allowlist = [addr1, addr2, addr3, addr4];
         await expect(
           presaleNFT.connect(allowlist[i]).mintPresale(
+            allowlist[i].address,
             0,
             quantity,
             maxQuantity,
@@ -738,6 +757,7 @@ describe("DCNTSeries", async () => {
         const allowlist = [addr1, addr2, addr3, addr4];
         await expect(
           presaleNFT.connect(allowlist[i]).mintPresale(
+            allowlist[i].address,
             0,
             1,
             maxQuantity,

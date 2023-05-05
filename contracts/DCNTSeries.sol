@@ -622,6 +622,7 @@ contract DCNTSeries is
 
   /**
    * @dev Mints a specified number of tokens to the presale buyer address.
+   * @param to The address to which the minted tokens will be sent.
    * @param tokenId The ID of the token to mint.
    * @param quantity The quantity of tokens to mint.
    * @param maxQuantity The maximum quantity of tokens that can be minted.

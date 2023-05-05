@@ -495,28 +495,33 @@ contract DCNTSeries is
     payable
     whenNotPaused
   {
-    uint256 totalPrice;
-    uint256 totalQuantity;
     uint256 numberOfTokens = tokenIds.length;
+    uint256 tokenId;
+    uint256 quantity;
+    uint256 price;
+    uint256 fee;
+    uint256 commission;
+    uint256 totalPrice;
+    uint256 totalFee;
+    uint256 totalCommission;
 
     unchecked {
       for (uint256 i = 0; i < numberOfTokens; i++) {
-        uint256 tokenId = tokenIds[i];
-        uint256 quantity = quantities[i];
+        tokenId = tokenIds[i];
+        quantity = quantities[i];
         _verifyTokenGate(tokenId, false);
         _checkMintable(to, tokenId, quantity);
-        totalPrice += _tokenPrice(tokenId) * quantity;
-        totalQuantity += quantity;
-        totalSupply[tokenId] += quantity;
-      }
-    }
-
-    uint256 fee;
-    uint256 commission;
+        price = _tokenPrice(tokenId);
 
     if ( feeManager != address(0) ) {
-      (fee, commission) = IFeeManager(feeManager).calculateFees(totalPrice, totalQuantity);
-      totalPrice += fee;
+          (fee, commission) = IFeeManager(feeManager).calculateFees(price, quantity);
+          totalFee += fee;
+          totalCommission += commission;
+        }
+
+        totalPrice += (price * quantity) + fee;
+        totalSupply[tokenId] += quantity;
+      }
     }
 
     if ( msg.value < totalPrice ) {
@@ -524,7 +529,7 @@ contract DCNTSeries is
     }
 
     _batchMint(to, tokenIds, quantities, '');
-    _transferFees(fee + commission);
+    _transferFees(totalFee + totalCommission);
     _transferRefund(msg.value - totalPrice);
   }
 

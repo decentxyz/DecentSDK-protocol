@@ -668,7 +668,7 @@ describe("DCNTSeries", async () => {
       expect(await freshNFT.balanceOf(addr3.address, 0)).to.equal(0);
       expect(await freshNFT.balanceOf(addr4.address, 0)).to.equal(0);
 
-      await freshNFT.mintAirdrop(0, [addr1.address, addr2.address, addr3.address, addr4.address]);
+      await freshNFT.mintAirdrop([0], [addr1.address, addr2.address, addr3.address, addr4.address]);
       expect(await freshNFT.balanceOf(addr1.address, 0)).to.equal(1);
       expect(await freshNFT.balanceOf(addr2.address, 0)).to.equal(1);
       expect(await freshNFT.balanceOf(addr3.address, 0)).to.equal(1);
@@ -677,14 +677,14 @@ describe("DCNTSeries", async () => {
 
     it("should prevent an airdrop which would exceed max supply", async () => {
       await nft.connect(addr2).mint(0, addr2.address, 2, { value: tokenPrice.mul(2) });
-      await expect(nft.mintAirdrop(0, [addr1.address])).to.be.revertedWithCustomError(
+      await expect(nft.mintAirdrop([0], [addr1.address])).to.be.revertedWithCustomError(
         nft,
         'AirdropExceedsMaxSupply'
       );
     });
 
     it("should prevent non-admin from minting an airdrop", async () => {
-      await expect(nft.connect(addr2).mintAirdrop(0, [])).to.be.revertedWithCustomError(
+      await expect(nft.connect(addr2).mintAirdrop([0], [])).to.be.revertedWithCustomError(
         nft,
         'OnlyAdmin'
       );

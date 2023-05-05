@@ -495,28 +495,33 @@ contract DCNTSeries is
     payable
     whenNotPaused
   {
-    uint256 totalPrice;
-    uint256 totalQuantity;
     uint256 numberOfTokens = tokenIds.length;
+    uint256 tokenId;
+    uint256 quantity;
+    uint256 price;
+    uint256 fee;
+    uint256 commission;
+    uint256 totalPrice;
+    uint256 totalFee;
+    uint256 totalCommission;
 
     unchecked {
       for (uint256 i = 0; i < numberOfTokens; i++) {
-        uint256 tokenId = tokenIds[i];
-        uint256 quantity = quantities[i];
+        tokenId = tokenIds[i];
+        quantity = quantities[i];
         _verifyTokenGate(tokenId, false);
         _checkMintable(to, tokenId, quantity);
-        totalPrice += _tokenPrice(tokenId) * quantity;
-        totalQuantity += quantity;
+        price = _tokenPrice(tokenId);
+
+        if ( feeManager != address(0) ) {
+          (fee, commission) = IFeeManager(feeManager).calculateFees(price, quantity);
+          totalFee += fee;
+          totalCommission += commission;
+        }
+
+        totalPrice += (price * quantity) + fee;
         totalSupply[tokenId] += quantity;
       }
-    }
-
-    uint256 fee;
-    uint256 commission;
-
-    if ( feeManager != address(0) ) {
-      (fee, commission) = IFeeManager(feeManager).calculateFees(totalPrice, totalQuantity);
-      totalPrice += fee;
     }
 
     if ( msg.value < totalPrice ) {
@@ -524,7 +529,7 @@ contract DCNTSeries is
     }
 
     _batchMint(to, tokenIds, quantities, '');
-    _transferFees(fee + commission);
+    _transferFees(totalFee + totalCommission);
     _transferRefund(msg.value - totalPrice);
   }
 
@@ -600,23 +605,39 @@ contract DCNTSeries is
   }
 
   /**
-   * @dev Mints a specified token to multiple recipients as part of an airdrop.
+   * @dev Mints specified tokens to multiple recipients as part of an airdrop.
+   * @param tokenIds The IDs of the tokens to mint.
+   * @param recipients The list of addresses to receive the minted tokens.
+   */
+  function mintAirdrop(uint256[] calldata tokenIds, address[] calldata recipients) external onlyAdmin {
+    uint256 numberOfTokens = tokenIds.length;
+
+    unchecked {
+      for (uint i = 0; i < numberOfTokens; i++) {
+        _mintAirdrop(tokenIds[i], recipients);
+      }
+    }
+  }
+
+  /**
+   * @dev Internal function to mint a specified token to multiple recipients as part of an airdrop.
    * @param tokenId The ID of the token to mint.
    * @param recipients The list of addresses to receive the minted tokens.
    */
-  function mintAirdrop(uint256 tokenId, address[] calldata recipients) external onlyAdmin validTokenId(tokenId) {
-    uint256 airdrops = recipients.length;
+  function _mintAirdrop(uint256 tokenId, address[] memory recipients) internal {
+    _checkValidTokenId(tokenId);
+    uint256 numberOfRecipients = recipients.length;
 
-    if ( totalSupply[tokenId] + airdrops > _drops[tokenDropIds[tokenId]].maxTokens ) {
+    if ( totalSupply[tokenId] + numberOfRecipients > _drops[tokenDropIds[tokenId]].maxTokens ) {
       revert AirdropExceedsMaxSupply();
     }
 
     unchecked {
-      for (uint i = 0; i < airdrops; i++) {
+      for (uint i = 0; i < numberOfRecipients; i++) {
         address to = recipients[i];
         _mint(to, tokenId, 1, '');
       }
-      totalSupply[tokenId] += airdrops;
+      totalSupply[tokenId] += numberOfRecipients;
     }
   }
 

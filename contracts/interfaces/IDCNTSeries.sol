@@ -272,11 +272,11 @@ interface IDCNTSeries {
   function burn(uint256 tokenId, uint256 quantity) external;
 
   /**
-   * @dev Mints a specified token to multiple recipients as part of an airdrop.
-   * @param tokenId The ID of the token to mint.
+   * @dev Mints specified tokens to multiple recipients as part of an airdrop.
+   * @param tokenIds The IDs of the tokens to mint.
    * @param recipients The list of addresses to receive the minted tokens.
    */
-  function mintAirdrop(uint256 tokenId, address[] calldata recipients) external;
+  function mintAirdrop(uint256[] calldata tokenIds, address[] calldata recipients) external;
 
   /**
    * @dev Mints a specified number of tokens to the presale buyer address.

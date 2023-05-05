@@ -330,6 +330,7 @@ describe("DCNTSeries", async () => {
 
       expect(await freshNFT.mintFee(0, 1)).to.equal(fixedFee);
       expect(await feeManager.fee()).to.equal(fixedFee);
+      expect(await feeManager.commissionBPS()).to.equal(ethers.BigNumber.from(commissionBPS));
 
       const initialBalance = await ethers.provider.getBalance(feeManager.address);
       expect(initialBalance).to.equal(0);
@@ -546,6 +547,72 @@ describe("DCNTSeries", async () => {
       const balances = await freshNFT.balanceOfBatch(owners,tokenIds);
       expect(balances).to.eql(quantities);
     });
+
+    it("should payout fees and commission to the optional fee manager", async () => {
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
+
+      const freshNFT = await deployDCNTSeries(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCaps,
+        isSoulbound,
+        1,  // startTokenId
+        10, // endTokenId
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        currencyOracle,
+        contractURI,
+        metadataURI,
+        {
+          maxTokens,
+          tokenPrice,
+          maxTokensPerOwner,
+          presaleMerkleRoot,
+          presaleStart,
+          presaleEnd,
+          saleStart,
+          saleEnd,
+          tokenGateConfig
+        }
+      );
+
+      expect(await freshNFT.mintFee(1, 10)).to.equal(fixedFee.mul(10));
+      expect(await feeManager.fee()).to.equal(fixedFee);
+      expect(await feeManager.commissionBPS()).to.equal(ethers.BigNumber.from(commissionBPS));
+
+      const initialBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(initialBalance).to.equal(0);
+
+      const numDrops = 10;
+      const owners = Array(numDrops).fill(addr1.address);
+      const tokenIds = Array.from(Array(numDrops), (e, i) => i + 1);
+      const quantities = Array(numDrops).fill(ethers.BigNumber.from(1));
+      const mintFee = await freshNFT.mintFee(1, 10);
+      const totalCost = tokenPrice.mul(10).add(mintFee);
+
+      await freshNFT.mintBatch(
+        addr1.address,
+        tokenIds,
+        quantities,
+        { value: totalCost }
+      );
+
+      const balances = await freshNFT.balanceOfBatch(owners,tokenIds);
+      expect(balances).to.eql(quantities);
+
+      const commission = tokenPrice.mul(commissionBPS).div(100_00);
+      const totalCommission = commission.mul(10);
+      const totalFees = totalCommission.add(fixedFee.mul(10));
+      const feeManagerBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(feeManagerBalance).to.equal(totalFees);
+
+      const nftBalance = await ethers.provider.getBalance(freshNFT.address);
+      expect(nftBalance).to.equal(totalCost.sub(totalFees));
+    });
   });
 
   describe("burn()", async () => {
@@ -601,7 +668,7 @@ describe("DCNTSeries", async () => {
       expect(await freshNFT.balanceOf(addr3.address, 0)).to.equal(0);
       expect(await freshNFT.balanceOf(addr4.address, 0)).to.equal(0);
 
-      await freshNFT.mintAirdrop(0, [addr1.address, addr2.address, addr3.address, addr4.address]);
+      await freshNFT.mintAirdrop([0], [addr1.address, addr2.address, addr3.address, addr4.address]);
       expect(await freshNFT.balanceOf(addr1.address, 0)).to.equal(1);
       expect(await freshNFT.balanceOf(addr2.address, 0)).to.equal(1);
       expect(await freshNFT.balanceOf(addr3.address, 0)).to.equal(1);
@@ -610,14 +677,14 @@ describe("DCNTSeries", async () => {
 
     it("should prevent an airdrop which would exceed max supply", async () => {
       await nft.connect(addr2).mint(0, addr2.address, 2, { value: tokenPrice.mul(2) });
-      await expect(nft.mintAirdrop(0, [addr1.address])).to.be.revertedWithCustomError(
+      await expect(nft.mintAirdrop([0], [addr1.address])).to.be.revertedWithCustomError(
         nft,
         'AirdropExceedsMaxSupply'
       );
     });
 
     it("should prevent non-admin from minting an airdrop", async () => {
-      await expect(nft.connect(addr2).mintAirdrop(0, [])).to.be.revertedWithCustomError(
+      await expect(nft.connect(addr2).mintAirdrop([0], [])).to.be.revertedWithCustomError(
         nft,
         'OnlyAdmin'
       );

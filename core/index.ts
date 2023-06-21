@@ -103,9 +103,9 @@ export const deployImplementations = async () => {
   };
 }
 
-export const deployContract = async (contract: string, args: any[] = []) => {
+export const deployContract = async (contract: string, args: any[] = [], overrides: any = {}) => {
   const factory = await ethers.getContractFactory(contract);
-  const tx = await factory.deploy(...args);
+  const tx = await factory.deploy(...args, overrides);
   return await tx.deployed();
 }
 
@@ -595,4 +595,24 @@ export const base64decode = (data: string) => {
   let decoded = data.replace('data:application/json;base64,','');
   decoded = Buffer.from(decoded, 'base64').toString('ascii');
   return decoded;
+}
+
+export const getSDKAddresses = () => {
+  const fs = require('fs');
+  const files = new Map();
+  files.set('mainnet', '1-mainnet');
+  files.set('polygon', '137-polygon');
+  files.set('optimism', '10-optimism');
+  files.set('arbitrum', '42161-arbitrum');
+  files.set('goerli', '5-goerli');
+  files.set('sepolia', '11155111-sepolia');
+  files.set('polygon_testnet', '80001-polygonMumbai');
+  files.set('optimism_testnet', '420-optimismGoerli');
+  files.set('arbitrum_testnet', '421613-arbitrumGoerli');
+  files.set('hardhat', '31337-hardhat');
+  files.set('localhost', '31337-hardhat');
+  const file = files.get(network.name);
+  var path = process.env.PWD + '/addresses/';
+  var addresses = JSON.parse(fs.readFileSync(`${path}${file}.json`, 'utf8'));
+  return addresses;
 }

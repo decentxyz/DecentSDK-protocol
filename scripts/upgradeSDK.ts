@@ -1,6 +1,7 @@
 import { ethers, network } from "hardhat";
-import { deployContract, deployDCNTVaultNFT } from "../core";
-const fs = require('fs');
+import { deployContract, getSDKAddresses } from "../core";
+
+const GAS_INCREASE_BPS = 1_00; // 1%
 
 const UPGRADES = {
   DCNTSDK: true,
@@ -17,29 +18,12 @@ const UPGRADES = {
   ZKEdition: false,
 }
 
-const getSDKAddresses = () => {
-  const files = new Map();
-  files.set('mainnet', '1-mainnet');
-  files.set('polygon', '137-polygon');
-  files.set('optimism', '10-optimism');
-  files.set('arbitrum', '42161-arbitrum');
-  files.set('goerli', '5-goerli');
-  files.set('polygon_testnet', '80001-polygonMumbai');
-  files.set('optimism_testnet', '420-optimismGoerli');
-  files.set('arbitrum_testnet', '421613-arbitrumGoerli');
-  files.set('hardhat', '31337-hardhat');
-  files.set('localhost', '31337-hardhat');
-  const file = files.get(network.name);
-  var path = process.env.PWD + '/addresses/';
-  var addresses = JSON.parse(fs.readFileSync(`${path}${file}.json`, 'utf8'));
-  return addresses;
-}
-
 const getUpgradedContractAt = async (contract: string, address: string, args: any[] = []) => {
   let contractKey = contract as keyof typeof UPGRADES;
   if ( UPGRADES[contractKey] ) {
     console.log(`Deploying contract: ${contract}`);
-    return await deployContract(contract, args);
+    const overrides = await getOverrides();
+    return await deployContract(contract, args, overrides);
   } else {
     console.log(`Existing contract: ${contract}`);
     return await ethers.getContractAt(contract, address);
@@ -57,6 +41,7 @@ async function main() {
   const DCNTCrescendo = await getUpgradedContractAt('DCNTCrescendo', addresses.DCNTCrescendo);
   const DCNTVault = await getUpgradedContractAt('DCNTVault', addresses.DCNTVault);
   const DCNTStaking = await getUpgradedContractAt('DCNTStaking', addresses.DCNTStaking);
+  const ZKEdition = await getUpgradedContractAt('ZKEdition', addresses?.ZKEdition);
 
   let DCNTMetadataRenderer;
   if ( UPGRADES.DCNTMetadataRenderer ) {
@@ -67,8 +52,6 @@ async function main() {
   }
 
   const DCNTRegistry = await getUpgradedContractAt('DCNTRegistry', addresses.DCNTRegistry);
-
-  const ZKEdition = await getUpgradedContractAt('ZKEdition', addresses?.ZKEdition);
 
   const DCNTSDK = await getUpgradedContractAt('DCNTSDK', addresses.DCNTSDK, [
     DCNT721A.address,

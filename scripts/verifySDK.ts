@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat";
-const fs = require('fs');
+import { getSDKAddresses } from "../core";
 const { execSync } = require('child_process');
 
 const run = (command: string) => {
@@ -8,22 +8,6 @@ const run = (command: string) => {
   } catch (error) {
     console.error(error);
   }
-}
-
-const getSDKAddresses = () => {
-  const files = new Map();
-  files.set('mainnet', '1-mainnet');
-  files.set('polygon', '137-polygon');
-  files.set('optimism', '10-optimism');
-  files.set('arbitrum', '42161-arbitrum');
-  files.set('goerli', '5-goerli');
-  files.set('polygon_testnet', '80001-polygonMumbai');
-  files.set('optimism_testnet', '420-optimismGoerli');
-  files.set('arbitrum_testnet', '421613-arbitrumGoerli');
-  const file = files.get(network.name);
-  var path = process.env.PWD + '/addresses/';
-  var addresses = JSON.parse(fs.readFileSync(`${path}${file}.json`, 'utf8'));
-  return addresses;
 }
 
 async function main() {
@@ -47,6 +31,7 @@ async function main() {
     +`${DCNTSDK.address} `
     +`${DCNT721A.address} `
     +`${DCNT4907A.address} `
+    +`${DCNTSeries.address} `
     +`${DCNTCrescendo.address} `
     +`${DCNTVault.address} `
     +`${DCNTStaking.address} `

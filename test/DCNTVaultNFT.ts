@@ -18,6 +18,7 @@ const presaleEnd = theFuture.time();
 const saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
+const feeManager = ethers.constants.AddressZero;
 const payoutAddress = ethers.constants.AddressZero;
 const contractURI = 'http://localhost/contract/';
 const metadataURI = 'http://localhost/metadata/';
@@ -66,6 +67,7 @@ describe("DCNTVaultNFT", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -122,6 +124,7 @@ describe("DCNTVaultNFT", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,

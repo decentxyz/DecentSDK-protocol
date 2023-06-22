@@ -20,6 +20,7 @@ const presaleEnd = theFuture.time();
 let saleStart = theFuture.time();
 const saleEnd = theFuture.time() + theFuture.oneYear;
 const royaltyBPS = 10_00;
+const feeManager = ethers.constants.AddressZero;
 const payoutAddress = ethers.constants.AddressZero;
 const metadataRendererInit = {
   description: "This is the Decent unit test NFT",
@@ -80,6 +81,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -113,6 +115,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -158,6 +161,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -185,6 +189,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -200,6 +205,39 @@ describe("DCNT721A", async () => {
       expect(config.tokenAddress).to.equal(gateNFT.address);
       expect(config.minBalance).to.equal(1337);
       expect(config.saleType).to.equal(2);
+    });
+  });
+
+  describe("mintFee()", async () => {
+    it("should return the mint fee", async () => {
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
+
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      expect(await freshNFT.mintFee(1)).to.equal(fixedFee);
     });
   });
 
@@ -222,6 +260,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -279,6 +318,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -307,6 +347,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -324,6 +365,48 @@ describe("DCNT721A", async () => {
       await gateNFT.mintNft(1);
       await freshNFT.mint(addr1.address, 1, { value: tokenPrice });
       expect(await freshNFT.balanceOf(addr1.address)).to.equal(1);
+    });
+
+    it("should payout fees and commission to the optional fee manager", async () => {
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
+
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        presaleMerkleRoot,
+        presaleStart,
+        presaleEnd,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      expect(await freshNFT.mintFee(1)).to.equal(fixedFee);
+      expect(await feeManager.fee()).to.equal(fixedFee);
+      expect(await feeManager.commissionBPS()).to.equal(ethers.BigNumber.from(commissionBPS));
+
+      const initialBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(initialBalance).to.equal(0);
+
+      await freshNFT.mint(addr1.address, 1, { value: tokenPrice.add(fixedFee) });
+      const commission = tokenPrice.mul(commissionBPS).div(100_00);
+      const totalFees = commission.add(fixedFee);
+      const finalBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(finalBalance).to.equal(totalFees);
     });
   });
 
@@ -344,6 +427,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -412,6 +496,7 @@ describe("DCNT721A", async () => {
         theFuture.time() + theFuture.oneMonth,
         theFuture.time() + theFuture.oneYear,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -541,6 +626,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -581,6 +667,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -621,6 +708,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -680,6 +768,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -731,6 +820,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -771,6 +861,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -846,6 +937,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -885,6 +977,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,
@@ -930,6 +1023,7 @@ describe("DCNT721A", async () => {
         saleStart,
         saleEnd,
         royaltyBPS,
+        feeManager,
         payoutAddress,
         contractURI,
         metadataURI,

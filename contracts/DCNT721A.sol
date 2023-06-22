@@ -17,6 +17,7 @@ pragma solidity ^0.8.0;
 
 import './erc721a/ERC721A.sol';
 import './interfaces/IMetadataRenderer.sol';
+import './interfaces/IFeeManager.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
@@ -64,6 +65,8 @@ contract DCNT721A is
 
   address public parentIP;
 
+  address public feeManager;
+
   /// ============ Events ============
 
   /// @notice Emitted after a successful token claim
@@ -90,6 +93,8 @@ contract DCNT721A is
     _;
   }
 
+  error FeeTransferFailed();
+
   /// ============ Constructor ============
 
   function initialize(
@@ -105,6 +110,7 @@ contract DCNT721A is
     _symbol = _editionConfig.symbol;
     _currentIndex = _startTokenId();
 
+    feeManager = _editionConfig.feeManager;
     parentIP = _metadataConfig.parentIP;
     tokenGateConfig = _tokenGateConfig;
 
@@ -137,6 +143,17 @@ contract DCNT721A is
     }
   }
 
+  /**
+   * @dev Gets the current minting fee for the specified token.
+   * @param quantity The quantity of tokens used to calculate the minting fee.
+   * @return fee The current fee for minting the specified token.
+   */
+  function mintFee(uint256 quantity) external view returns (uint256 fee) {
+    if ( feeManager != address(0) ) {
+      (fee, ) = IFeeManager(feeManager).calculateFees(edition.tokenPrice, quantity);
+    }
+  }
+
   /// @notice purchase nft
   function mint(address to, uint256 numberOfTokens)
     external
@@ -151,7 +168,17 @@ contract DCNT721A is
       "Purchase would exceed max supply"
     );
     require(mintIndex <= edition.maxTokens, "SOLD OUT");
-    require(msg.value >= (edition.tokenPrice * numberOfTokens), "Insufficient funds");
+
+    uint256 fee;
+    uint256 commission;
+
+    if ( feeManager != address(0) ) {
+      (fee, commission) = IFeeManager(feeManager).calculateFees(edition.tokenPrice, numberOfTokens);
+    }
+
+    uint256 totalPrice = (edition.tokenPrice * numberOfTokens) + fee;
+    require(msg.value >= totalPrice, "Insufficient funds");
+
     if ( edition.maxTokenPurchase != 0 ) {
       require(numberOfTokens <= edition.maxTokenPurchase, "Exceeded max number per mint");
     }
@@ -160,6 +187,21 @@ contract DCNT721A is
     unchecked {
       for (uint256 i = 0; i < numberOfTokens; i++) {
         emit Minted(to, mintIndex++);
+      }
+    }
+
+    _transferFees(fee + commission);
+  }
+
+  /**
+   * @dev Internal function to transfer fees to the fee manager.
+   * @param fees The amount of funds to transfer.
+   */
+  function _transferFees(uint256 fees) internal {
+    if ( fees > 0 ) {
+      (bool success, ) = payable(IFeeManager(feeManager).recipient()).call{value: fees}("");
+      if ( ! success ) {
+        revert FeeTransferFailed();
       }
     }
   }

@@ -14,6 +14,7 @@ struct EditionConfig {
   uint32 saleEnd;
   uint16 royaltyBPS;
   uint96 tokenPrice;
+  address feeManager;
   address payoutAddress;
   bytes32 presaleMerkleRoot;
 }

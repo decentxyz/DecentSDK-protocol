@@ -601,6 +601,58 @@ describe("DCNT721A", async () => {
       expect(await presaleNFT.balanceOf(addr1.address)).to.equal(1);
       expect(await presaleNFT.balanceOf(addr2.address)).to.equal(2);
     });
+
+    it("should payout fees and commission to the optional fee manager", async () => {
+      const fixedFee = ethers.utils.parseEther('0.0005'); // $1.00 USD in ETH at $2000 USD
+      const commissionBPS = 10_00; // 10% in BPS
+      const feeManager = await deployContract('FeeManager', [fixedFee, commissionBPS]);
+
+      const freshNFT = await deployDCNT721A(
+        sdk,
+        name,
+        symbol,
+        hasAdjustableCap,
+        isSoulbound,
+        maxTokens,
+        tokenPrice,
+        maxTokenPurchase,
+        tree.getHexRoot(),
+        theFuture.time(),
+        theFuture.time() + theFuture.oneDay,
+        saleStart,
+        saleEnd,
+        royaltyBPS,
+        feeManager.address,
+        payoutAddress,
+        contractURI,
+        metadataURI,
+        metadataRendererInit,
+        tokenGateConfig
+      );
+
+      expect(await freshNFT.mintFee(1)).to.equal(fixedFee);
+      expect(await feeManager.fee()).to.equal(fixedFee);
+      expect(await feeManager.commissionBPS()).to.equal(ethers.BigNumber.from(commissionBPS));
+
+      const initialBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(initialBalance).to.equal(0);
+
+      const fee = await freshNFT.mintFee(4);
+      await freshNFT.connect(addr4).mintPresale(
+        addr4.address,
+        4,
+        4,
+        tokenPrice,
+        tree.getHexProof(leaves[3]),
+        { value: tokenPrice.mul(4).add(fee) }
+      );
+      expect(await freshNFT.balanceOf(addr4.address)).to.equal(4);
+
+      const commission = tokenPrice.mul(commissionBPS).div(100_00);
+      const totalFees = commission.add(fixedFee).mul(4);
+      const finalBalance = await ethers.provider.getBalance(feeManager.address);
+      expect(finalBalance).to.equal(totalFees);
+    });
   });
 
   describe("adjustCap()", async() => {

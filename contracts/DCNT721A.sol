@@ -254,9 +254,19 @@ contract DCNT721A is
         )
       ), 'not approved');
 
-    require(msg.value >= (pricePerToken * quantity), "Insufficient funds");
+    uint256 fee;
+    uint256 commission;
+
+    if ( feeManager != address(0) ) {
+      (fee, commission) = IFeeManager(feeManager).calculateFees(pricePerToken, quantity);
+    }
+
+    uint256 totalPrice = (pricePerToken * quantity) + fee;
+
+    require(msg.value >= totalPrice, "Insufficient funds");
     require(balanceOf(to) + quantity <= maxQuantity, 'minted too many');
     _safeMint(to, quantity);
+    _transferFees(fee + commission);
     unchecked {
       for (uint256 i = 0; i < quantity; i++) {
         emit Minted(to, mintIndex++);

@@ -5,17 +5,17 @@ const GAS_INCREASE_BPS = 1_00; // 1%
 
 const UPGRADES = {
   DCNTSDK: true,
-  DCNT721A: false,
-  DCNT4907A: false,
-  DCNTSeries: true,
+  DCNT721A: true,
+  DCNT4907A: true,
+  DCNTSeries: false,
   DCNTCrescendo: false,
   DCNTVault: false,
   DCNTStaking: false,
   DCNTMetadataRenderer: false,
   DCNTRegistry: false,
-  DCNTVaultNFT: false,
+  DCNTVaultNFT: true,
   DCNTRentalMarket: false,
-  ZKEdition: false,
+  ZKEdition: true,
 }
 
 const getOverrides = async () => {
@@ -28,7 +28,7 @@ const getOverrides = async () => {
   const maxPriorityFeePerGas = increase(feeData.maxPriorityFeePerGas);
   const maxFeePerGas = gasPrice.add(maxPriorityFeePerGas);
 
-  return { gasPrice, maxPriorityFeePerGas, maxFeePerGas };
+  return { maxPriorityFeePerGas, maxFeePerGas };
 }
 
 const getUpgradedContractAt = async (contract: string, address: string, args: any[] = []) => {

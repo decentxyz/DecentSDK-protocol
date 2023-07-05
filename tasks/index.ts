@@ -42,3 +42,15 @@ task("gas", "Prints network fees")
     console.log(`pending base fee per gas: ${pendingBaseFee}`);
     console.log(`latest base fee per gas:  ${latestBaseFee}`);
   });
+
+task("transferOwnership", "Transfer ownership of a contract")
+  .addParam("contractAddress", "Address of the ownable contract")
+  .addParam("newOwner", "Address of the new owner")
+  .setAction(async (taskArgs, { ethers, network }) => {
+    const { contractAddress, newOwner } = taskArgs;
+    const [signer] = await ethers.getSigners();
+    const abi = ['function transferOwnership(address)'];
+    const contract = new ethers.Contract(contractAddress, abi, signer);
+    await contract.transferOwnership(newOwner);
+    console.log(`Ownership of contract ${contractAddress} transferred to ${newOwner}`);
+  });

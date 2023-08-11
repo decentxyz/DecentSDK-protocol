@@ -23,6 +23,10 @@ const config: HardhatUserConfig = {
       url: process.env.GOERLI_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },
+    sepolia: {
+      url: process.env.SEPOLIA_URL,
+      accounts: [process.env.PRIVATE_KEY as string]
+    },
     polygon: {
       url: process.env.POLYGON_MAINNET_URL,
       accounts: [process.env.PRIVATE_KEY as string]
@@ -47,17 +51,40 @@ const config: HardhatUserConfig = {
       url: process.env.ARBITRUM_TESTNET_URL,
       accounts: [process.env.PRIVATE_KEY as string]
     },
+    base: {
+      url: process.env.BASE_MAINNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string],
+      gasPrice: 1000000000,
+    },
+    base_testnet: {
+      url: process.env.BASE_TESTNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string],
+      gasPrice: 1000000000,
+    },
+    zora: {
+      url: process.env.ZORA_MAINNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
+    zora_testnet: {
+      url: process.env.ZORA_TESTNET_URL,
+      accounts: [process.env.PRIVATE_KEY as string],
+    },
   },
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY as string,
       goerli: process.env.ETHERSCAN_KEY as string,
+      sepolia: process.env.ETHERSCAN_KEY as string,
       polygon: process.env.POLYGONSCAN_KEY as string,
       polygonMumbai: process.env.POLYGONSCAN_KEY as string,
       optimisticEthereum: process.env.OPTIMISMSCAN_KEY as string,
       optimism_testnet: process.env.OPTIMISMSCAN_KEY as string,
       arbitrumOne: process.env.ARBISCAN_KEY as string,
       arbitrum_testnet: process.env.ARBISCAN_KEY as string,
+      base: process.env.BASESCAN_KEY as string,
+      base_testnet: process.env.BASESCAN_KEY as string,
+      zora: process.env.BLOCKSCOUT_KEY as string,
+      zora_testnet: process.env.BLOCKSCOUT_KEY as string,
     },
     customChains: [
       {
@@ -76,6 +103,38 @@ const config: HardhatUserConfig = {
           browserURL: "https://goerli.arbiscan.io/"
         }
       },
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+         apiURL: "https://api.basescan.org/api",
+         browserURL: "https://basescan.org"
+        }
+      },
+      {
+        network: "base_testnet",
+        chainId: 84531,
+        urls: {
+         apiURL: "https://api-goerli.basescan.org/api",
+         browserURL: "https://goerli.basescan.org"
+        }
+      },
+      {
+        network: "zora",
+        chainId: 7777777,
+        urls: {
+          apiURL: "https://explorer.zora.energy/api",
+          browserURL: "https://explorer.zora.energy"
+        }
+      },
+      {
+        network: "zora_testnet",
+        chainId: 999,
+        urls: {
+          apiURL: "https://testnet.explorer.zora.energy/api",
+          browserURL: "https://testnet.explorer.zora.energy"
+        }
+      }
     ],
   },
   gasReporter: {

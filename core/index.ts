@@ -612,11 +612,15 @@ export const getSDKAddresses = () => {
   files.set('polygon', '137-polygon');
   files.set('optimism', '10-optimism');
   files.set('arbitrum', '42161-arbitrum');
+  files.set('base', '8453-base');
+  files.set('zora', '7777777-zora');
   files.set('goerli', '5-goerli');
   files.set('sepolia', '11155111-sepolia');
   files.set('polygon_testnet', '80001-polygonMumbai');
   files.set('optimism_testnet', '420-optimismGoerli');
   files.set('arbitrum_testnet', '421613-arbitrumGoerli');
+  files.set('base_testnet', '84531-baseGoerli');
+  files.set('zora_testnet', '999-zoraGoerli');
   files.set('hardhat', '31337-hardhat');
   files.set('localhost', '31337-hardhat');
   const file = files.get(network.name);

@@ -13,6 +13,10 @@ export const getFees = () => {
   fees.set('optimism_testnet',  { fee: '0.00044', commissionBPS: 0 });
   fees.set('arbitrum',          { fee: '0.00044', commissionBPS: 0 });
   fees.set('arbitrum_testnet',  { fee: '0.00044', commissionBPS: 0 });
+  fees.set('base',              { fee: '0.00044', commissionBPS: 0 });
+  fees.set('base_testnet',      { fee: '0.00044', commissionBPS: 0 });
+  fees.set('zora',              { fee: '0.00044', commissionBPS: 0 });
+  fees.set('zora_testnet',      { fee: '0.00044', commissionBPS: 0 });
   return fees.get(network.name);
 }
 

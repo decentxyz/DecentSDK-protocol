@@ -4,8 +4,8 @@ import { deployContract, getSDKAddresses } from "../core";
 const GAS_INCREASE_BPS = 1_00; // 1%
 
 const UPGRADES = {
-  DCNTSDK: true,
-  DCNT721A: true,
+  DCNTSDK: false,
+  DCNT721A: false,
   DCNT4907A: true,
   DCNTSeries: false,
   DCNTCrescendo: false,
@@ -13,13 +13,13 @@ const UPGRADES = {
   DCNTStaking: false,
   DCNTMetadataRenderer: false,
   DCNTRegistry: false,
-  DCNTVaultNFT: true,
+  DCNTVaultNFT: false,
   DCNTRentalMarket: false,
-  ZKEdition: true,
+  ZKEdition: false,
 }
 
 const getOverrides = async () => {
-  if ( network.name != 'mainnet' && network.name != 'goerli' )  return {};
+  if ( network.name !== 'mainnet' && network.name !== 'goerli' && network.name !== 'sepolia' )  return {};
 
   const increase = (num: ethers.BigNumber) => num.add(num.mul(GAS_INCREASE_BPS).div(10000));
 
